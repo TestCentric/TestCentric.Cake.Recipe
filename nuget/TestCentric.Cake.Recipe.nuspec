@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>TestCentric.Cake.Recipe</id>
+    <version>0.0.0</version>
+    <description>Cake Recipe used for building TestCentric applications and extensions.</description>
+    <authors>Charlie Poole</authors>
+    <copyright>Copyright (c) 2021 Charlie Poole</copyright>
+    <projectUrl>http://test-centric.org</projectUrl>
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <repository type="git" url="https://github.com/TestCentric/TestCentric.Cake.Recipe"/>
+    <iconUrl>https://test-centric.org/assets/img/testcentric_128x128.png</iconUrl>
+    <icon>testcentric.png</icon>
+    <language>en-US</language>
+    <tags>testcentric cake recipe</tags>
+    <releaseNotes>https://raw.githubusercontent.com/TestCentric/netcore21-pluggable-agent/master/CHANGES.txt</releaseNotes>
+  </metadata>
+  <files>
+	  <file src="../LICENSE.txt" />
+	  <file src="../testcentric.png" />
+    <file src="../recipe/*.cake" target="content" />
+  </files>
+</package>
