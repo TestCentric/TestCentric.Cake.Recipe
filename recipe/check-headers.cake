@@ -2,34 +2,19 @@
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
 
-// Standard Header. Each string represents one line.
-static readonly string[] STD_HDR = new[] {
-    "// ***********************************************************************",
-    "// Copyright (c) Charlie Poole and TestCentric Engine contributors.",
-    "// Licensed under the MIT License. See LICENSE.txt in root directory.",
-    "// ***********************************************************************"
-};
-
-// Pattern used to find the files to be checked
-const string FILES_TO_CHECK = "src/**/*.cs";
-
-// Normally, AssemblyInfo files are ignored. Set to true to check them.
-bool CHECK_ASSEMBLY_INFO = false;
-
-// File names, which are exempt from checking
-static readonly string[] EXEMPT_FILES = new string[0];
-
-static readonly int CD_LENGTH = Environment.CurrentDirectory.Length + 1;
+private static int CD_LENGTH => Environment.CurrentDirectory.Length + 1;
 
 Task("CheckHeaders")
-    .Does(() =>
+    .Does<BuildParameters>((parameters) =>
     {
         var NoHeader = new List<FilePath>();
         var NonStandard = new List<FilePath>();
         var Exempted = new List<FilePath>();
         int examined = 0;
 
-        foreach(var file in GetFiles(FILES_TO_CHECK))
+        var sourceFiles = GetFiles(parameters.SourceDirectory +"**/*.cs");
+        var exemptFiles = parameters.ExemptFiles;
+        foreach(var file in sourceFiles)
         {
             var path = file.ToString();
 
@@ -42,16 +27,16 @@ Task("CheckHeaders")
                 continue;
 
             // Ignore AssemblyInfo files
-            if (!CHECK_ASSEMBLY_INFO && System.IO.Path.GetFileName(path) == "AssemblyInfo.cs")
+            if (!parameters.CheckAssemblyInfoHeaders && System.IO.Path.GetFileName(path) == "AssemblyInfo.cs")
                 continue;
 
             examined++;
             var header = GetHeader(file);
-            if (EXEMPT_FILES.Contains(file.GetFilename().ToString()))
+            if (exemptFiles.Contains(file.GetFilename().ToString()))
                 Exempted.Add(file);
             else if (header.Count == 0)
                 NoHeader.Add(file);
-            else if (!header.SequenceEqual(STD_HDR))
+            else if (!header.SequenceEqual(parameters.StandardHeader))
                 NonStandard.Add(file);
         }
 
