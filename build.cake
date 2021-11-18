@@ -5,37 +5,43 @@
 //////////////////////////////////////////////////////////////////////
 
 const string NUGET_ID = "TestCentric.Cake.Recipe";
-const string DEFAULT_VERSION = "0.1.0";
-const string NUGET_DIR = "nuget/";
-const string PACKAGE_DIR = "package/";
+const string CHOCO_ID = "NONE";
 const string RECIPE_DIR = "recipe/";
+const string DEFAULT_VERSION = "0.2.0";
 
-const string MYGET_API_KEY = "MYGET_API_KEY";
-const string MYGET_PUSH_URL = "https://www.myget.org/F/testcentric/api/v2";
-
-//////////////////////////////////////////////////////////////////////
-// ARGUMENTS  
-//////////////////////////////////////////////////////////////////////
+#load recipe/parameters.cake
 
 var target = Argument("target", "Default");
 
-var PackageVersion = Argument("version", DEFAULT_VERSION);
-var NuGetPackageSource = $"{NUGET_DIR}{NUGET_ID}.nuspec";
-var NuGetPackage = $"{PACKAGE_DIR}{NUGET_ID}.{PackageVersion}.nupkg";
+//////////////////////////////////////////////////////////////////////
+// SETUP
+//////////////////////////////////////////////////////////////////////
+
+Setup<BuildParameters>((context) =>
+{
+	var parameters = new BuildParameters(context);
+
+	Information($"NetCore21PluggableAgent {parameters.Configuration} version {parameters.PackageVersion}");
+
+	if (BuildSystem.IsRunningOnAppVeyor)
+		AppVeyor.UpdateBuildVersion(parameters.PackageVersion);
+
+	return parameters;
+});
 
 //////////////////////////////////////////////////////////////////////
 // BUILD PACKAGE
 //////////////////////////////////////////////////////////////////////
 
 Task("Package")
-	.Does(() =>
+	.Does<BuildParameters>((parameters) =>
 	{
-		CreateDirectory(PACKAGE_DIR);
+		CreateDirectory(parameters.PackageDirectory);
 
-		NuGetPack(NuGetPackageSource, new NuGetPackSettings()
+		NuGetPack("nuget/TestCentric.Cake.Recipe.nuspec", new NuGetPackSettings()
 		{
-			Version = PackageVersion,
-			OutputDirectory = PACKAGE_DIR,
+			Version = parameters.PackageVersion,
+			OutputDirectory = parameters.PackageDirectory,
 			NoPackageAnalysis = true
 		});
 	});
@@ -46,9 +52,9 @@ Task("Package")
 
 Task("Publish")
 	.IsDependentOn("Package")
-	.Does(() =>
+	.Does<BuildParameters>((parameters) =>
 	{
-		NuGetPush(NuGetPackage, new NuGetPushSettings()
+		NuGetPush(parameters.NuGetPackage, new NuGetPushSettings()
 		{
 			ApiKey = EnvironmentVariable(MYGET_API_KEY),
 			Source = MYGET_PUSH_URL

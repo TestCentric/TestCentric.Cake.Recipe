@@ -12,7 +12,7 @@ public abstract class PackageTester
         Skipped = 7,
         Assemblies = new AssemblyResult[]
         {
-            new AssemblyResult() { Name = MOCK_ASSEMBLY }
+            new AssemblyResult() { Name = "mock-assembly.dll" }
         }
     };
 
@@ -57,7 +57,7 @@ public abstract class PackageTester
         if (_context.FileExists(_parameters.OutputDirectory + TEST_RESULT))
             _context.DeleteFile(_parameters.OutputDirectory + TEST_RESULT);
 
-        _guiRunner.RunUnattended($"{_parameters.OutputDirectory}tests/{runtime}/{MOCK_ASSEMBLY}");
+        _guiRunner.RunUnattended($"{_parameters.OutputDirectory}tests/{runtime}/mock-assembly.dll");
 
         return new ActualResult(_parameters.OutputDirectory + TEST_RESULT);
     }

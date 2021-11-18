@@ -2,7 +2,7 @@
 #load "./package-checks.cake"
 #load "./test-results.cake"
 #load "./package-tests.cake"
-//#load "./testcentric-gui.cake"
+#load "./testcentric-gui.cake"
 #load "./versioning.cake"
 
 // URLs for uploading packages
@@ -17,16 +17,12 @@ private const string CHOCO_API_KEY = "CHOCO_API_KEY";
 private const string GITHUB_ACCESS_TOKEN = "GITHUB_ACCESS_TOKEN";
 
 // Pre-release labels that we publish
-static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev", "pre" };
+static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
 static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
 static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
 
 // Defaults
 const string DEFAULT_CONFIGURATION = "Release";
-// NOTE: Since GitVersion is only used when running under
-// Windows, the default version should be updated to the 
-// next version after each release.
-const string DEFAULT_VERSION = "1.0.0";
 
 public class BuildParameters
 {
