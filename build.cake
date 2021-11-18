@@ -9,6 +9,7 @@ const string CHOCO_ID = "NONE";
 const string RECIPE_DIR = "recipe/";
 const string DEFAULT_VERSION = "0.2.0";
 
+// Dogfooding: We use the recipe to build the recipe package
 #load recipe/parameters.cake
 
 var target = Argument("target", "Default");

@@ -17,12 +17,20 @@ private const string CHOCO_API_KEY = "CHOCO_API_KEY";
 private const string GITHUB_ACCESS_TOKEN = "GITHUB_ACCESS_TOKEN";
 
 // Pre-release labels that we publish
-static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
-static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
-static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
+private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
+private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
+private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
 
 // Defaults
 const string DEFAULT_CONFIGURATION = "Release";
+
+// Standard Header. Each string represents one line.
+static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
+    "// ***********************************************************************",
+    "// Copyright (c) Charlie Poole and TestCentric Engine contributors.",
+    "// Licensed under the MIT License. See LICENSE.txt in root directory.",
+    "// ***********************************************************************"
+};
 
 public class BuildParameters
 {
@@ -66,10 +74,14 @@ public class BuildParameters
 	public string NuGetTestDirectory => PackageTestDirectory + "nuget/";
 	public string ChocolateyTestDirectory => PackageTestDirectory + "choco/";
 
+	// Checking 
+	public string[] StandardHeader => DEFAULT_STANDARD_HEADER;
+	public string[] ExemptFiles => new string[0];
+	public bool CheckAssemblyInfoHeaders => false;
+
 	// Packaging
 	public string NuGetPackageName => $"{NUGET_ID}.{PackageVersion}.nupkg";
 	public string NuGetPackage => PackageDirectory + NuGetPackageName;
 	public string ChocolateyPackageName => $"{CHOCO_ID}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
-
 }
