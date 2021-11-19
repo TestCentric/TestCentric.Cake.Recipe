@@ -1,6 +1,7 @@
 #load "./check-headers.cake"
 #load "./package-checks.cake"
 #load "./test-results.cake"
+#load "./test-report.cake"
 #load "./package-tests.cake"
 #load "./testcentric-gui.cake"
 #load "./versioning.cake"

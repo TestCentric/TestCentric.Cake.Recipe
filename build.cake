@@ -7,7 +7,7 @@
 const string NUGET_ID = "TestCentric.Cake.Recipe";
 const string CHOCO_ID = "NONE";
 const string RECIPE_DIR = "recipe/";
-const string DEFAULT_VERSION = "0.2.0";
+const string DEFAULT_VERSION = "1.0.0";
 
 // Dogfooding: We use the recipe to build the recipe package
 #load recipe/parameters.cake
