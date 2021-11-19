@@ -29,12 +29,12 @@ public abstract class PackageTester
     protected abstract string PackageId { get; }
     protected abstract string RunnerId { get; }
     
-    public void RunAllTests()
+    public void RunAllTests(params string[] runtimes)
     {
         _guiRunner.InstallRunner();
 
         int errors = 0;
-        foreach (var runtime in new[] { "netcoreapp1.1", "netcoreapp2.1" })
+        foreach (var runtime in runtimes)
         {
             _context.Information($"Running {runtime} mock-assembly tests");
 
