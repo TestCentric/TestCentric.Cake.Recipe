@@ -11,7 +11,7 @@ public class GuiRunner
 
 	private BuildParameters _parameters;
 
-	public GuiRunner(BuildParameters parameters, string packageId, string version = null)
+	public GuiRunner(BuildParameters parameters, string packageId)
 	{
 		if (packageId != null && packageId != NuGetId && packageId != ChocoId)
 			throw new System.Exception($"Package Id invalid: {packageId}");
@@ -19,7 +19,7 @@ public class GuiRunner
 		_parameters = parameters;
 
 		PackageId = packageId;
-		Version = version;
+		Version = parameters.GuiVersion;
 	}
 
 	public string PackageId { get; }

@@ -24,6 +24,7 @@ private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "b
 
 // Defaults
 const string DEFAULT_CONFIGURATION = "Release";
+const string DEFAULT_GUI_VERSION = "2.0.0";
 
 // Standard Header. Each string represents one line.
 static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
@@ -85,4 +86,6 @@ public class BuildParameters
 	public string NuGetPackage => PackageDirectory + NuGetPackageName;
 	public string ChocolateyPackageName => $"{CHOCO_ID}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
+
+	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;
 }
