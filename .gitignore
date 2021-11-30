@@ -4,6 +4,9 @@ packages
 # VsCode
 .vscode
 
+# Visual Studio
+.vs
+
 # Packaging Directory
 package
 

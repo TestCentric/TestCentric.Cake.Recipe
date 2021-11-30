@@ -67,7 +67,7 @@ public class NuGetPackageTester : PackageTester
 {
     public NuGetPackageTester(BuildParameters parameters) : base(parameters)
     {
-        _guiRunner = new GuiRunner(parameters, GuiRunner.NuGetId, "2.0.0-dev00079");
+        _guiRunner = new GuiRunner(parameters, GuiRunner.NuGetId);
     }
 
     protected override string PackageId => NUGET_ID;
@@ -78,7 +78,7 @@ public class ChocolateyPackageTester : PackageTester
 {
     public ChocolateyPackageTester(BuildParameters parameters) : base(parameters)
     {
-        _guiRunner = new GuiRunner(parameters, GuiRunner.ChocoId, "2.0.0-dev00079");
+        _guiRunner = new GuiRunner(parameters, GuiRunner.ChocoId);
     }
 
     protected override string PackageId => CHOCO_ID;
