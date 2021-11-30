@@ -55,6 +55,7 @@ public class BuildParameters
 
 	// Versioning
 	public BuildVersion BuildVersion { get; }
+	public string BranchName => BuildVersion.BranchName;
 	public string PackageVersion => BuildVersion.PackageVersion;
 	public string AssemblyVersion => BuildVersion.AssemblyVersion;
 	public string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
@@ -87,5 +88,9 @@ public class BuildParameters
 	public string ChocolateyPackageName => $"{CHOCO_ID}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
 
+	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;
+
+	// Publishing
+	public bool ShouldPublishToMyGet => IsDevelopmentRelease;
 }

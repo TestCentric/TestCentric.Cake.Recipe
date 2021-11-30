@@ -78,11 +78,14 @@ Task("PublishPackage")
 	.IsDependentOn("BuildPackage")
 	.Does<BuildParameters>((parameters) =>
 	{
-		NuGetPush(parameters.NuGetPackage, new NuGetPushSettings()
-		{
-			ApiKey = EnvironmentVariable(MYGET_API_KEY),
-			Source = MYGET_PUSH_URL
-		});
+		if (!parameters.ShouldPublishToMyGet)
+			Information("Nothing to publish. Not on main branch.");
+		else
+			NuGetPush(parameters.NuGetPackage, new NuGetPushSettings()
+			{
+				ApiKey = EnvironmentVariable(MYGET_API_KEY),
+				Source = MYGET_PUSH_URL
+			});
 	});
 
 //////////////////////////////////////////////////////////////////////
