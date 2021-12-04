@@ -36,7 +36,7 @@ Setup<BuildParameters>((context) =>
 // BUILD PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("BuildPackage")
+Task("Build")
 	.Does<BuildParameters>((parameters) =>
 	{
 		CreateDirectory(parameters.PackageDirectory);
@@ -49,8 +49,8 @@ Task("BuildPackage")
 		});
 	});
 
-Task("TestPackage")
-	.IsDependentOn("BuildPackage")
+Task("Test")
+	.IsDependentOn("Build")
 	.IsDependentOn("TestGuiInstall");
 
 Task("TestGuiInstall")
@@ -76,8 +76,8 @@ Task("TestGuiInstall")
 // PUBLISH PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("PublishPackage")
-	.IsDependentOn("BuildPackage")
+Task("Publish")
+	.IsDependentOn("Build")
 	.Does<BuildParameters>((parameters) =>
 	{
 		if (!parameters.ShouldPublishToMyGet)
@@ -95,16 +95,16 @@ Task("PublishPackage")
 //////////////////////////////////////////////////////////////////////
 
 Task("Appveyor")
-	.IsDependentOn("BuildPackage")
-	.IsDependentOn("TestPackage")
-	.IsDependentOn("PublishPackage");
+	.IsDependentOn("Build")
+	.IsDependentOn("Test")
+	.IsDependentOn("Publish");
 
 Task("Full")
-	.IsDependentOn("BuildPackage")
-	.IsDependentOn("TestPackage");
+	.IsDependentOn("Build")
+	.IsDependentOn("Test");
 
 Task("Default")
-    .IsDependentOn("BuildPackage");
+    .IsDependentOn("Build");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
