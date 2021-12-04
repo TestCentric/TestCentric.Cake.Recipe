@@ -21,6 +21,7 @@ private const string GITHUB_ACCESS_TOKEN = "GITHUB_ACCESS_TOKEN";
 private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
+private static readonly string[] LABELS_WE_RELEASE_ON_GITHUB = { "alpha", "beta", "rc" };
 
 // Defaults
 const string DEFAULT_CONFIGURATION = "Release";
@@ -37,18 +38,33 @@ static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
 public class BuildParameters
 {
     private ISetupContext _context;
+	private BuildSystem _buildSystem;
 
 	public BuildParameters(ISetupContext context)
     {
         _context = context;
+		_buildSystem = _context.BuildSystem();
+
+		Target = _context.TargetTask.Name;
+		TasksToExecute = _context.TasksToExecute.Select(t => t.Name);
 
 		Configuration = _context.Argument("configuration", DEFAULT_CONFIGURATION);
 		ProjectDirectory = _context.Environment.WorkingDirectory.FullPath + "/";
 
+		MyGetApiKey = _context.EnvironmentVariable(MYGET_API_KEY);
+		NuGetApiKey = _context.EnvironmentVariable(NUGET_API_KEY);
+		ChocolateyApiKey = _context.EnvironmentVariable(CHOCO_API_KEY);
+		GitHubAccessToken = _context.EnvironmentVariable(GITHUB_ACCESS_TOKEN);
+
 		BuildVersion = new BuildVersion(context);
     }
 
-    public ISetupContext Context => _context;
+	// Targets
+	public string Target { get; }
+	public IEnumerable<string> TasksToExecute { get; }
+
+	// Setup Context
+	public ISetupContext Context => _context;
 
 	// Arguments
 	public string Configuration { get; }
@@ -56,12 +72,17 @@ public class BuildParameters
 	// Versioning
 	public BuildVersion BuildVersion { get; }
 	public string BranchName => BuildVersion.BranchName;
+	public bool IsReleaseBranch => BuildVersion.IsReleaseBranch;
 	public string PackageVersion => BuildVersion.PackageVersion;
 	public string AssemblyVersion => BuildVersion.AssemblyVersion;
 	public string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
 	public string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
-	public bool IsProductionRelease => !PackageVersion.Contains("-");
 	public bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
+
+	public bool IsLocalBuild => _buildSystem.IsLocalBuild;
+	public bool IsRunningOnUnix => _context.IsRunningOnUnix();
+	public bool IsRunningOnWindows => _context.IsRunningOnWindows();
+	public bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
 
 	// Directories
 	public string ProjectDirectory { get; }
@@ -83,14 +104,34 @@ public class BuildParameters
 	public bool CheckAssemblyInfoHeaders => false;
 
 	// Packaging
-	public string NuGetPackageName => $"{NUGET_ID}.{PackageVersion}.nupkg";
+	public string NuGetId { get; set; }
+	public string ChocoId { get; set; }
+	public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
 	public string NuGetPackage => PackageDirectory + NuGetPackageName;
-	public string ChocolateyPackageName => $"{CHOCO_ID}.{PackageVersion}.nupkg";
+	public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
 
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;
 
 	// Publishing
-	public bool ShouldPublishToMyGet => IsDevelopmentRelease;
+	public string MyGetPushUrl => MYGET_PUSH_URL;
+	public string NuGetPushUrl => NUGET_PUSH_URL;
+	public string ChocolateyPushUrl => CHOCO_PUSH_URL;
+
+	public string MyGetApiKey { get; }
+	public string NuGetApiKey { get; }
+	public string ChocolateyApiKey { get; }
+	public string GitHubAccessToken { get; }
+
+	//public bool ShouldPublishToMyGet => IsDevelopmentRelease;
+	public bool IsPreRelease => BuildVersion.IsPreRelease;
+	public bool ShouldPublishToMyGet =>
+		!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel);
+	public bool ShouldPublishToNuGet =>
+		!IsPreRelease || LABELS_WE_PUBLISH_ON_NUGET.Contains(BuildVersion.PreReleaseLabel);
+	public bool ShouldPublishToChocolatey =>
+		!IsPreRelease || LABELS_WE_PUBLISH_ON_CHOCOLATEY.Contains(BuildVersion.PreReleaseLabel);
+	public bool IsProductionRelease =>
+		!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel);
 }
