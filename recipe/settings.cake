@@ -5,7 +5,8 @@
 #load "./package-tests.cake"
 #load "./testcentric-gui.cake"
 #load "./versioning.cake"
-#load "./github.cake"
+#load "./clean-targets.cake"
+#load "./github-targets.cake"
 
 Task("DisplaySettings")
 	.Does<BuildSettings>((settings) =>

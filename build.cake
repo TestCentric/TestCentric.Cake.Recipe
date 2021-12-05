@@ -34,7 +34,7 @@ Setup<BuildSettings>((context) =>
 // BUILD PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("Build")
+Task("PackageRecipe")
 	.Does<BuildSettings>((settings) =>
 	{
 		CreateDirectory(settings.PackageDirectory);
@@ -47,8 +47,8 @@ Task("Build")
 		});
 	});
 
-Task("Test")
-	.IsDependentOn("Build")
+Task("TestRecipe")
+	.IsDependentOn("PackageRecipe")
 	.IsDependentOn("TestGuiInstall");
 
 Task("TestGuiInstall")
@@ -74,8 +74,8 @@ Task("TestGuiInstall")
 // PUBLISH PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("Publish")
-	.IsDependentOn("Build")
+Task("PublishRecipe")
+	.IsDependentOn("PackageRecipe")
 	.Does<BuildSettings>((settings) =>
 	{
 		if (!settings.ShouldPublishToMyGet)
@@ -92,17 +92,21 @@ Task("Publish")
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
 
+// NOTE: We use non-standard task names because the recipe definitions
+// of Package, Test and Publish, apply to the normal Clean/Build/Test
+// sequence used when creating binary packages.
+
 Task("Appveyor")
-	.IsDependentOn("Build")
-	.IsDependentOn("Test")
-	.IsDependentOn("Publish");
+	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("TestRecipe")
+	.IsDependentOn("PublishRecipe");
 
 Task("Full")
-	.IsDependentOn("Build")
-	.IsDependentOn("Test");
+	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("TestRecipe");
 
 Task("Default")
-    .IsDependentOn("Build");
+    .IsDependentOn("PackageRecipe");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
