@@ -8,6 +8,7 @@
 #load "./clean-targets.cake"
 #load "./build-targets.cake"
 #load "./test-targets.cake"
+#load "./publishing-targets.cake"
 #load "./github-targets.cake"
 
 Task("DisplaySettings")
