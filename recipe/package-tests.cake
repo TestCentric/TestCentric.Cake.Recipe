@@ -16,14 +16,14 @@ public abstract class PackageTester
         }
     };
 
-    protected BuildParameters _parameters;
+    protected BuildSettings _settings;
     protected ICakeContext _context;
     protected GuiRunner _guiRunner;
 
-    public PackageTester(BuildParameters parameters)
+    public PackageTester(BuildSettings settings)
     {
-        _parameters = parameters;
-        _context = parameters.Context;
+        _settings = settings;
+        _context = settings.Context;
     }
 
     protected abstract string PackageId { get; }
@@ -54,33 +54,33 @@ public abstract class PackageTester
         // Delete result file ahead of time so we don't mistakenly
         // read a left-over file from another test run. Leave the
         // file after the run in case we need it to debug a failure.
-        if (_context.FileExists(_parameters.OutputDirectory + TEST_RESULT))
-            _context.DeleteFile(_parameters.OutputDirectory + TEST_RESULT);
+        if (_context.FileExists(_settings.OutputDirectory + TEST_RESULT))
+            _context.DeleteFile(_settings.OutputDirectory + TEST_RESULT);
 
-        _guiRunner.RunUnattended($"{_parameters.OutputDirectory}tests/{runtime}/mock-assembly.dll");
+        _guiRunner.RunUnattended($"{_settings.OutputDirectory}tests/{runtime}/mock-assembly.dll");
 
-        return new ActualResult(_parameters.OutputDirectory + TEST_RESULT);
+        return new ActualResult(_settings.OutputDirectory + TEST_RESULT);
     }
 }
 
 public class NuGetPackageTester : PackageTester
 {
-    public NuGetPackageTester(BuildParameters parameters) : base(parameters)
+    public NuGetPackageTester(BuildSettings settings) : base(settings)
     {
-        _guiRunner = new GuiRunner(parameters, GuiRunner.NuGetId);
+        _guiRunner = new GuiRunner(settings, GuiRunner.NuGetId);
     }
 
-    protected override string PackageId => _parameters.NuGetId;
+    protected override string PackageId => _settings.NuGetId;
     protected override string RunnerId => GuiRunner.NuGetId;
 }
 
 public class ChocolateyPackageTester : PackageTester
 {
-    public ChocolateyPackageTester(BuildParameters parameters) : base(parameters)
+    public ChocolateyPackageTester(BuildSettings settings) : base(settings)
     {
-        _guiRunner = new GuiRunner(parameters, GuiRunner.ChocoId);
+        _guiRunner = new GuiRunner(settings, GuiRunner.ChocoId);
     }
 
-    protected override string PackageId => _parameters.ChocoId;
+    protected override string PackageId => _settings.ChocoId;
     protected override string RunnerId => GuiRunner.ChocoId;
 }

@@ -9,22 +9,22 @@ public class GuiRunner
 	
 	private const string RUNNER_EXE = "testcentric.exe";
 
-	private BuildParameters _parameters;
+	private BuildSettings _settings;
 
-	public GuiRunner(BuildParameters parameters, string packageId)
+	public GuiRunner(BuildSettings settings, string packageId)
 	{
 		if (packageId != null && packageId != NuGetId && packageId != ChocoId)
 			throw new System.Exception($"Package Id invalid: {packageId}");
 
-		_parameters = parameters;
+		_settings = settings;
 
 		PackageId = packageId;
-		Version = parameters.GuiVersion;
+		Version = settings.GuiVersion;
 	}
 
 	public string PackageId { get; }
 	public string Version { get; }
-	public string InstallPath => _parameters.PackageTestDirectory;
+	public string InstallPath => _settings.PackageTestDirectory;
 	public string ExecutablePath =>
 		$"{InstallPath}{PackageId}.{Version}/tools/{RUNNER_EXE}";
 	public bool IsInstalled => System.IO.File.Exists(ExecutablePath);
@@ -44,10 +44,10 @@ public class GuiRunner
 		Console.WriteLine(ExecutablePath);
 		Console.WriteLine(arguments);
 		Console.WriteLine();
-		return _parameters.Context.StartProcess(ExecutablePath, new ProcessSettings()
+		return _settings.Context.StartProcess(ExecutablePath, new ProcessSettings()
 		{
 			Arguments = arguments,
-			WorkingDirectory = _parameters.OutputDirectory
+			WorkingDirectory = _settings.OutputDirectory
 		});
 	}
 
@@ -62,7 +62,7 @@ public class GuiRunner
 		if (!System.IO.Directory.Exists(InstallPath))
 			throw new System.Exception($"Directory does not exist: {InstallPath}");
 
-		_parameters.Context.NuGetInstall(PackageId,
+		_settings.Context.NuGetInstall(PackageId,
 			new NuGetInstallSettings()
 			{
 				Version = Version,

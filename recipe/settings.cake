@@ -5,44 +5,79 @@
 #load "./package-tests.cake"
 #load "./testcentric-gui.cake"
 #load "./versioning.cake"
+#load "./dump-settings.cake"
 
-// URLs for uploading packages
-private const string MYGET_PUSH_URL = "https://www.myget.org/F/testcentric/api/v2";
-private const string NUGET_PUSH_URL = "https://api.nuget.org/v3/index.json";
-private const string CHOCO_PUSH_URL = "https://push.chocolatey.org/";
-
-// Environment Variable names holding API keys
-private const string MYGET_API_KEY = "MYGET_API_KEY";
-private const string NUGET_API_KEY = "NUGET_API_KEY";
-private const string CHOCO_API_KEY = "CHOCO_API_KEY";
-private const string GITHUB_ACCESS_TOKEN = "GITHUB_ACCESS_TOKEN";
-
-// Pre-release labels that we publish
-private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
-private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
-private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
-private static readonly string[] LABELS_WE_RELEASE_ON_GITHUB = { "alpha", "beta", "rc" };
-
-// Defaults
-const string DEFAULT_CONFIGURATION = "Release";
-const string DEFAULT_GUI_VERSION = "2.0.0";
-
-// Standard Header. Each string represents one line.
-static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
-    "// ***********************************************************************",
-    "// Copyright (c) Charlie Poole and TestCentric Engine contributors.",
-    "// Licensed under the MIT License. See LICENSE.txt in root directory.",
-    "// ***********************************************************************"
-};
-
-public class BuildParameters
+public class BuildSettings
 {
-    private ISetupContext _context;
+	// URLs for uploading packages
+	private const string MYGET_PUSH_URL = "https://www.myget.org/F/testcentric/api/v2";
+	private const string NUGET_PUSH_URL = "https://api.nuget.org/v3/index.json";
+	private const string CHOCO_PUSH_URL = "https://push.chocolatey.org/";
+
+	// Environment Variable names holding API keys
+	private const string MYGET_API_KEY = "MYGET_API_KEY";
+	private const string NUGET_API_KEY = "NUGET_API_KEY";
+	private const string CHOCO_API_KEY = "CHOCO_API_KEY";
+	private const string GITHUB_ACCESS_TOKEN = "GITHUB_ACCESS_TOKEN";
+
+	// Pre-release labels that we publish
+	private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
+	private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
+	private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
+	private static readonly string[] LABELS_WE_RELEASE_ON_GITHUB = { "alpha", "beta", "rc" };
+
+	// Defaults
+	const string DEFAULT_CONFIGURATION = "Release";
+	const string DEFAULT_GUI_VERSION = "2.0.0";
+	const string DEFAULT_COPYRIGHT = "Copyright (c) Charlie Poole and TestCentric contributors.";
+	static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
+		"// ***********************************************************************",
+		$"// {DEFAULT_COPYRIGHT}",
+		"// Licensed under the MIT License. See LICENSE.txt in root directory.",
+		"// ***********************************************************************"
+	};
+
+	private ISetupContext _context;
 	private BuildSystem _buildSystem;
 
-	public BuildParameters(ISetupContext context)
-    {
-        _context = context;
+	public static BuildSettings Initialize(
+		ISetupContext context,
+		string title = null,
+		string nugetId = null,
+		string chocoId = null,
+		string guiVersion = null,
+		string githubOwner = null,
+		string githubRepository = null,
+		string copyright = null,
+		string[] standardHeader = null)
+	{
+		if (context == null)
+			throw new ArgumentNullException("context");
+
+		var parms = new BuildSettings(context);
+
+		parms.Title = title;
+		parms.NuGetId = nugetId;
+		parms.ChocoId = chocoId;
+		parms.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
+		parms.GitHubOwner = githubOwner;
+		parms.GitHubRepository = githubRepository;
+		parms.StandardHeader = standardHeader;
+
+		if (standardHeader == null)
+		{
+			parms.StandardHeader = DEFAULT_STANDARD_HEADER;
+			// We can only replace copyright line in the default header
+			if (copyright != null)
+				parms.StandardHeader[1] = "// " + copyright;
+		}
+
+		return parms;
+	}
+
+	private BuildSettings(ISetupContext context)
+	{
+		_context = context;
 		_buildSystem = _context.BuildSystem();
 
 		Target = _context.TargetTask.Name;
@@ -57,7 +92,7 @@ public class BuildParameters
 		GitHubAccessToken = _context.EnvironmentVariable(GITHUB_ACCESS_TOKEN);
 
 		BuildVersion = new BuildVersion(context);
-    }
+	}
 
 	// Targets
 	public string Target { get; }
@@ -84,7 +119,7 @@ public class BuildParameters
 	public bool IsRunningOnWindows => _context.IsRunningOnWindows();
 	public bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
 
-	// Directories
+	// Standard Directory Structure - not changeable by user
 	public string ProjectDirectory { get; }
 	public string SourceDirectory => ProjectDirectory + "src/";
 	public string OutputDirectory => ProjectDirectory + "bin/" + Configuration + "/";
@@ -99,11 +134,12 @@ public class BuildParameters
 	public string ChocolateyTestDirectory => PackageTestDirectory + "choco/";
 
 	// Checking 
-	public string[] StandardHeader => DEFAULT_STANDARD_HEADER;
+	public string[] StandardHeader { get; set; }
 	public string[] ExemptFiles => new string[0];
 	public bool CheckAssemblyInfoHeaders => false;
 
 	// Packaging
+	public string Title { get; set; }
 	public string NuGetId { get; set; }
 	public string ChocoId { get; set; }
 	public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
@@ -114,14 +150,21 @@ public class BuildParameters
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;
 
-	// Publishing
+	// Publishing - MyGet
 	public string MyGetPushUrl => MYGET_PUSH_URL;
-	public string NuGetPushUrl => NUGET_PUSH_URL;
-	public string ChocolateyPushUrl => CHOCO_PUSH_URL;
-
 	public string MyGetApiKey { get; }
+
+	// Publishing - NuGet
+	public string NuGetPushUrl => NUGET_PUSH_URL;
 	public string NuGetApiKey { get; }
+
+	// Publishing - Chocolatey
+	public string ChocolateyPushUrl => CHOCO_PUSH_URL;
 	public string ChocolateyApiKey { get; }
+
+	// Publishing - GitHub
+	public string GitHubOwner { get; set; }
+	public string GitHubRepository { get; set; }
 	public string GitHubAccessToken { get; }
 
 	//public bool ShouldPublishToMyGet => IsDevelopmentRelease;

@@ -7,8 +7,7 @@
 const string RECIPE_DIR = "recipe/";
 const string DEFAULT_VERSION = "1.0.0";
 // Dogfooding: We use the recipe to build the recipe package
-#load recipe/parameters.cake
-#load recipe/dump-settings.cake
+#load recipe/settings.cake
 
 var target = Argument("target", "Default");
 
@@ -16,20 +15,19 @@ var target = Argument("target", "Default");
 // SETUP
 //////////////////////////////////////////////////////////////////////
 
-Setup<BuildParameters>((context) =>
+Setup<BuildSettings>((context) =>
 {
-	var parameters = new BuildParameters(context)
-	{
-		NuGetId = "TestCentric.Cake.Recipe",
-		GuiVersion = "2.0.0-dev00081"
-	};
+	var settings = BuildSettings.Initialize(
+		context: context,
+		nugetId: "TestCentric.Cake.Recipe",
+		guiVersion: "2.0.0-dev00081");
 
-	Information($"{parameters.NuGetId} {parameters.Configuration} version {parameters.PackageVersion}");
+	Information($"{settings.NuGetId} {settings.Configuration} version {settings.PackageVersion}");
 
 	if (BuildSystem.IsRunningOnAppVeyor)
-		AppVeyor.UpdateBuildVersion(parameters.PackageVersion);
+		AppVeyor.UpdateBuildVersion(settings.PackageVersion);
 
-	return parameters;
+	return settings;
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -37,14 +35,14 @@ Setup<BuildParameters>((context) =>
 //////////////////////////////////////////////////////////////////////
 
 Task("Build")
-	.Does<BuildParameters>((parameters) =>
+	.Does<BuildSettings>((settings) =>
 	{
-		CreateDirectory(parameters.PackageDirectory);
+		CreateDirectory(settings.PackageDirectory);
 
 		NuGetPack("nuget/TestCentric.Cake.Recipe.nuspec", new NuGetPackSettings()
 		{
-			Version = parameters.PackageVersion,
-			OutputDirectory = parameters.PackageDirectory,
+			Version = settings.PackageVersion,
+			OutputDirectory = settings.PackageDirectory,
 			NoPackageAnalysis = true
 		});
 	});
@@ -54,19 +52,19 @@ Task("Test")
 	.IsDependentOn("TestGuiInstall");
 
 Task("TestGuiInstall")
-	.Does<BuildParameters>((parameters) =>
+	.Does<BuildSettings>((settings) =>
 	{
-		Information($"Installing {GuiRunner.NuGetId}.{parameters.GuiVersion}...\n");
+		Information($"Installing {GuiRunner.NuGetId}.{settings.GuiVersion}...\n");
 
-		CreateDirectory(parameters.PackageTestDirectory);
-		CleanDirectory(parameters.PackageTestDirectory);
+		CreateDirectory(settings.PackageTestDirectory);
+		CleanDirectory(settings.PackageTestDirectory);
 
-		new GuiRunner(parameters, GuiRunner.NuGetId).InstallRunner();
+		new GuiRunner(settings, GuiRunner.NuGetId).InstallRunner();
 
 		Information("Verifying the installation...");
 
-		Check.That(parameters.PackageTestDirectory,
-			HasDirectory($"{GuiRunner.NuGetId}.{parameters.GuiVersion}")
+		Check.That(settings.PackageTestDirectory,
+			HasDirectory($"{GuiRunner.NuGetId}.{settings.GuiVersion}")
 				.WithFiles("LICENSE.txt", "NOTICES.txt", "CHANGES.txt"));
 
 		Information("\nGUI was successfully installed!");
@@ -78,15 +76,15 @@ Task("TestGuiInstall")
 
 Task("Publish")
 	.IsDependentOn("Build")
-	.Does<BuildParameters>((parameters) =>
+	.Does<BuildSettings>((settings) =>
 	{
-		if (!parameters.ShouldPublishToMyGet)
+		if (!settings.ShouldPublishToMyGet)
 			Information("Nothing to publish. Not on main branch.");
 		else
-			NuGetPush(parameters.NuGetPackage, new NuGetPushSettings()
+			NuGetPush(settings.NuGetPackage, new NuGetPushSettings()
 			{
-				ApiKey = EnvironmentVariable(MYGET_API_KEY),
-				Source = MYGET_PUSH_URL
+				ApiKey = settings.MyGetApiKey,
+				Source = settings.MyGetPushUrl
 			});
 	});
 

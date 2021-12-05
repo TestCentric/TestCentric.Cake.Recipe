@@ -5,21 +5,21 @@
 private static int CD_LENGTH => Environment.CurrentDirectory.Length + 1;
 
 Task("CheckHeaders")
-    .Does<BuildParameters>((parameters) =>
+    .Does<BuildSettings>((settings) =>
     {
-        new HeaderCheck(parameters).CheckHeaders();
+        new HeaderCheck(settings).CheckHeaders();
     });
 
 // Separate class keeps names hidden
 private class HeaderCheck
 {
-    private BuildParameters _parameters;
+    private BuildSettings _settings;
     private ICakeContext _context;
 
-    public HeaderCheck(BuildParameters parameters)
+    public HeaderCheck(BuildSettings settings)
     {
-        _parameters = parameters;
-        _context = parameters.Context;
+        _settings = settings;
+        _context = settings.Context;
     }
 
     public void CheckHeaders()
@@ -29,8 +29,8 @@ private class HeaderCheck
         var Exempted = new List<FilePath>();
         int examined = 0;
 
-        var sourceFiles = _context.GetFiles(_parameters.SourceDirectory + "**/*.cs");
-        var exemptFiles = _parameters.ExemptFiles;
+        var sourceFiles = _context.GetFiles(_settings.SourceDirectory + "**/*.cs");
+        var exemptFiles = _settings.ExemptFiles;
         foreach (var file in sourceFiles)
         {
             var path = file.ToString();
@@ -44,7 +44,7 @@ private class HeaderCheck
                 continue;
 
             // Ignore AssemblyInfo files
-            if (!_parameters.CheckAssemblyInfoHeaders && System.IO.Path.GetFileName(path) == "AssemblyInfo.cs")
+            if (!_settings.CheckAssemblyInfoHeaders && System.IO.Path.GetFileName(path) == "AssemblyInfo.cs")
                 continue;
 
             examined++;
@@ -53,7 +53,7 @@ private class HeaderCheck
                 Exempted.Add(file);
             else if (header.Count == 0)
                 NoHeader.Add(file);
-            else if (!header.SequenceEqual(_parameters.StandardHeader))
+            else if (!header.SequenceEqual(_settings.StandardHeader))
                 NonStandard.Add(file);
         }
 
