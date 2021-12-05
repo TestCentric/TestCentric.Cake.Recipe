@@ -7,6 +7,7 @@
 #load "./versioning.cake"
 #load "./clean-targets.cake"
 #load "./build-targets.cake"
+#load "./test-targets.cake"
 #load "./github-targets.cake"
 
 Task("DisplaySettings")
@@ -53,6 +54,7 @@ public class BuildSettings
 		string title = null,
 		string nugetId = null,
 		string chocoId = null,
+		string unitTest = null,
 		string guiVersion = null,
 		string githubOwner = null,
 		string githubRepository = null,
@@ -66,15 +68,16 @@ public class BuildSettings
 		var settings = new BuildSettings(context);
 
 		settings.Title = title;
+		settings.SolutionFile = solutionFile;
+		if (solutionFile == null && title != null)
+			settings.SolutionFile = title + ".sln";
+		settings.UnitTest = unitTest;
 		settings.NuGetId = nugetId;
 		settings.ChocoId = chocoId;
 		settings.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
 		settings.GitHubOwner = githubOwner;
 		settings.GitHubRepository = githubRepository;
 		settings.StandardHeader = standardHeader;
-		settings.SolutionFile = solutionFile;
-		if (solutionFile == null && title != null)
-			settings.SolutionFile = title + ".sln";
 
 		if (standardHeader == null)
 		{
@@ -148,6 +151,7 @@ public class BuildSettings
 
 	// Files
 	public string SolutionFile { get; set; }
+	public string UnitTest { get; set; }
 
 	// Checking 
 	public string[] StandardHeader { get; set; }
