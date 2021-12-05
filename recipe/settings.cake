@@ -6,6 +6,7 @@
 #load "./testcentric-gui.cake"
 #load "./versioning.cake"
 #load "./clean-targets.cake"
+#load "./build-targets.cake"
 #load "./github-targets.cake"
 
 Task("DisplaySettings")
@@ -56,30 +57,34 @@ public class BuildSettings
 		string githubOwner = null,
 		string githubRepository = null,
 		string copyright = null,
-		string[] standardHeader = null)
+		string[] standardHeader = null,
+		string solutionFile = null)
 	{
 		if (context == null)
 			throw new ArgumentNullException("context");
 
-		var parms = new BuildSettings(context);
+		var settings = new BuildSettings(context);
 
-		parms.Title = title;
-		parms.NuGetId = nugetId;
-		parms.ChocoId = chocoId;
-		parms.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
-		parms.GitHubOwner = githubOwner;
-		parms.GitHubRepository = githubRepository;
-		parms.StandardHeader = standardHeader;
+		settings.Title = title;
+		settings.NuGetId = nugetId;
+		settings.ChocoId = chocoId;
+		settings.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
+		settings.GitHubOwner = githubOwner;
+		settings.GitHubRepository = githubRepository;
+		settings.StandardHeader = standardHeader;
+		settings.SolutionFile = solutionFile;
+		if (solutionFile == null && title != null)
+			settings.SolutionFile = title + ".sln";
 
 		if (standardHeader == null)
 		{
-			parms.StandardHeader = DEFAULT_STANDARD_HEADER;
+			settings.StandardHeader = DEFAULT_STANDARD_HEADER;
 			// We can only replace copyright line in the default header
 			if (copyright != null)
-				parms.StandardHeader[1] = "// " + copyright;
+				settings.StandardHeader[1] = "// " + copyright;
 		}
 
-		return parms;
+		return settings;
 	}
 
 	private BuildSettings(ISetupContext context)
@@ -121,6 +126,7 @@ public class BuildSettings
 	public string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
 	public bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
 
+	// Build System
 	public bool IsLocalBuild => _buildSystem.IsLocalBuild;
 	public bool IsRunningOnUnix => _context.IsRunningOnUnix();
 	public bool IsRunningOnWindows => _context.IsRunningOnWindows();
@@ -139,6 +145,9 @@ public class BuildSettings
 	public string ZipTestDirectory => PackageTestDirectory + "zip/";
 	public string NuGetTestDirectory => PackageTestDirectory + "nuget/";
 	public string ChocolateyTestDirectory => PackageTestDirectory + "choco/";
+
+	// Files
+	public string SolutionFile { get; set; }
 
 	// Checking 
 	public string[] StandardHeader { get; set; }
