@@ -5,7 +5,13 @@
 #load "./package-tests.cake"
 #load "./testcentric-gui.cake"
 #load "./versioning.cake"
-#load "./dump-settings.cake"
+#load "./github.cake"
+
+Task("DisplaySettings")
+	.Does<BuildSettings>((settings) =>
+	{
+		settings.DisplaySettings();
+	});
 
 public class BuildSettings
 {
@@ -177,4 +183,61 @@ public class BuildSettings
 		!IsPreRelease || LABELS_WE_PUBLISH_ON_CHOCOLATEY.Contains(BuildVersion.PreReleaseLabel);
 	public bool IsProductionRelease =>
 		!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel);
+
+	public void DisplaySettings()
+    {
+		Console.WriteLine("\nTASKS");
+		Console.WriteLine("Target:                       " + Target);
+		Console.WriteLine("TasksToExecute:               " + string.Join(", ", TasksToExecute));
+
+		Console.WriteLine("\nENVIRONMENT");
+		Console.WriteLine("IsLocalBuild:                 " + IsLocalBuild);
+		Console.WriteLine("IsRunningOnWindows:           " + IsRunningOnWindows);
+		Console.WriteLine("IsRunningOnUnix:              " + IsRunningOnUnix);
+		Console.WriteLine("IsRunningOnAppVeyor:          " + IsRunningOnAppVeyor);
+
+		Console.WriteLine("\nVERSIONING");
+		Console.WriteLine("PackageVersion:               " + PackageVersion);
+		Console.WriteLine("AssemblyVersion:              " + AssemblyVersion);
+		Console.WriteLine("AssemblyFileVersion:          " + AssemblyFileVersion);
+		Console.WriteLine("AssemblyInformationalVersion: " + AssemblyInformationalVersion);
+		Console.WriteLine("SemVer:                       " + BuildVersion.SemVer);
+		Console.WriteLine("IsPreRelease:                 " + BuildVersion.IsPreRelease);
+		Console.WriteLine("PreReleaseLabel:              " + BuildVersion.PreReleaseLabel);
+		Console.WriteLine("PreReleaseSuffix:             " + BuildVersion.PreReleaseSuffix);
+
+		Console.WriteLine("\nDIRECTORIES");
+		Console.WriteLine("Project:   " + ProjectDirectory);
+		Console.WriteLine("Output:    " + OutputDirectory);
+		Console.WriteLine("Source:    " + SourceDirectory);
+		Console.WriteLine("NuGet:     " + NuGetDirectory);
+		Console.WriteLine("Choco:     " + ChocoDirectory);
+		Console.WriteLine("Package:   " + PackageDirectory);
+		Console.WriteLine("ZipImage:  " + ZipImageDirectory);
+		Console.WriteLine("ZipTest:   " + ZipTestDirectory);
+		Console.WriteLine("NuGetTest: " + NuGetTestDirectory);
+		Console.WriteLine("ChocoTest: " + ChocolateyTestDirectory);
+
+		Console.WriteLine("\nBUILD");
+		Console.WriteLine("Configuration:   " + Configuration);
+		//Console.WriteLine("Engine Runtimes: " + string.Join(", ", SupportedEngineRuntimes));
+
+		Console.WriteLine("\nPACKAGING");
+		Console.WriteLine("MyGetPushUrl:              " + MyGetPushUrl);
+		Console.WriteLine("NuGetPushUrl:              " + NuGetPushUrl);
+		Console.WriteLine("ChocolateyPushUrl:         " + ChocolateyPushUrl);
+		Console.WriteLine("MyGetApiKey:               " + (!string.IsNullOrEmpty(MyGetApiKey) ? "AVAILABLE" : "NOT AVAILABLE"));
+		Console.WriteLine("NuGetApiKey:               " + (!string.IsNullOrEmpty(NuGetApiKey) ? "AVAILABLE" : "NOT AVAILABLE"));
+		Console.WriteLine("ChocolateyApiKey:          " + (!string.IsNullOrEmpty(ChocolateyApiKey) ? "AVAILABLE" : "NOT AVAILABLE"));
+
+		Console.WriteLine("\nPUBLISHING");
+		Console.WriteLine("ShouldPublishToMyGet:      " + ShouldPublishToMyGet);
+		Console.WriteLine("ShouldPublishToNuGet:      " + ShouldPublishToNuGet);
+		Console.WriteLine("ShouldPublishToChocolatey: " + ShouldPublishToChocolatey);
+
+		Console.WriteLine("\nRELEASING");
+		Console.WriteLine("BranchName:                   " + BranchName);
+		Console.WriteLine("IsReleaseBranch:              " + IsReleaseBranch);
+		Console.WriteLine("IsProductionRelease:          " + IsProductionRelease);
+	}
 }

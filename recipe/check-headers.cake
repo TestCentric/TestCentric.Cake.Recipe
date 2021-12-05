@@ -2,8 +2,6 @@
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
 
-private static int CD_LENGTH => Environment.CurrentDirectory.Length + 1;
-
 Task("CheckHeaders")
     .Does<BuildSettings>((settings) =>
     {
@@ -111,6 +109,8 @@ private class HeaderCheck
 
     private string RelPathTo(FilePath file)
     {
+        int CD_LENGTH = Environment.CurrentDirectory.Length + 1;
+
         return file.ToString().Substring(CD_LENGTH);
     }
 }
