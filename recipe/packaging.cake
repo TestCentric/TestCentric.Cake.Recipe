@@ -1,4 +1,23 @@
 //////////////////////////////////////////////////////////////////////
+// PACKAGING TARGETS
+//////////////////////////////////////////////////////////////////////
+
+Task("Package")
+	.IsDependentOn("Build")
+	.IsDependentOn("PackageNuGet")
+	.IsDependentOn("PackageChocolatey");
+
+Task("PackageNuGet")
+	.IsDependentOn("BuildNuGetPackage")
+	.IsDependentOn("VerifyNuGetPackage")
+	.IsDependentOn("TestNuGetPackage");
+
+Task("PackageChocolatey")
+	.IsDependentOn("BuildChocolateyPackage")
+	.IsDependentOn("VerifyChocolateyPackage")
+	.IsDependentOn("TestChocolateyPackage");
+
+//////////////////////////////////////////////////////////////////////
 // BUILD PACKAGES
 //////////////////////////////////////////////////////////////////////
 

@@ -6,8 +6,7 @@ static bool hadPublishingErrors = false;
 
 Task("Publish")
 	.Description("Publish nuget and chocolatey packages according to the current settings")
-	// Temporarily removed until all targets are added
-	//.IsDependentOn("Package")
+	.IsDependentOn("Package")
 	.IsDependentOn("PublishToMyGet")
 	.IsDependentOn("PublishToNuGet")
 	.IsDependentOn("PublishToChocolatey")
