@@ -3,6 +3,7 @@
 #load "./test-results.cake"
 #load "./test-report.cake"
 #load "./package-tests.cake"
+#load "./packaging.cake"
 #load "./testcentric-gui.cake"
 #load "./versioning.cake"
 #load "./clean-targets.cake"
