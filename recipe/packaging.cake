@@ -7,7 +7,7 @@ Task("BuildNuGetPackage")
 	{
 		CreateDirectory(settings.PackageDirectory);
 
-		NuGetPack("nuget/Net20PluggableAgent.nuspec", new NuGetPackSettings()
+		NuGetPack(settings.NuGetSource, new NuGetPackSettings()
 		{
 			Version = settings.PackageVersion,
 			OutputDirectory = settings.PackageDirectory,
@@ -20,7 +20,7 @@ Task("BuildChocolateyPackage")
 	{
 		CreateDirectory(settings.PackageDirectory);
 
-		ChocolateyPack("choco/net20-pluggable-agent.nuspec", new ChocolateyPackSettings()
+		ChocolateyPack(settings.ChocolateySource, new ChocolateyPackSettings()
 		{
 			Version = settings.PackageVersion,
 			OutputDirectory = settings.PackageDirectory
