@@ -55,9 +55,9 @@ public class BuildSettings
 		ISetupContext context,
 		string title = null,
 		string nugetId = null,
-		string nugetSource = null,
+		string nugetPackageSource = null,
 		string chocoId = null,
-		string chocoSource = null,
+		string chocolateyPackageSource = null,
 		string unitTest = null,
 		string guiVersion = null,
 		string githubOwner = null,
@@ -77,9 +77,9 @@ public class BuildSettings
 			settings.SolutionFile = title + ".sln";
 		settings.UnitTest = unitTest;
 		settings.NuGetId = nugetId;
-		settings.NuGetSource = nugetSource;
+		settings.NuGetPackageSource = nugetPackageSource;
 		settings.ChocoId = chocoId;
-		settings.ChocolateySource = chocoSource;
+		settings.ChocolateyPackageSource = chocolateyPackageSource;
 		settings.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
 		settings.GitHubOwner = githubOwner;
 		settings.GitHubRepository = githubRepository;
@@ -167,13 +167,13 @@ public class BuildSettings
 	// Packaging
 	public string Title { get; set; }
 	public string NuGetId { get; set; }
-	public string NuGetSource => { get; set; }
 	public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
 	public string NuGetPackage => PackageDirectory + NuGetPackageName;
+	public string NuGetPackageSource { get; set; }
 	public string ChocoId { get; set; }
-    public string ChocolateySource { get; set; }
 	public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
+	public string ChocolateyPackageSource { get; set; }
 
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;

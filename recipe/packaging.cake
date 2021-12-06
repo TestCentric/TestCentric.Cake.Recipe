@@ -7,7 +7,7 @@ Task("BuildNuGetPackage")
 	{
 		CreateDirectory(settings.PackageDirectory);
 
-		NuGetPack(settings.NuGetSource, new NuGetPackSettings()
+		NuGetPack(settings.NuGetPackageSource, new NuGetPackSettings()
 		{
 			Version = settings.PackageVersion,
 			OutputDirectory = settings.PackageDirectory,
@@ -20,7 +20,7 @@ Task("BuildChocolateyPackage")
 	{
 		CreateDirectory(settings.PackageDirectory);
 
-		ChocolateyPack(settings.ChocolateySource, new ChocolateyPackSettings()
+		ChocolateyPack(settings.ChocolateyPackageSource, new ChocolateyPackSettings()
 		{
 			Version = settings.PackageVersion,
 			OutputDirectory = settings.PackageDirectory
