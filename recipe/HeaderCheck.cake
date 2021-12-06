@@ -2,13 +2,6 @@
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
 
-Task("CheckHeaders")
-    .Does<BuildSettings>((settings) =>
-    {
-        new HeaderCheck(settings).CheckHeaders();
-    });
-
-// Separate class keeps names hidden
 private class HeaderCheck
 {
     private BuildSettings _settings;
@@ -42,7 +35,7 @@ private class HeaderCheck
                 continue;
 
             // Ignore AssemblyInfo files
-            if (!_settings.CheckAssemblyInfoHeaders && System.IO.Path.GetFileName(path) == "AssemblyInfo.cs")
+            if (System.IO.Path.GetFileName(path) == "AssemblyInfo.cs")
                 continue;
 
             examined++;

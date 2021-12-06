@@ -2,7 +2,7 @@
 // UNIT TESTS
 //////////////////////////////////////////////////////////////////////
 
-Task("UnitTests")
+Task("Test")
 	.IsDependentOn("Build")
 	.Does<BuildSettings>((settings) =>
 	{

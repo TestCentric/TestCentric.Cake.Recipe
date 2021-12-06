@@ -8,7 +8,7 @@
 
 using System.Xml;
 
-public abstract class ResultSummary
+public abstract class TestResult
 {
 	public string OverallResult { get; set; }
 	public int Total { get; set; }
@@ -17,18 +17,18 @@ public abstract class ResultSummary
 	public int Warnings { get; set; }
 	public int Inconclusive { get; set; }
 	public int Skipped { get; set; }
-
-	public AssemblyResult[] Assemblies { get; set; }
 }
 
-public class AssemblyResult : ResultSummary
+public class AssemblyResult : TestResult
 {
 	public string Name { get; set; }
 	public string Runtime { get; set; }
 }
 
-public class ExpectedResult : ResultSummary
+public class ExpectedResult : TestResult
 {
+	public AssemblyResult[] Assemblies { get; set; }
+
 	public ExpectedResult(string overallResult)
 	{
 		if (string.IsNullOrEmpty(overallResult))
@@ -43,8 +43,10 @@ public class ExpectedResult : ResultSummary
 	}
 }
 
-public class ActualResult : ResultSummary
+public class ActualResult : TestResult
 {
+	public AssemblyResult[] Assemblies { get; set; }
+
 	public ActualResult(string resultFile)
 	{
 		var doc = new XmlDocument();

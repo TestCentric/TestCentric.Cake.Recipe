@@ -53,7 +53,6 @@ public class GuiRunner
 
 	static readonly string[] PACKAGE_SOURCES = {
 		"https://www.nuget.org/api/v2",
-		"https://www.myget.org/F/nunit/api/v2",
 		"https://www.myget.org/F/testcentric/api/v2"
 	};
 

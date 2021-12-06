@@ -1,16 +1,15 @@
-#load "./check-headers.cake"
-#load "./package-checks.cake"
-#load "./test-results.cake"
-#load "./test-report.cake"
+#load "./HeaderCheck.cake"
+#load "./PackageCheck.cake"
+#load "./TestResult.cake"
+#load "./TestReport.cake"
 #load "./package-tests.cake"
+#load "./GuiRunner.cake"
+#load "./BuildVersion.cake"
+#load "./building.cake"
+#load "./testing.cake"
 #load "./packaging.cake"
-#load "./testcentric-gui.cake"
-#load "./versioning.cake"
-#load "./clean-targets.cake"
-#load "./build-targets.cake"
-#load "./test-targets.cake"
-#load "./publishing-targets.cake"
-#load "./github-targets.cake"
+#load "./publishing.cake"
+#load "./releasing.cake"
 
 Task("DisplaySettings")
 	.Does<BuildSettings>((settings) =>
@@ -162,7 +161,6 @@ public class BuildSettings
 	// Checking 
 	public string[] StandardHeader { get; set; }
 	public string[] ExemptFiles => new string[0];
-	public bool CheckAssemblyInfoHeaders => false;
 
 	// Packaging
 	public string Title { get; set; }

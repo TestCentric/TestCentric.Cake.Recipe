@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 public class BuildVersion
 {
     private ISetupContext _context;
+    // TODO: Get GitVersion to work on Linux
     private GitVersion _gitVersion;
 
     // NOTE: This is complicated because (1) the user may have specified 
@@ -20,9 +21,8 @@ public class BuildVersion
         BranchName = _gitVersion.BranchName;
         IsReleaseBranch = BranchName.StartsWith("release-");
 
-        // TODO: Get GitVersion to work on Linux
         string packageVersion = context.HasArgument("packageVersion")
-            ? context.Argument("packageVersion", DEFAULT_VERSION)
+            ? context.Argument<string>("packageVersion")
             : CalculatePackageVersion();
 
         int dash = packageVersion.IndexOf('-');

@@ -5,9 +5,10 @@
 //////////////////////////////////////////////////////////////////////
 
 const string RECIPE_DIR = "recipe/";
-const string DEFAULT_VERSION = "1.0.0";
-// Dogfooding: We use the recipe to build the recipe package
-#load recipe/settings.cake
+
+// We use the some files for testing. In addition, loading the
+// entire recipe gives us an error if any references are missing.
+#load recipe/BuildSettings.cake
 
 var target = Argument("target", "Default");
 

@@ -90,6 +90,7 @@ Task("InstallChocolateyPackage")
 // CHECK PACKAGE CONTENT
 //////////////////////////////////////////////////////////////////////
 
+// TODO: Move specific checks to build.cake
 static readonly string[] LAUNCHER_FILES = {
 	"net20-agent-launcher.dll", "nunit.engine.api.dll"
 };
