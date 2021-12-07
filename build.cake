@@ -20,10 +20,10 @@ Setup<BuildSettings>((context) =>
 {
 	var settings = BuildSettings.Initialize(
 		context: context,
-		nugetId: "TestCentric.Cake.Recipe",
+		title: "TestCentric.Cake.Recipe",
 		guiVersion: "2.0.0-dev00081");
 
-	Information($"{settings.NuGetId} {settings.Configuration} version {settings.PackageVersion}");
+	Information($"{settings.Title} {settings.Configuration} version {settings.PackageVersion}");
 
 	if (BuildSystem.IsRunningOnAppVeyor)
 		AppVeyor.UpdateBuildVersion(settings.PackageVersion);
@@ -82,11 +82,14 @@ Task("PublishRecipe")
 		if (!settings.ShouldPublishToMyGet)
 			Information("Nothing to publish. Not on main branch.");
 		else
-			NuGetPush(settings.NuGetPackage, new NuGetPushSettings()
+		{
+			var recipePackage = $"{ settings.PackageDirectory} { settings.Title}.{settings.PackageVersion}";
+			NuGetPush(recipePackage, new NuGetPushSettings()
 			{
 				ApiKey = settings.MyGetApiKey,
 				Source = settings.MyGetPushUrl
 			});
+		}
 	});
 
 //////////////////////////////////////////////////////////////////////

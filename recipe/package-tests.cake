@@ -70,7 +70,7 @@ public class NuGetPackageTester : PackageTester
         _guiRunner = new GuiRunner(settings, GuiRunner.NuGetId);
     }
 
-    protected override string PackageId => _settings.NuGetId;
+    protected override string PackageId => _settings.Packages[0].PackageId;//_settings.NuGetId;
     protected override string RunnerId => GuiRunner.NuGetId;
 }
 
@@ -81,6 +81,6 @@ public class ChocolateyPackageTester : PackageTester
         _guiRunner = new GuiRunner(settings, GuiRunner.ChocoId);
     }
 
-    protected override string PackageId => _settings.ChocoId;
+    protected override string PackageId => _settings.Packages[1].PackageId;//_settings.ChocoId;
     protected override string RunnerId => GuiRunner.ChocoId;
 }

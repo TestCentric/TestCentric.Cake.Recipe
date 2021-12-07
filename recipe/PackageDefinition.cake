@@ -25,6 +25,7 @@ abstract public class PackageDefinition
 	public string PackageName => $"{PackageId}.{PackageVersion}.nupkg";
 
 	public abstract void BuildPackage();
+	public abstract void InstallPackage();
 	public abstract void TestPackage();
 }
 
@@ -46,6 +47,23 @@ public class NuGetPackage : PackageDefinition
 			OutputDirectory = PackageDirectory,
 			NoPackageAnalysis = true
 		});
+	}
+
+	public override void InstallPackage()
+	{
+		if (System.IO.Directory.Exists(PackageTestDirectory))
+			_context.DeleteDirectory(PackageTestDirectory,
+				new DeleteDirectorySettings()
+				{
+					Recursive = true
+				});
+
+		_context.CreateDirectory(PackageTestDirectory);
+
+		_context.Unzip(PackageDirectory + PackageName, PackageTestDirectory);
+
+		_context.Information($"  Installed {PackageName}");
+		_context.Information($"    at {PackageTestDirectory}");
 	}
 
 	public override void TestPackage()
@@ -71,6 +89,10 @@ public class ChocolateyPackage : PackageDefinition
 			Version = PackageVersion,
 			OutputDirectory = PackageDirectory
 		});
+	}
+
+	public override void InstallPackage()
+	{
 	}
 
 	public override void TestPackage()

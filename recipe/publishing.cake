@@ -27,8 +27,8 @@ Task("PublishToMyGet")
 		else
 			try
 			{
-				PushNuGetPackage(settings.NuGetPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
-				PushChocolateyPackage(settings.ChocolateyPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
+				//PushNuGetPackage(settings.NuGetPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
+				//PushChocolateyPackage(settings.ChocolateyPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
 			}
 			catch (Exception ex)
 			{
@@ -48,7 +48,7 @@ Task("PublishToNuGet")
 		else
 			try
 			{
-				PushNuGetPackage(settings.NuGetPackage, settings.NuGetApiKey, settings.NuGetPushUrl);
+				//PushNuGetPackage(settings.NuGetPackage, settings.NuGetApiKey, settings.NuGetPushUrl);
 			}
 			catch (Exception ex)
 			{
@@ -68,7 +68,7 @@ Task("PublishToChocolatey")
 		else
 			try
 			{
-				PushChocolateyPackage(settings.ChocolateyPackage, settings.ChocolateyApiKey, settings.ChocolateyPushUrl);
+				//PushChocolateyPackage(settings.ChocolateyPackage, settings.ChocolateyApiKey, settings.ChocolateyPushUrl);
 			}
 			catch (Exception ex)
 			{

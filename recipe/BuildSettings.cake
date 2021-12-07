@@ -54,21 +54,23 @@ public class BuildSettings
 	public static BuildSettings Initialize(
 		ISetupContext context,
 		string title = null,
-		string nugetId = null,
-		string nugetPackageSource = null,
-		string chocoId = null,
-		string chocolateyPackageSource = null,
-		string unitTest = null,
+        //string nugetId = null,
+        //string nugetPackageSource = null,
+        //string chocoId = null,
+        //string chocolateyPackageSource = null,
+        string unitTest = null,
 		string guiVersion = null,
 		string githubOwner = null,
 		string githubRepository = null,
 		string copyright = null,
 		string[] standardHeader = null,
-		string solutionFile = null,
-		IList<PackageDefinition> packages = null)
+		string solutionFile = null)
 	{
 		if (context == null)
 			throw new ArgumentNullException("context");
+
+		if (title == null)
+			throw new ArgumentNullException("title");
 
 		var settings = new BuildSettings(context);
 
@@ -77,15 +79,14 @@ public class BuildSettings
 		if (solutionFile == null && title != null)
 			settings.SolutionFile = title + ".sln";
 		settings.UnitTest = unitTest;
-		settings.NuGetId = nugetId;
-		settings.NuGetPackageSource = nugetPackageSource;
-		settings.ChocoId = chocoId;
-		settings.ChocolateyPackageSource = chocolateyPackageSource;
+		//settings.NuGetId = nugetId;
+		//settings.NuGetPackageSource = nugetPackageSource;
+		//settings.ChocoId = chocoId;
+		//settings.ChocolateyPackageSource = chocolateyPackageSource;
 		settings.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
 		settings.GitHubOwner = githubOwner;
 		settings.GitHubRepository = githubRepository;
 		settings.StandardHeader = standardHeader;
-		settings.Packages = packages;
 
 		if (standardHeader == null)
 		{
@@ -167,15 +168,15 @@ public class BuildSettings
 
 	// Packaging
 	public string Title { get; private set; }
-	public string NuGetId { get; private set; }
-	public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
-	public string NuGetPackage => PackageDirectory + NuGetPackageName;
-	public string NuGetPackageSource { get; private set; }
-	public string ChocoId { get; private set; }
-	public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
-	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
-	public string ChocolateyPackageSource { get; private set; }
-	public IList<PackageDefinition> Packages { get; set; }
+    //public string NuGetId { get; private set; }
+    //public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
+    //public string NuGetPackage => PackageDirectory + NuGetPackageName;
+    //public string NuGetPackageSource { get; private set; }
+    //public string ChocoId { get; private set; }
+    //public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
+    //public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
+    //public string ChocolateyPackageSource { get; private set; }
+    public List<PackageDefinition> Packages { get; } = new List<PackageDefinition>();
 
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;

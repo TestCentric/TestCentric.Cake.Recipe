@@ -52,14 +52,14 @@ Task("CreateProductionRelease")
 			string owner = settings.GitHubOwner;
 			string repository = settings.GitHubRepository;
 			string tagName = settings.PackageVersion;
-			string assets = IsRunningOnWindows()
-				? $"\"{settings.NuGetPackage},{settings.ChocolateyPackage}\""
-				: $"\"{settings.NuGetPackage}\"";
+            //string assets = IsRunningOnWindows()
+            //	? $"\"{settings.NuGetPackage},{settings.ChocolateyPackage}\""
+            //	: $"\"{settings.NuGetPackage}\"";
 
-			Information($"Publishing release {tagName} to GitHub");
+            Information($"Publishing release {tagName} to GitHub");
 
-			GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
-			GitReleaseManagerClose(token, owner, repository, tagName);
+			//GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
+			//GitReleaseManagerClose(token, owner, repository, tagName);
 		}
 		else
 		{
