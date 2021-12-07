@@ -23,6 +23,36 @@ Setup<BuildSettings>((context) =>
 		title: "TestCentric.Cake.Recipe",
 		guiVersion: "2.0.0-dev00081");
 
+	settings.Packages.Add
+	(
+		new NuGetPackage
+		(
+			settings,
+			"TestCentric.Cake.Recipe",
+			"nuget/TestCentric.Cake.Recipe.nuspec"
+		)
+		{
+			PackageChecks = new PackageCheck[]
+			{
+				HasFiles("LICENSE.txt", "testcentric.png"),
+				HasDirectory("content").WithFiles(
+					"HeaderCheck.cake",
+					"PackageCheck.cake",
+					"PackageDefinition.cake",
+					"TestResult.cake",
+					"TestReport.cake",
+					"package-tests.cake",
+					"GuiRunner.cake",
+					"BuildVersion.cake",
+					"building.cake",
+					"testing.cake",
+					"packaging.cake",
+					"publishing.cake",
+					"releasing.cake")
+			}
+		}
+	);
+
 	Information($"{settings.Title} {settings.Configuration} version {settings.PackageVersion}");
 
 	if (BuildSystem.IsRunningOnAppVeyor)
@@ -83,7 +113,7 @@ Task("PublishRecipe")
 			Information("Nothing to publish. Not on main branch.");
 		else
 		{
-			var recipePackage = $"{ settings.PackageDirectory} { settings.Title}.{settings.PackageVersion}";
+			var recipePackage = $"{ settings.PackageDirectory}{settings.Title}.{settings.PackageVersion}.nupkg";
 			NuGetPush(recipePackage, new NuGetPushSettings()
 			{
 				ApiKey = settings.MyGetApiKey,

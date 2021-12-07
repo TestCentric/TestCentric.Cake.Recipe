@@ -54,10 +54,6 @@ public class BuildSettings
 	public static BuildSettings Initialize(
 		ISetupContext context,
 		string title = null,
-        //string nugetId = null,
-        //string nugetPackageSource = null,
-        //string chocoId = null,
-        //string chocolateyPackageSource = null,
         string unitTest = null,
 		string guiVersion = null,
 		string githubOwner = null,
@@ -77,12 +73,12 @@ public class BuildSettings
 		settings.Title = title;
 		settings.SolutionFile = solutionFile;
 		if (solutionFile == null && title != null)
-			settings.SolutionFile = title + ".sln";
+		{
+			var sln = title + ".sln";
+			if (System.IO.File.Exists(sln))
+				settings.SolutionFile = sln;
+		}
 		settings.UnitTest = unitTest;
-		//settings.NuGetId = nugetId;
-		//settings.NuGetPackageSource = nugetPackageSource;
-		//settings.ChocoId = chocoId;
-		//settings.ChocolateyPackageSource = chocolateyPackageSource;
 		settings.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
 		settings.GitHubOwner = githubOwner;
 		settings.GitHubRepository = githubRepository;
@@ -168,14 +164,6 @@ public class BuildSettings
 
 	// Packaging
 	public string Title { get; private set; }
-    //public string NuGetId { get; private set; }
-    //public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
-    //public string NuGetPackage => PackageDirectory + NuGetPackageName;
-    //public string NuGetPackageSource { get; private set; }
-    //public string ChocoId { get; private set; }
-    //public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
-    //public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
-    //public string ChocolateyPackageSource { get; private set; }
     public List<PackageDefinition> Packages { get; } = new List<PackageDefinition>();
 
 	// Package Testing

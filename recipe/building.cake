@@ -5,8 +5,11 @@
 Task("Clean")
 	.Does<BuildSettings>((settings) =>
 	{
-		Information("Cleaning " + settings.OutputDirectory);
-		CleanDirectory(settings.OutputDirectory);
+		if (settings.SolutionFile != null)
+		{
+			Information("Cleaning " + settings.OutputDirectory);
+			CleanDirectory(settings.OutputDirectory);
+		}
 
 		Information("Cleaning " + settings.PackageTestDirectory);
 		CleanDirectory(settings.PackageTestDirectory);
@@ -26,6 +29,7 @@ Task("CleanAll")
 //////////////////////////////////////////////////////////////////////
 
 Task("DeleteObjectDirectories")
+	.WithCriteria<BuildSettings>((settings) => settings.SolutionFile != null)
 	.Does(() =>
 	{
 		Information("Deleting object directories");
@@ -46,6 +50,7 @@ static readonly string[] PACKAGE_SOURCES =
 };
 
 Task("NuGetRestore")
+	.WithCriteria<BuildSettings>((settings) => settings.SolutionFile != null)
 	.Does<BuildSettings>((settings) =>
 	{
 		NuGetRestore(settings.SolutionFile, new NuGetRestoreSettings()
@@ -60,6 +65,7 @@ Task("NuGetRestore")
 //////////////////////////////////////////////////////////////////////
 
 Task("CheckHeaders")
+	.WithCriteria<BuildSettings>((settings) => System.IO.Directory.Exists(settings.SourceDirectory))
 	.Does<BuildSettings>((settings) =>
 	{
 		new HeaderCheck(settings).CheckHeaders();
@@ -70,6 +76,7 @@ Task("CheckHeaders")
 //////////////////////////////////////////////////////////////////////
 
 Task("Build")
+	.WithCriteria<BuildSettings>((settings) => settings.SolutionFile != null)
 	.IsDependentOn("Clean")
 	.IsDependentOn("NuGetRestore")
 	.IsDependentOn("CheckHeaders")

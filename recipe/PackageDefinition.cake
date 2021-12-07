@@ -25,7 +25,6 @@ abstract public class PackageDefinition
 	public string PackageName => $"{PackageId}.{PackageVersion}.nupkg";
 
 	public abstract void BuildPackage();
-	public abstract void InstallPackage();
 	public abstract void TestPackage();
 }
 
@@ -47,23 +46,6 @@ public class NuGetPackage : PackageDefinition
 			OutputDirectory = PackageDirectory,
 			NoPackageAnalysis = true
 		});
-	}
-
-	public override void InstallPackage()
-	{
-		if (System.IO.Directory.Exists(PackageTestDirectory))
-			_context.DeleteDirectory(PackageTestDirectory,
-				new DeleteDirectorySettings()
-				{
-					Recursive = true
-				});
-
-		_context.CreateDirectory(PackageTestDirectory);
-
-		_context.Unzip(PackageDirectory + PackageName, PackageTestDirectory);
-
-		_context.Information($"  Installed {PackageName}");
-		_context.Information($"    at {PackageTestDirectory}");
 	}
 
 	public override void TestPackage()
@@ -91,10 +73,6 @@ public class ChocolateyPackage : PackageDefinition
 		});
 	}
 
-	public override void InstallPackage()
-	{
-	}
-
 	public override void TestPackage()
 	{
 		new ChocolateyPackageTester(_settings).RunAllTests();
@@ -109,17 +87,4 @@ static readonly string[] MY_AGENT_FILES = {
 	"net40-pluggable-agent.exe", "net40-pluggable-agent.exe.config",
 	"net40-pluggable-agent-x86.exe", "net40-pluggable-agent-x86.exe.config",
 	"nunit.engine.api.dll", "testcentric.engine.core.dll"
-};
-
-var NuGetPackageChecks = new PackageCheck[]
-{
-		HasFiles("LICENSE.txt", "CHANGES.txt"),
-		HasDirectory("tools").WithFiles(MY_LAUNCHER_FILES),
-		HasDirectory("tools/agent").WithFiles(MY_AGENT_FILES)
-};
-
-var ChocolateyPackageChecks = new PackageCheck[]
-{
-			HasDirectory("tools").WithFiles("LICENSE.txt", "CHANGES.txt", "VERIFICATION.txt").WithFiles(MY_LAUNCHER_FILES),
-			HasDirectory("tools/agent").WithFiles(MY_AGENT_FILES)
 };
