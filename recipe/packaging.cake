@@ -21,6 +21,13 @@ Task("PackageChocolatey")
 // BUILD PACKAGES
 //////////////////////////////////////////////////////////////////////
 
+Task("BuildPackages")
+	.Does<BuildSettings>((settings) =>
+	{
+		foreach (var package in settings.Packages)
+			package.BuildPackage();
+	});
+
 Task("BuildNuGetPackage")
 	.Does<BuildSettings>((settings) =>
 	{
@@ -90,6 +97,17 @@ Task("InstallChocolateyPackage")
 // CHECK PACKAGE CONTENT
 //////////////////////////////////////////////////////////////////////
 
+Task("VerifyPackages")
+	.IsDependentOn("BuildPackages")
+	.Does<BuildSettings>((settings) =>
+	{
+		foreach (var package in settings.Packages)
+		{
+			Check.That(package.PackageTestDirectory, package.PackageChecks);
+			Information("  SUCCESS: All checks were successful");
+		}
+	});
+
 // TODO: Move specific checks to build.cake
 static readonly string[] LAUNCHER_FILES = {
 	"net20-agent-launcher.dll", "nunit.engine.api.dll"
@@ -127,6 +145,16 @@ Task("VerifyChocolateyPackage")
 //////////////////////////////////////////////////////////////////////
 // TEST PACKAGES
 //////////////////////////////////////////////////////////////////////
+
+Task("TestPackages")
+	.IsDependentOn("BuildPackages")
+	.Does<BuildSettings>((settings) =>
+	{
+		foreach (var package in settings.Packages)
+		{
+			package.TestPackage();
+		}
+	});
 
 Task("TestNuGetPackage")
 	.IsDependentOn("InstallNuGetPackage")

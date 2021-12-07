@@ -1,5 +1,6 @@
 #load "./HeaderCheck.cake"
 #load "./PackageCheck.cake"
+#load "./PackageDefinition.cake"
 #load "./TestResult.cake"
 #load "./TestReport.cake"
 #load "./package-tests.cake"
@@ -63,7 +64,8 @@ public class BuildSettings
 		string githubRepository = null,
 		string copyright = null,
 		string[] standardHeader = null,
-		string solutionFile = null)
+		string solutionFile = null,
+		PackageDefinition[] packages = null)
 	{
 		if (context == null)
 			throw new ArgumentNullException("context");
@@ -83,6 +85,7 @@ public class BuildSettings
 		settings.GitHubOwner = githubOwner;
 		settings.GitHubRepository = githubRepository;
 		settings.StandardHeader = standardHeader;
+		settings.Packages = packages;
 
 		if (standardHeader == null)
 		{
@@ -163,15 +166,16 @@ public class BuildSettings
 	public string[] ExemptFiles => new string[0];
 
 	// Packaging
-	public string Title { get; set; }
-	public string NuGetId { get; set; }
+	public string Title { get; private set; }
+	public string NuGetId { get; private set; }
 	public string NuGetPackageName => $"{NuGetId}.{PackageVersion}.nupkg";
 	public string NuGetPackage => PackageDirectory + NuGetPackageName;
-	public string NuGetPackageSource { get; set; }
-	public string ChocoId { get; set; }
+	public string NuGetPackageSource { get; private set; }
+	public string ChocoId { get; private set; }
 	public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
-	public string ChocolateyPackageSource { get; set; }
+	public string ChocolateyPackageSource { get; private set; }
+	public PackageDefinition[] Packages { get; private set; }
 
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;
