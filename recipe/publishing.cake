@@ -25,16 +25,22 @@ Task("PublishToMyGet")
 		if (!settings.IsProductionRelease && !settings.IsDevelopmentRelease)
 			Information("Nothing to publish to MyGet from this run.");
 		else
+		foreach (var package in settings.Packages)
+		{
+			var packagePath = settings.PackageDirectory + package.PackageName;
 			try
 			{
-				//PushNuGetPackage(settings.NuGetPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
-				//PushChocolateyPackage(settings.ChocolateyPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
+				if (package is NuGetPackage)
+					PushNuGetPackage(packagePath, settings.MyGetApiKey, settings.MyGetPushUrl);
+				else if (package is ChocolateyPackage)
+					PushChocolateyPackage(packagePath, settings.MyGetApiKey, settings.MyGetPushUrl);
 			}
 			catch (Exception ex)
 			{
 				Error(ex.Message);
 				hadPublishingErrors = true;
 			}
+		}
 	});
 
 // This task may either be run by the PublishPackages task,
@@ -46,15 +52,20 @@ Task("PublishToNuGet")
 		if (!settings.IsProductionRelease)
 			Information("Nothing to publish to NuGet from this run.");
 		else
+		foreach (var package in settings.Packages)
+		{
+			var packagePath = settings.PackageDirectory + package.PackageName;
 			try
 			{
-				//PushNuGetPackage(settings.NuGetPackage, settings.NuGetApiKey, settings.NuGetPushUrl);
+				if (package is NuGetPackage)
+					PushNuGetPackage(packagePath, settings.NuGetApiKey, settings.NuGetPushUrl);
 			}
 			catch (Exception ex)
 			{
 				Error(ex.Message);
 				hadPublishingErrors = true;
 			}
+		}
 	});
 
 // This task may either be run by the PublishPackages task,
@@ -66,15 +77,20 @@ Task("PublishToChocolatey")
 		if (!settings.IsProductionRelease)
 			Information("Nothing to publish to Chocolatey from this run.");
 		else
+		foreach (var package in settings.Packages)
+		{
+			var packagePath = settings.PackageDirectory + package.PackageName;
 			try
 			{
-				//PushChocolateyPackage(settings.ChocolateyPackage, settings.ChocolateyApiKey, settings.ChocolateyPushUrl);
+				if (package is ChocolateyPackage)
+					PushChocolateyPackage(packagePath, settings.ChocolateyApiKey, settings.ChocolateyPushUrl);
 			}
 			catch (Exception ex)
 			{
 				Error(ex.Message);
 				hadPublishingErrors = true;
 			}
+		}
 	});
 
 private void PushNuGetPackage(FilePath package, string apiKey, string url)

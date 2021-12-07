@@ -65,21 +65,21 @@ Setup<BuildSettings>((context) =>
 // BUILD PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("PackageRecipe")
-	.Does<BuildSettings>((settings) =>
-	{
-		CreateDirectory(settings.PackageDirectory);
+//Task("PackageRecipe")
+//	.Does<BuildSettings>((settings) =>
+//	{
+//		CreateDirectory(settings.PackageDirectory);
 
-		NuGetPack("nuget/TestCentric.Cake.Recipe.nuspec", new NuGetPackSettings()
-		{
-			Version = settings.PackageVersion,
-			OutputDirectory = settings.PackageDirectory,
-			NoPackageAnalysis = true
-		});
-	});
+//		NuGetPack("nuget/TestCentric.Cake.Recipe.nuspec", new NuGetPackSettings()
+//		{
+//			Version = settings.PackageVersion,
+//			OutputDirectory = settings.PackageDirectory,
+//			NoPackageAnalysis = true
+//		});
+//	});
 
 Task("TestRecipe")
-	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("Package")
 	.IsDependentOn("TestGuiInstall");
 
 Task("TestGuiInstall")
@@ -105,22 +105,22 @@ Task("TestGuiInstall")
 // PUBLISH PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("PublishRecipe")
-	.IsDependentOn("PackageRecipe")
-	.Does<BuildSettings>((settings) =>
-	{
-		if (!settings.ShouldPublishToMyGet)
-			Information("Nothing to publish. Not on main branch.");
-		else
-		{
-			var recipePackage = $"{ settings.PackageDirectory}{settings.Title}.{settings.PackageVersion}.nupkg";
-			NuGetPush(recipePackage, new NuGetPushSettings()
-			{
-				ApiKey = settings.MyGetApiKey,
-				Source = settings.MyGetPushUrl
-			});
-		}
-	});
+//Task("PublishRecipe")
+//	.IsDependentOn("Package")
+//	.Does<BuildSettings>((settings) =>
+//	{
+//		if (!settings.ShouldPublishToMyGet)
+//			Information("Nothing to publish. Not on main branch.");
+//		else
+//		{
+//			var recipePackage = $"{ settings.PackageDirectory}{settings.Title}.{settings.PackageVersion}.nupkg";
+//			NuGetPush(recipePackage, new NuGetPushSettings()
+//			{
+//				ApiKey = settings.MyGetApiKey,
+//				Source = settings.MyGetPushUrl
+//			});
+//		}
+//	});
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
@@ -131,16 +131,16 @@ Task("PublishRecipe")
 // sequence used when creating binary packages.
 
 Task("Appveyor")
-	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("Package")
 	.IsDependentOn("TestRecipe")
-	.IsDependentOn("PublishRecipe");
+	.IsDependentOn("Publish");
 
 Task("Full")
-	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("Package")
 	.IsDependentOn("TestRecipe");
 
 Task("Default")
-    .IsDependentOn("PackageRecipe");
+    .IsDependentOn("Package");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
