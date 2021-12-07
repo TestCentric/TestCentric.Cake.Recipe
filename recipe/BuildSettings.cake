@@ -65,7 +65,7 @@ public class BuildSettings
 		string copyright = null,
 		string[] standardHeader = null,
 		string solutionFile = null,
-		PackageDefinition[] packages = null)
+		IList<PackageDefinition> packages = null)
 	{
 		if (context == null)
 			throw new ArgumentNullException("context");
@@ -175,7 +175,7 @@ public class BuildSettings
 	public string ChocolateyPackageName => $"{ChocoId}.{PackageVersion}.nupkg";
 	public string ChocolateyPackage => PackageDirectory + ChocolateyPackageName;
 	public string ChocolateyPackageSource { get; private set; }
-	public PackageDefinition[] Packages { get; private set; }
+	public IList<PackageDefinition> Packages { get; set; }
 
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;

@@ -9,7 +9,7 @@ abstract public class PackageDefinition
 		_context = settings.Context;
 
 		PackageId = packageId;
-		PackageSource = PackageSource;
+		PackageSource = packageSource;
 	}
 
 	public string PackageId { get; }
