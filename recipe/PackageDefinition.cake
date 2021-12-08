@@ -15,8 +15,8 @@ abstract public class PackageDefinition
 	public string PackageId { get; }
 	public string PackageSource { get; }
 
-	public PackageCheck[] PackageChecks { get; set; }
-	//public PackageTest[] PackageTests { get; set; }
+	public PackageCheck[] PackageChecks { get; set; } = new PackageCheck[0];
+	public PackageTest[] PackageTests { get; set; } = new PackageTest[0];
 
 	public string PackageTestDirectory { get; protected set; }
 
@@ -50,7 +50,7 @@ public class NuGetPackage : PackageDefinition
 
 	public override void TestPackage()
 	{
-		new NuGetPackageTester(_settings).RunAllTests();
+		new NuGetPackageTester(_settings, this).RunAllTests();
 	}
 }
 
@@ -75,16 +75,6 @@ public class ChocolateyPackage : PackageDefinition
 
 	public override void TestPackage()
 	{
-		new ChocolateyPackageTester(_settings).RunAllTests();
+		new ChocolateyPackageTester(_settings, this).RunAllTests();
 	}
 }
-
-static readonly string[] MY_LAUNCHER_FILES = {
-	"net40-agent-launcher.dll", "nunit.engine.api.dll"
-};
-
-static readonly string[] MY_AGENT_FILES = {
-	"net40-pluggable-agent.exe", "net40-pluggable-agent.exe.config",
-	"net40-pluggable-agent-x86.exe", "net40-pluggable-agent-x86.exe.config",
-	"nunit.engine.api.dll", "testcentric.engine.core.dll"
-};

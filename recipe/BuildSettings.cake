@@ -1,8 +1,8 @@
 #load "./HeaderCheck.cake"
 #load "./PackageCheck.cake"
 #load "./PackageDefinition.cake"
-#load "./TestResult.cake"
-#load "./TestReport.cake"
+#load "./test-results.cake"
+#load "./test-reports.cake"
 #load "./package-tests.cake"
 #load "./GuiRunner.cake"
 #load "./BuildVersion.cake"
@@ -12,10 +12,10 @@
 #load "./publishing.cake"
 #load "./releasing.cake"
 
-Task("DisplaySettings")
+Task("DumpSettings")
 	.Does<BuildSettings>((settings) =>
 	{
-		settings.DisplaySettings();
+		settings.DumpSettings();
 	});
 
 public class BuildSettings
@@ -197,7 +197,7 @@ public class BuildSettings
 	public bool IsProductionRelease =>
 		!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel);
 
-	public void DisplaySettings()
+	public void DumpSettings()
     {
 		Console.WriteLine("\nTASKS");
 		Console.WriteLine("Target:                       " + Target);

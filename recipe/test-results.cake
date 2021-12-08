@@ -8,45 +8,48 @@
 
 using System.Xml;
 
-public abstract class TestResult
+public abstract class ResultSummary
 {
 	public string OverallResult { get; set; }
-	public int Total { get; set; }
-	public int Passed { get; set; }
-	public int Failed { get; set; }
-	public int Warnings { get; set; }
-	public int Inconclusive { get; set; }
+	public int Total  { get; set; }
+	public int Passed  { get; set; }
+	public int Failed  { get; set; }
+	public int Warnings  { get; set; }
+	public int Inconclusive  { get; set; }
 	public int Skipped { get; set; }
 }
 
-public class AssemblyResult : TestResult
+public class ExpectedResult : ResultSummary
 {
-	public string Name { get; set; }
-	public string Runtime { get; set; }
-}
-
-public class ExpectedResult : TestResult
-{
-	public AssemblyResult[] Assemblies { get; set; }
-
 	public ExpectedResult(string overallResult)
 	{
 		if (string.IsNullOrEmpty(overallResult))
 			throw new ArgumentNullException(nameof(overallResult));
 
 		OverallResult = overallResult;
+		
 		// Initialize counters to -1, indicating no expected value.
 		// Set properties of those items to be checked.
 		Total = Passed = Failed = Warnings = Inconclusive = Skipped = -1;
-
-		Assemblies = new AssemblyResult[0];
 	}
+
+	public ExpectedAssemblyResult[] Assemblies { get; set; } = new ExpectedAssemblyResult[0];
 }
 
-public class ActualResult : TestResult
+public class ExpectedAssemblyResult
 {
-	public AssemblyResult[] Assemblies { get; set; }
+	public ExpectedAssemblyResult(string assemblyName, string agentName)
+	{
+		AssemblyName = assemblyName;
+		AgentName = agentName;
+	}
 
+	public string AssemblyName { get; }
+	public string AgentName { get; }
+}
+
+public class ActualResult : ResultSummary
+{
 	public ActualResult(string resultFile)
 	{
 		var doc = new XmlDocument();
@@ -64,22 +67,17 @@ public class ActualResult : TestResult
 		Inconclusive = IntAttribute(Xml, "inconclusive");
 		Skipped = IntAttribute(Xml, "skipped");
 
-		var assemblies = Xml.SelectNodes("test-suite[@type='Assembly']");
-		Assemblies = new AssemblyResult[assemblies.Count];
+		var assemblies = new List<ActualAssemblyResult>();
 
-		for (int i = 0; i < assemblies.Count; i++)
-		{
-			XmlNode assembly = assemblies[i];
-			var env = assembly.SelectSingleNode("environment");
-			string name = assembly.Attributes["name"].Value;
-			string clrVersion = env.Attributes["clr-version"].Value;
-			// This agent is only used with the .NET Framework.
-			string runtime = "net" + clrVersion.Substring(0, 3).Replace(".", "");
-			Assemblies[i] = new AssemblyResult() { Name = name, Runtime = runtime };
-		}
+		foreach (XmlNode node in Xml.SelectNodes("//test-suite[@type='Assembly']"))
+			assemblies.Add(new ActualAssemblyResult(node));
+
+		Assemblies = assemblies.ToArray();
 	}
 
 	public XmlNode Xml { get; }
+
+	public ActualAssemblyResult[] Assemblies { get; }
 
 	private string GetAttribute(XmlNode node, string name)
 	{
@@ -90,7 +88,30 @@ public class ActualResult : TestResult
 	{
 		string s = GetAttribute(node, name);
 		// TODO: We should replace 0 with -1, representing a missing counter
-		// attribute, after issue #904 is fixed.
+		// attribute, after issue #707 is fixed.
 		return s == null ? 0 : int.Parse(s);
 	}
+}
+
+public class ActualAssemblyResult
+{
+	public ActualAssemblyResult(XmlNode xml)
+    {
+		AssemblyName = xml.Attributes["name"]?.Value;
+
+		var env = xml.SelectSingleNode("environment");
+		var settings = xml.SelectSingleNode("settings");
+
+		// If TargetRuntimeFramework setting is not present, the GUI will have crashed anyway
+		var runtimeSetting = settings.SelectSingleNode("setting[@name='TargetRuntimeFramework']");
+		TargetRuntime = runtimeSetting?.Attributes["value"]?.Value;
+
+		var agentSetting = settings?.SelectSingleNode("setting[@name='SelectedAgentName']");
+		AgentName = agentSetting.Attributes["value"]?.Value;
+	}
+
+	public string AssemblyName { get; }
+	public string AgentName { get; }
+
+	public string TargetRuntime { get; }
 }

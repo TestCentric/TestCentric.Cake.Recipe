@@ -39,8 +39,8 @@ Setup<BuildSettings>((context) =>
 					"HeaderCheck.cake",
 					"PackageCheck.cake",
 					"PackageDefinition.cake",
-					"TestResult.cake",
-					"TestReport.cake",
+					"test-results.cake",
+					"test-reports.cake",
 					"package-tests.cake",
 					"GuiRunner.cake",
 					"BuildVersion.cake",
@@ -62,21 +62,8 @@ Setup<BuildSettings>((context) =>
 });
 
 //////////////////////////////////////////////////////////////////////
-// BUILD PACKAGE
+// TEST PACKAGE
 //////////////////////////////////////////////////////////////////////
-
-//Task("PackageRecipe")
-//	.Does<BuildSettings>((settings) =>
-//	{
-//		CreateDirectory(settings.PackageDirectory);
-
-//		NuGetPack("nuget/TestCentric.Cake.Recipe.nuspec", new NuGetPackSettings()
-//		{
-//			Version = settings.PackageVersion,
-//			OutputDirectory = settings.PackageDirectory,
-//			NoPackageAnalysis = true
-//		});
-//	});
 
 Task("TestRecipe")
 	.IsDependentOn("Package")
@@ -100,27 +87,6 @@ Task("TestGuiInstall")
 
 		Information("\nGUI was successfully installed!");
 	});
-
-//////////////////////////////////////////////////////////////////////
-// PUBLISH PACKAGE
-//////////////////////////////////////////////////////////////////////
-
-//Task("PublishRecipe")
-//	.IsDependentOn("Package")
-//	.Does<BuildSettings>((settings) =>
-//	{
-//		if (!settings.ShouldPublishToMyGet)
-//			Information("Nothing to publish. Not on main branch.");
-//		else
-//		{
-//			var recipePackage = $"{ settings.PackageDirectory}{settings.Title}.{settings.PackageVersion}.nupkg";
-//			NuGetPush(recipePackage, new NuGetPushSettings()
-//			{
-//				ApiKey = settings.MyGetApiKey,
-//				Source = settings.MyGetPushUrl
-//			});
-//		}
-//	});
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
