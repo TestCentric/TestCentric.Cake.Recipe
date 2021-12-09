@@ -39,9 +39,9 @@ public class PackageTestReport
 			var actual = actualAssemblies[i];
 
 			if (expected.AssemblyName != actual.AssemblyName)
-				Errors.Add($"   Expected: {expected.AssemblyName}\r\n    But was: { actual.AssemblyName}");
-			else if (actual.AgentName != null && expected.AgentName != actual.AgentName)
-				Errors.Add($"   Assembly {actual.AssemblyName}\r\n     Expected: {expected.AgentName}\r\n      But was: {actual.AgentName}");
+				Errors.Add($"   Expected: {expected.AssemblyName}\r\n    But was: { actual.AssemblyName ?? "<null>"}");
+			else if (expected.AgentName != null && expected.AgentName != actual.AgentName)
+				Errors.Add($"   Assembly {actual.AssemblyName}\r\n     Expected: {expected.AgentName}\r\n      But was: {actual.AgentName ?? "<null>"}");
         }
 
 		for (int i = actualAssemblies.Length; i < expectedAssemblies.Length; i++)

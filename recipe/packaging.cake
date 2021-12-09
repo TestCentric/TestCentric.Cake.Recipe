@@ -72,6 +72,8 @@ Task("TestPackages")
 	.IsDependentOn("BuildPackages")
 	.Does<BuildSettings>((settings) =>
 	{
+		new GuiRunner(settings, "TestCentric.GuiRunner").InstallRunner();
+
 		foreach (var package in settings.Packages)
 		{
 			package.TestPackage();

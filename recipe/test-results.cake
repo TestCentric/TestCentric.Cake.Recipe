@@ -38,7 +38,7 @@ public class ExpectedResult : ResultSummary
 
 public class ExpectedAssemblyResult
 {
-	public ExpectedAssemblyResult(string assemblyName, string agentName)
+	public ExpectedAssemblyResult(string assemblyName, string agentName = null)
 	{
 		AssemblyName = assemblyName;
 		AgentName = agentName;
@@ -106,8 +106,8 @@ public class ActualAssemblyResult
 		var runtimeSetting = settings.SelectSingleNode("setting[@name='TargetRuntimeFramework']");
 		TargetRuntime = runtimeSetting?.Attributes["value"]?.Value;
 
-		var agentSetting = settings?.SelectSingleNode("setting[@name='SelectedAgentName']");
-		AgentName = agentSetting.Attributes["value"]?.Value;
+		var agentSetting = settings.SelectSingleNode("setting[@name='SelectedAgentName']");
+		AgentName = agentSetting?.Attributes["value"]?.Value;
 	}
 
 	public string AssemblyName { get; }

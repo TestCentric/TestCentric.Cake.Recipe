@@ -232,7 +232,7 @@ public abstract class PackageTester : GuiTester
 	// to limit tests on some of them would be efficiency... so far not a problem.
 	private List<PackageTest> PackageTests { get; }
 
-	protected string StandardRunner => "C:/users/charlie/dev/TestCentric/testcentric-gui/bin/Release/testcentric.exe";
+	protected string StandardRunner => $"C:/users/charlie/dev/TestCentric/testcentric-gui/package/TestCentric.GuiRunner.2.0.0-dev00081/tools/testcentric.exe";
 
 	public void RunAllTests()
 	{
