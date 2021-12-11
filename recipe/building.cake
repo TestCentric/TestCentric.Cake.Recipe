@@ -3,16 +3,11 @@
 //////////////////////////////////////////////////////////////////////
 
 Task("Clean")
+	.WithCriteria<BuildSettings>((settings) => settings.SolutionFile != null)
 	.Does<BuildSettings>((settings) =>
 	{
-		if (settings.SolutionFile != null)
-		{
-			Information("Cleaning " + settings.OutputDirectory);
-			CleanDirectory(settings.OutputDirectory);
-		}
-
-		Information("Cleaning " + settings.PackageTestDirectory);
-		CleanDirectory(settings.PackageTestDirectory);
+		Information("Cleaning " + settings.OutputDirectory);
+		CleanDirectory(settings.OutputDirectory);
 	});
 
 //////////////////////////////////////////////////////////////////////

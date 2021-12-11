@@ -27,12 +27,13 @@ Task("PublishToMyGet")
 		else
 		foreach (var package in settings.Packages)
 		{
-			var packagePath = settings.PackageDirectory + package.PackageName;
+			var packageName = $"{package.PackageId}.{settings.PackageVersion}.nupkg";
+			var packagePath = settings.PackageDirectory + packageName;
 			try
 			{
-				if (package is NuGetPackage)
+				if (package.IsNuGetPackage)
 					PushNuGetPackage(packagePath, settings.MyGetApiKey, settings.MyGetPushUrl);
-				else if (package is ChocolateyPackage)
+				else if (package.IsChocolateyPackage)
 					PushChocolateyPackage(packagePath, settings.MyGetApiKey, settings.MyGetPushUrl);
 			}
 			catch (Exception ex)
@@ -54,10 +55,11 @@ Task("PublishToNuGet")
 		else
 		foreach (var package in settings.Packages)
 		{
-			var packagePath = settings.PackageDirectory + package.PackageName;
+			var packageName = $"{package.PackageId}.{settings.PackageVersion}.nupkg";
+			var packagePath = settings.PackageDirectory + packageName;
 			try
 			{
-				if (package is NuGetPackage)
+				if (package.IsNuGetPackage)
 					PushNuGetPackage(packagePath, settings.NuGetApiKey, settings.NuGetPushUrl);
 			}
 			catch (Exception ex)
@@ -79,10 +81,11 @@ Task("PublishToChocolatey")
 		else
 		foreach (var package in settings.Packages)
 		{
-			var packagePath = settings.PackageDirectory + package.PackageName;
+			var packageName = $"{package.PackageId}.{settings.PackageVersion}.nupkg";
+			var packagePath = settings.PackageDirectory + packageName;
 			try
 			{
-				if (package is ChocolateyPackage)
+				if (package.IsChocolateyPackage)
 					PushChocolateyPackage(packagePath, settings.ChocolateyApiKey, settings.ChocolateyPushUrl);
 			}
 			catch (Exception ex)

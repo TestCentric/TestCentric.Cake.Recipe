@@ -11,6 +11,9 @@ public class PackageTestReport
 
 	public PackageTestReport(PackageTest test, ActualResult actualResult)
 	{
+		if (actualResult == null)
+			throw new ArgumentNullException(nameof(actualResult));
+
 		Test = test;
 		Result = actualResult;
 		Errors = new List<string>();
@@ -18,11 +21,10 @@ public class PackageTestReport
 		var expectedResult = test.ExpectedResult;
 
 		ReportMissingFiles();
-
 		if (actualResult.OverallResult == null)
 			Errors.Add("   The test-run element has no result attribute.");
 		else if (expectedResult.OverallResult != actualResult.OverallResult)
-			Errors.Add($"   Expected: Overall Result = {expectedResult.OverallResult}\n   But was: {actualResult.OverallResult}");
+			Errors.Add($"   Expected: Overall Result = {expectedResult.OverallResult}\r\n   But was: {actualResult.OverallResult}");
 		CheckCounter("Test Count", expectedResult.Total, actualResult.Total);
 		CheckCounter("Passed", expectedResult.Passed, actualResult.Passed);
 		CheckCounter("Failed", expectedResult.Failed, actualResult.Failed);

@@ -54,7 +54,6 @@ public class ActualResult : ResultSummary
 	{
 		var doc = new XmlDocument();
 		doc.Load(resultFile);
-
 		Xml = doc.DocumentElement;
 		if (Xml.Name != "test-run")
 			throw new Exception("The test-run element was not found.");
@@ -66,7 +65,6 @@ public class ActualResult : ResultSummary
 		Warnings = IntAttribute(Xml, "warnings");
 		Inconclusive = IntAttribute(Xml, "inconclusive");
 		Skipped = IntAttribute(Xml, "skipped");
-
 		var assemblies = new List<ActualAssemblyResult>();
 
 		foreach (XmlNode node in Xml.SelectNodes("//test-suite[@type='Assembly']"))

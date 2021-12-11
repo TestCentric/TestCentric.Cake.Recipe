@@ -16,7 +16,25 @@ Task("BuildPackages")
 	.Does<BuildSettings>((settings) =>
 	{
 		foreach (var package in settings.Packages)
-			package.BuildPackage();
+			if (package.IsNuGetPackage)
+			{
+				CreateDirectory(settings.PackageDirectory);
+				NuGetPack(package.PackageSource, new NuGetPackSettings()
+				{
+					Version = settings.PackageVersion,
+					OutputDirectory = settings.PackageDirectory,
+					NoPackageAnalysis = true
+				});
+			}
+			else if (package.IsChocolateyPackage)
+			{
+                CreateDirectory(settings.PackageDirectory);
+                ChocolateyPack(package.PackageSource, new ChocolateyPackSettings()
+                {
+                    Version = settings.PackageVersion,
+                    OutputDirectory = settings.PackageDirectory
+                });
+			}
 	});
 
 //////////////////////////////////////////////////////////////////////
@@ -29,8 +47,8 @@ Task("InstallPackages")
 	{
 		foreach (var package in settings.Packages)
 		{
-			var packageName = package.PackageName;
-			var testDirectory = package.PackageTestDirectory;
+			var packageName = $"{package.PackageId}.{settings.PackageVersion}.nupkg";
+			var testDirectory = settings.PackageTestDirectory + package.PackageId;
 
 			if (System.IO.Directory.Exists(testDirectory))
 				DeleteDirectory(testDirectory,
@@ -58,8 +76,10 @@ Task("VerifyPackages")
 	{
 		foreach (var package in settings.Packages)
 		{
-			Information($"Verifying package {package.PackageName}");
-			Check.That(package.PackageTestDirectory, package.PackageChecks);
+			var packageName = $"{package.PackageId}.{settings.PackageVersion}.nupkg";
+			Information($"Verifying package {packageName}");
+			var testDirectory = settings.PackageTestDirectory + package.PackageId;
+			Check.That(testDirectory, package.PackageChecks);
 			Information("  SUCCESS: All checks were successful");
 		}
 	});
@@ -72,10 +92,9 @@ Task("TestPackages")
 	.IsDependentOn("BuildPackages")
 	.Does<BuildSettings>((settings) =>
 	{
-		new GuiRunner(settings, "TestCentric.GuiRunner").InstallRunner();
-
 		foreach (var package in settings.Packages)
-		{
-			package.TestPackage();
-		}
+			if (package.IsNuGetPackage)
+				new NuGetPackageTester(settings, package).RunAllTests();
+			else if (package.IsChocolateyPackage)
+				new ChocolateyPackageTester(settings, package).RunAllTests();
 	});

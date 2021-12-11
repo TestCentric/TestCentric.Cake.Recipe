@@ -1,34 +1,3 @@
-
-// Class that knows how to run tests against either GUI
-public class GuiTester
-{
-	private BuildSettings _settings;
-
-	public GuiTester(BuildSettings settings)
-	{
-		_settings = settings;
-	}
-
-	public int RunGuiUnattended(string runnerPath, string arguments)
-	{
-		if (!arguments.Contains(" --run"))
-			arguments += " --run";
-		if (!arguments.Contains(" --unattended"))
-			arguments += " --unattended";
-
-		return RunGui(runnerPath, arguments);
-	}
-
-	public int RunGui(string runnerPath, string arguments)
-	{
-		return _settings.Context.StartProcess(runnerPath, new ProcessSettings()
-		{
-			Arguments = arguments,
-			WorkingDirectory = _settings.OutputDirectory
-		});
-	}
-}
-
 // Representation of a single test to be run against a pre-built package.
 // Each test has a Level, with the following values defined...
 //  0 Do not run - used for temporarily disabling a test
@@ -46,6 +15,15 @@ public struct PackageTest
 	
 	public PackageTest(int level, string description, string runner, string arguments, ExpectedResult expectedResult, params string[] extensionsNeeded)
 	{
+		if (description == null)
+			throw new ArgumentNullException(nameof(description));
+		if (runner == null)
+			throw new ArgumentNullException(nameof(runner));
+		if (arguments == null)
+			throw new ArgumentNullException(nameof(arguments));
+		if (expectedResult == null)
+			throw new ArgumentNullException(nameof(expectedResult));
+
 		Level = level;
 		Description = description;
 		Runner = runner;
@@ -57,162 +35,18 @@ public struct PackageTest
 
 const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
 
-// Abstract base for all package testers. Currently, we only
-// have one package of each type (Zip, NuGet, Chocolatey).
-public abstract class PackageTester : GuiTester
+// Abstract base for all package testers.
+public abstract class PackageTester
 {
 	protected BuildSettings _settings;
 	protected PackageDefinition _package;
 	private ICakeContext _context;
 
 	public PackageTester(BuildSettings settings, PackageDefinition package)
-		: base(settings) 
 	{
 		_settings = settings;
 		_package = package;
 		_context = settings.Context;
-
-		PackageTests = new List<PackageTest>(_package.PackageTests);
-
-        //// Level 1 tests are run each time we build the packages
-        //PackageTests.Add(new PackageTest(1, "Run mock-assembly.dll under .NET 4.5", StandardRunner,
-        //    "../../../testcentric-gui/bin/Release/net45/mock-assembly.dll",
-        //    new ExpectedResult("Failed")
-        //    {
-        //        Total = 40,
-        //        Passed = 22,
-        //        Failed = 6,
-        //        Warnings = 0,
-        //        Inconclusive = 5,
-        //        Skipped = 7,
-        //        Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "Net40AgentLauncher") }
-        //    }));
-
-        //PackageTests.Add(new PackageTest(1, "Run net35 mock-assembly.dll under .NET 4.0", StandardRunner,
-        //"net35/mock-assembly.dll",
-        //new ExpectedResult("Failed")
-        //{
-        //	Total = 40,
-        //	Passed = 22,
-        //	Failed = 6,
-        //	Warnings = 0,
-        //	Inconclusive = 5,
-        //	Skipped = 7,
-        //	Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "Net40AgentLauncher") }
-        //}));
-
-
-        //PackageTests.Add(new PackageTest(1, "Run net35 mock-assembly.dll under .NET 2.0 pluggable agent", StandardRunner,
-        //	"net35/mock-assembly.dll",
-        //	new ExpectedResult("Failed")
-        //	{
-        //		Total = 40,
-        //		Passed = 22,
-        //		Failed = 6,
-        //		Warnings = 0,
-        //		Inconclusive = 5,
-        //		Skipped = 7,
-        //		Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "Net20AgentLauncher") }
-        //	},
-        //	Net20PluggableAgent));
-
-        //PackageTests.Add(new PackageTest(1, "Run .NET Core 2.1 mock-assembly.dll under .NET Core 3.1", StandardRunner,
-        //          "netcoreapp2.1/mock-assembly.dll",
-        //          new ExpectedResult("Failed")
-        //          {
-        //		Total = 40,
-        //		Passed = 22,
-        //		Failed = 6,
-        //		Warnings = 0,
-        //		Inconclusive = 5,
-        //		Skipped = 7,
-        //		Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "NetCore31AgentLauncher") }
-        //          }));
-
-        //      PackageTests.Add(new PackageTest(1, "Run mock-assembly.dll under .NET Core 3.1", StandardRunner,
-        //          "netcoreapp3.1/mock-assembly.dll",
-        //          new ExpectedResult("Failed")
-        //          {
-        //		Total = 40,
-        //		Passed = 22,
-        //		Failed = 6,
-        //		Warnings = 0,
-        //		Inconclusive = 5,
-        //		Skipped = 7,
-        //		Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "NetCore31AgentLauncher") }
-        //          }));
-
-        //      //    PackageTests.Add(new PackageTest(1, "Run mock-assembly.dll targeting .NET Core 1.1", StandardRunner,
-        //      //        "netcoreapp1.1/mock-assembly.dll",
-        //      //        new ExpectedResult("Failed")
-        //      //        {
-        //      //Total = 40,
-        //      //Passed = 22,
-        //      //Failed = 6,
-        //      //Warnings = 0,
-        //      //Inconclusive = 5,
-        //      //Skipped = 7,
-        //      //Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "netcore-1.1") }
-        //      //        }));
-
-        //      PackageTests.Add(new PackageTest(1, "Run mock-assembly.dll under .NET 5.0", StandardRunner,
-        //          "net5.0/mock-assembly.dll",
-        //          new ExpectedResult("Failed")
-        //          {
-        //              Total = 40,
-        //              Passed = 22,
-        //              Failed = 6,
-        //              Warnings = 0,
-        //              Inconclusive = 5,
-        //              Skipped = 7,
-        //              Assemblies = new[] { new ExpectedAssemblyResult("mock-assembly.dll", "Net50AgentLauncher") }
-        //          }));
-
-        //      //PackageTests.Add(new PackageTest(1, "Run different builds of mock-assembly.dll together", StandardRunner,
-        //      //    "net35/mock-assembly.dll netcoreapp2.1/mock-assembly.dll",
-        //      //    new ExpectedResult("Failed")
-        //      //    {
-        //      //        Total = 72,
-        //      //        Passed = 46,
-        //      //        Failed = 10,
-        //      //        Warnings = 2,
-        //      //        Inconclusive = 2,
-        //      //        Skipped = 14,
-        //      //        Assemblies = new[] {
-        //      //            new ExpectedAssemblyResult("mock-assembly.dll", "net-2.0"),
-        //      //            new ExpectedAssemblyResult("mock-assembly.dll", "netcore-2.1") }
-        //      //    }));
-
-        //      // Level 2 tests are run for PRs and when packages will be published
-
-        //      //PackageTests.Add(new PackageTest(2, "Run mock-assembly.dll built for NUnit V2", StandardRunner,
-        //      //	"v2-tests/mock-assembly.dll",
-        //      //	new ExpectedResult("Failed")
-        //      //	{
-        //      //		Total = 28,
-        //      //		Passed = 18,
-        //      //		Failed = 5,
-        //      //		Warnings = 0,
-        //      //		Inconclusive = 1,
-        //      //		Skipped = 4
-        //      //	},
-        //      //	NUnitV2Driver));
-
-        //      // TODO: Use --config option when it's supported by the extension.
-        //      // Current test relies on the fact that the Release config appears
-        //      // first in the project file.
-        //      //if (_settings.Configuration == "Release")
-        //      //{
-        //      //    PackageTests.Add(new PackageTest(2, "Run an NUnit project", StandardRunner,
-        //      //        "../../GuiTests.nunit --trace=Debug",
-        //      //        new ExpectedResult("Passed")
-        //      //        {
-        //      //            Assemblies = new[] {
-        //      //                    new ExpectedAssemblyResult("TestCentric.Gui.Tests.dll", "net-4.5"),
-        //      //                    new ExpectedAssemblyResult("TestCentric.Gui.Model.Tests.dll", "net-4.5") }
-        //      //        },
-        //      //        NUnitProjectLoader));
-        //      //}
     }
 
 	protected abstract string PackageName { get; }
@@ -227,18 +61,11 @@ public abstract class PackageTester : GuiTester
 
 	private List<string> InstalledExtensions { get; } = new List<string>();
 
-	// NOTE: Currently, we use the same tests for all packages. There seems to be
-	// no reason for the three packages to differ in capability so the only reason
-	// to limit tests on some of them would be efficiency... so far not a problem.
-	private List<PackageTest> PackageTests { get; }
-
-	protected string StandardRunner => $"C:/users/charlie/dev/TestCentric/testcentric-gui/package/TestCentric.GuiRunner.2.0.0-dev00081/tools/testcentric.exe";
-
 	public void RunAllTests()
 	{
 		Console.WriteLine("Testing package " + PackageName);
 
-		RunPackageTests(/*_settings.PackageTestLevel*/);
+		RunPackageTests(_settings.PackageTestLevel);
 
 		//CheckTestErrors(ref ErrorDetail);
 	}
@@ -273,17 +100,18 @@ public abstract class PackageTester : GuiTester
 
 	protected abstract void InstallEngineExtension(string extension);
 
-	private void RunPackageTests(/*int testLevel*/)
+	private void RunPackageTests(int testLevel)
 	{
+		var runner = new GuiRunner(_settings, GuiRunner.NuGetId);
 		var reporter = new ResultReporter(PackageName);
 
-		ClearAllExtensions();
+		//ClearAllExtensions();
 
 		foreach (var packageTest in _package.PackageTests)
 		{
-			//if (packageTest.Level > 0 && packageTest.Level <= testLevel)
-			//{
-				foreach (string extension in packageTest.ExtensionsNeeded)
+            if (packageTest.Level > 0 && packageTest.Level <= testLevel)
+            {
+                foreach (string extension in packageTest.ExtensionsNeeded)
 					CheckExtensionIsInstalled(extension);
 
 				var resultFile = _settings.OutputDirectory + DEFAULT_TEST_RESULT_FILE;
@@ -296,9 +124,9 @@ public abstract class PackageTester : GuiTester
 				DisplayBanner(packageTest.Description);
 				DisplayTestEnvironment(packageTest);
 
-				RunGuiUnattended(packageTest.Runner, packageTest.Arguments);
+                runner.RunUnattended(packageTest.Arguments);
 
-				try
+                try
                 {
 					var result = new ActualResult(resultFile);
 					var report = new PackageTestReport(packageTest, result);
@@ -312,9 +140,10 @@ public abstract class PackageTester : GuiTester
                 {
 					reporter.AddReport(new PackageTestReport(packageTest, ex));
 
-					Console.WriteLine("\nERROR: No result found!");
+					Console.WriteLine("\nERROR: Failed to generate Report!");
+					Console.WriteLine(ex.ToString());
 				}
-			//}
+			}
 		}
 
 		bool anyErrors = reporter.ReportResults();
@@ -376,8 +205,8 @@ public class NuGetPackageTester : PackageTester
 {
 	public NuGetPackageTester(BuildSettings settings, PackageDefinition package) : base(settings, package) { }
 
-	protected override string PackageName => _package.PackageName;
-	protected override FilePath PackageUnderTest => _settings.PackageTestDirectory + _package.PackageName;
+	protected override string PackageName => $"{_package.PackageId}.{_settings.PackageVersion}.nupkg";
+	protected override FilePath PackageUnderTest => _settings.PackageTestDirectory + PackageName;
 	protected override string PackageTestDirectory => _settings.NuGetTestDirectory;
 	protected override string PackageTestBinDirectory => PackageTestDirectory + "tools/";
 	protected override string ExtensionInstallDirectory => _settings.PackageTestDirectory;
@@ -397,8 +226,8 @@ public class ChocolateyPackageTester : PackageTester
 {
 	public ChocolateyPackageTester(BuildSettings settings, PackageDefinition package) : base(settings, package) { }
 
-	protected override string PackageName => _package.PackageName;
-	protected override FilePath PackageUnderTest => _settings.PackageTestDirectory + _package.PackageName;
+	protected override string PackageName => $"{_package.PackageId}.{_settings.PackageVersion}.nupkg";
+	protected override FilePath PackageUnderTest => _settings.PackageTestDirectory + PackageName;
 	protected override string PackageTestDirectory => _settings.ChocolateyTestDirectory;
 	protected override string PackageTestBinDirectory => PackageTestDirectory + "tools/";
 	protected override string ExtensionInstallDirectory => _settings.PackageTestDirectory;

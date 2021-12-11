@@ -1,7 +1,10 @@
 public static class Check
 {
-	public static void That(string testDir, params PackageCheck[] checks)
-    {
+	public static void That(string testDir, IList<PackageCheck> checks)
+	{
+		if (checks == null)
+			throw new ArgumentNullException(nameof(checks));
+
 		foreach (var check in checks)
 			check.ApplyTo(testDir);
     }

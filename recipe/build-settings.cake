@@ -1,11 +1,11 @@
-#load "./HeaderCheck.cake"
-#load "./PackageCheck.cake"
-#load "./PackageDefinition.cake"
+#load "./check-headers.cake"
+#load "./package-checks.cake"
+#load "./package-definition.cake"
 #load "./test-results.cake"
 #load "./test-reports.cake"
 #load "./package-tests.cake"
-#load "./GuiRunner.cake"
-#load "./BuildVersion.cake"
+#load "./testcentric-gui.cake"
+#load "./versioning.cake"
 #load "./building.cake"
 #load "./testing.cake"
 #load "./packaging.cake"
@@ -53,20 +53,24 @@ public class BuildSettings
 
 	public static BuildSettings Initialize(
 		ISetupContext context,
-		string title = null,
+		string title,
         string unitTest = null,
 		string guiVersion = null,
 		string githubOwner = null,
 		string githubRepository = null,
 		string copyright = null,
 		string[] standardHeader = null,
-		string solutionFile = null)
+		string solutionFile = null,
+		int packageTestLevel = 1,
+		PackageDefinition[] packages = null,
+		PackageTest[] packageTests = null)
 	{
 		if (context == null)
-			throw new ArgumentNullException("context");
-
+			throw new ArgumentNullException(nameof(context));
 		if (title == null)
-			throw new ArgumentNullException("title");
+			throw new ArgumentNullException(nameof(title));
+		if (packages == null)
+			throw new ArgumentNullException(nameof(packages));
 
 		var settings = new BuildSettings(context);
 
@@ -79,6 +83,7 @@ public class BuildSettings
 				settings.SolutionFile = sln;
 		}
 		settings.UnitTest = unitTest;
+		settings.PackageTestLevel = packageTestLevel;
 		settings.GuiVersion = guiVersion ?? DEFAULT_GUI_VERSION;
 		settings.GitHubOwner = githubOwner;
 		settings.GitHubRepository = githubRepository;
@@ -91,6 +96,15 @@ public class BuildSettings
 			if (copyright != null)
 				settings.StandardHeader[1] = "// " + copyright;
 		}
+
+		settings.Packages = packages;
+
+		// Specifying packageTests on BuildSettings means that
+		// all packages use the same tests. Otherwise, the tests
+		// shoulc be specified separately for each package.
+		if (packageTests != null)
+			foreach (var package in packages)
+				package.PackageTests = packageTests;
 
 		return settings;
 	}
@@ -149,7 +163,7 @@ public class BuildSettings
 	public string ChocoDirectory => ProjectDirectory + "choco/";
 	public string PackageDirectory => ProjectDirectory + "package/";
 	public string ZipImageDirectory => PackageDirectory + "zipimage/";
-	public string PackageTestDirectory => PackageDirectory + "test/";
+	public string PackageTestDirectory => ProjectDirectory + "tools/";
 	public string ZipTestDirectory => PackageTestDirectory + "zip/";
 	public string NuGetTestDirectory => PackageTestDirectory + "nuget/";
 	public string ChocolateyTestDirectory => PackageTestDirectory + "choco/";
@@ -164,10 +178,11 @@ public class BuildSettings
 
 	// Packaging
 	public string Title { get; private set; }
-    public List<PackageDefinition> Packages { get; } = new List<PackageDefinition>();
+    public IList<PackageDefinition> Packages { get; private set; } = new List<PackageDefinition>();
 
 	// Package Testing
 	public string GuiVersion { get; set; } = DEFAULT_GUI_VERSION;
+	public int PackageTestLevel { get; set; }
 
 	// Publishing - MyGet
 	public string MyGetPushUrl => MYGET_PUSH_URL;

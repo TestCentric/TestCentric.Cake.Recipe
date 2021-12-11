@@ -8,7 +8,7 @@ const string RECIPE_DIR = "recipe/";
 
 // We use the some files for testing. In addition, loading the
 // entire recipe gives us an error if any references are missing.
-#load recipe/BuildSettings.cake
+#load recipe/build-settings.cake
 
 var target = Argument("target", "Default");
 
@@ -21,36 +21,29 @@ Setup<BuildSettings>((context) =>
 	var settings = BuildSettings.Initialize(
 		context: context,
 		title: "TestCentric.Cake.Recipe",
-		guiVersion: "2.0.0-dev00081");
-
-	settings.Packages.Add
-	(
-		new NuGetPackage
+		guiVersion: "2.0.0-dev00081",
+		packages: new[] { new NuGetPackage
 		(
-			settings,
-			"TestCentric.Cake.Recipe",
-			"nuget/TestCentric.Cake.Recipe.nuspec"
-		)
-		{
-			PackageChecks = new PackageCheck[]
-			{
+			id: "TestCentric.Cake.Recipe",
+			source: "nuget/TestCentric.Cake.Recipe.nuspec",
+			checks: new PackageCheck[] {
 				HasFiles("LICENSE.txt", "testcentric.png"),
 				HasDirectory("content").WithFiles(
-					"HeaderCheck.cake",
-					"PackageCheck.cake",
-					"PackageDefinition.cake",
+					"check-headers.cake",
+					"package-checks.cake",
+					"package-definition.cake",
 					"test-results.cake",
 					"test-reports.cake",
 					"package-tests.cake",
-					"GuiRunner.cake",
-					"BuildVersion.cake",
+					"testcentric-gui.cake",
+					"versioning.cake",
 					"building.cake",
 					"testing.cake",
 					"packaging.cake",
 					"publishing.cake",
 					"releasing.cake")
 			}
-		}
+		)}
 	);
 
 	Information($"{settings.Title} {settings.Configuration} version {settings.PackageVersion}");
@@ -65,28 +58,6 @@ Setup<BuildSettings>((context) =>
 // TEST PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("TestRecipe")
-	.IsDependentOn("Package")
-	.IsDependentOn("TestGuiInstall");
-
-Task("TestGuiInstall")
-	.Does<BuildSettings>((settings) =>
-	{
-		Information($"Installing {GuiRunner.NuGetId}.{settings.GuiVersion}...\n");
-
-		CreateDirectory(settings.PackageTestDirectory);
-		CleanDirectory(settings.PackageTestDirectory);
-
-		new GuiRunner(settings, GuiRunner.NuGetId).InstallRunner();
-
-		Information("Verifying the installation...");
-
-		Check.That(settings.PackageTestDirectory,
-			HasDirectory($"{GuiRunner.NuGetId}.{settings.GuiVersion}")
-				.WithFiles("LICENSE.txt", "NOTICES.txt", "CHANGES.txt"));
-
-		Information("\nGUI was successfully installed!");
-	});
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
@@ -98,12 +69,7 @@ Task("TestGuiInstall")
 
 Task("Appveyor")
 	.IsDependentOn("Package")
-	.IsDependentOn("TestRecipe")
 	.IsDependentOn("Publish");
-
-Task("Full")
-	.IsDependentOn("Package")
-	.IsDependentOn("TestRecipe");
 
 Task("Default")
     .IsDependentOn("Package");
