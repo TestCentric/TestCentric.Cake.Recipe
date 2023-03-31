@@ -101,7 +101,7 @@ public class ActualAssemblyResult
 		var settings = xml.SelectSingleNode("settings");
 
 		// If TargetRuntimeFramework setting is not present, the GUI will have crashed anyway
-		var runtimeSetting = settings.SelectSingleNode("setting[@name='TargetRuntimeFramework']");
+		var runtimeSetting = settings?.SelectSingleNode("setting[@name='TargetRuntimeFramework']");
 		TargetRuntime = runtimeSetting?.Attributes["value"]?.Value;
 
 		var agentSetting = settings.SelectSingleNode("setting[@name='SelectedAgentName']");

@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 public class BuildVersion
 {
-    private ISetupContext _context;
+    private ICakeContext _context;
     // TODO: Get GitVersion to work on Linux
     private GitVersion _gitVersion;
 
@@ -13,7 +13,7 @@ public class BuildVersion
     //
     // We simplify things a by figuring out the full package version and
     // then parsing it to provide information that is used in the build.
-    public BuildVersion(ISetupContext context)
+    public BuildVersion(ICakeContext context)
     {
         _context = context;
         _gitVersion = context.GitVersion();
