@@ -4,140 +4,103 @@
 
 Task("Package")
 	.IsDependentOn("Build")
-	.IsDependentOn("PackageNuGet")
-	.IsDependentOn("PackageChocolatey");
+	.IsDependentOn("PackageExistingBuild");
 
-Task("PackageNuGet")
-	.IsDependentOn("BuildNuGetPackage")
-	.IsDependentOn("VerifyNuGetPackage")
-	.IsDependentOn("TestNuGetPackage");
+Task("PackageExistingBuild")
+	.Does(() => {
+		foreach(var package in BuildSettings.Packages)
+			package.BuildVerifyAndTest();
+	});
 
-Task("PackageChocolatey")
-	.IsDependentOn("BuildChocolateyPackage")
-	.IsDependentOn("VerifyChocolateyPackage")
-	.IsDependentOn("TestChocolateyPackage");
-
+/*
 //////////////////////////////////////////////////////////////////////
 // BUILD PACKAGES
 //////////////////////////////////////////////////////////////////////
 
-Task("BuildNuGetPackage")
-	.Does<BuildSettings>((settings) =>
+Task("BuildPackages")
+	.Does(() =>
 	{
-		CreateDirectory(settings.PackageDirectory);
-
-		NuGetPack(settings.NuGetPackageSource, new NuGetPackSettings()
-		{
-			Version = settings.PackageVersion,
-			OutputDirectory = settings.PackageDirectory,
-			NoPackageAnalysis = true
-		});
-	});
-
-Task("BuildChocolateyPackage")
-	.Does<BuildSettings>((settings) =>
-	{
-		CreateDirectory(settings.PackageDirectory);
-
-		ChocolateyPack(settings.ChocolateyPackageSource, new ChocolateyPackSettings()
-		{
-			Version = settings.PackageVersion,
-			OutputDirectory = settings.PackageDirectory
-		});
+		foreach (var package in BuildSettings.Packages)
+			if (package.IsNuGetPackage)
+			{
+				CreateDirectory(BuildSettings.PackageDirectory);
+				NuGetPack(package.PackageSource, new NuGetPackSettings()
+				{
+					Version = BuildSettings.PackageVersion,
+					OutputDirectory = BuildSettings.PackageDirectory,
+					NoPackageAnalysis = true
+				});
+			}
+			else if (package.IsChocolateyPackage)
+			{
+                CreateDirectory(BuildSettings.PackageDirectory);
+                ChocolateyPack(package.PackageSource, new ChocolateyPackSettings()
+                {
+                    Version = BuildSettings.PackageVersion,
+                    OutputDirectory = BuildSettings.PackageDirectory
+                });
+			}
 	});
 
 //////////////////////////////////////////////////////////////////////
 // INSTALL PACKAGES
 //////////////////////////////////////////////////////////////////////
 
-Task("InstallNuGetPackage")
-	.Does<BuildSettings>((settings) =>
+Task("InstallPackages")
+	.IsDependentOn("BuildPackages")
+	.Does(() =>
 	{
-		if (System.IO.Directory.Exists(settings.NuGetTestDirectory))
-			DeleteDirectory(settings.NuGetTestDirectory,
-				new DeleteDirectorySettings()
-				{
-					Recursive = true
-				});
+		foreach (var package in BuildSettings.Packages)
+		{
+			var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+			var testDirectory = BuildSettings.PackageTestDirectory + package.PackageId;
 
-		CreateDirectory(settings.NuGetTestDirectory);
+			if (System.IO.Directory.Exists(testDirectory))
+				DeleteDirectory(testDirectory,
+					new DeleteDirectorySettings()
+					{
+						Recursive = true
+					});
 
-		Unzip(settings.NuGetPackage, settings.NuGetTestDirectory);
+			CreateDirectory(testDirectory);
 
-		Information($"  Installed {System.IO.Path.GetFileName(settings.NuGetPackage)}");
-		Information($"    at {settings.NuGetTestDirectory}");
-	});
+			Unzip(settings.PackageDirectory + packageName, testDirectory);
 
-Task("InstallChocolateyPackage")
-	.Does<BuildSettings>((settings) =>
-	{
-		if (System.IO.Directory.Exists(settings.ChocolateyTestDirectory))
-			DeleteDirectory(settings.ChocolateyTestDirectory,
-				new DeleteDirectorySettings()
-				{
-					Recursive = true
-				});
-
-		CreateDirectory(settings.ChocolateyTestDirectory);
-
-		Unzip(settings.ChocolateyPackage, settings.ChocolateyTestDirectory);
-
-		Information($"  Installed {System.IO.Path.GetFileName(settings.ChocolateyPackage)}");
-		Information($"    at {settings.ChocolateyTestDirectory}");
+			Information($"  Installed {packageName}");
+			Information($"    at {testDirectory}");
+		}
 	});
 
 //////////////////////////////////////////////////////////////////////
 // CHECK PACKAGE CONTENT
 //////////////////////////////////////////////////////////////////////
 
-// TODO: Move specific checks to build.cake
-static readonly string[] LAUNCHER_FILES = {
-	"net20-agent-launcher.dll", "nunit.engine.api.dll"
-};
-
-static readonly string[] AGENT_FILES = {
-	"net20-pluggable-agent.exe", "net20-pluggable-agent.exe.config",
-	"net20-pluggable-agent-x86.exe", "net20-pluggable-agent-x86.exe.config",
-	"nunit.engine.api.dll", "testcentric.engine.core.dll"
-};
-
-Task("VerifyNuGetPackage")
-	.IsDependentOn("InstallNuGetPackage")
-	.Does<BuildSettings>((settings) =>
+Task("VerifyPackages")
+	.IsDependentOn("InstallPackages")
+	.Does(() =>
 	{
-		Check.That(settings.NuGetTestDirectory,
-		HasFiles("LICENSE.txt", "CHANGES.txt"),
-			HasDirectory("tools").WithFiles(LAUNCHER_FILES),
-			HasDirectory("tools/agent").WithFiles(AGENT_FILES));
-
-		Information("  SUCCESS: All checks were successful");
-	});
-
-Task("VerifyChocolateyPackage")
-	.IsDependentOn("InstallChocolateyPackage")
-	.Does<BuildSettings>((settings) =>
-	{
-		Check.That(settings.ChocolateyTestDirectory,
-			HasDirectory("tools").WithFiles("LICENSE.txt", "CHANGES.txt", "VERIFICATION.txt").WithFiles(LAUNCHER_FILES),
-			HasDirectory("tools/agent").WithFiles(AGENT_FILES));
-
-		Information("  SUCCESS: All checks were successful");
+		foreach (var package in BuildSettings.Packages)
+		{
+			var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+			Information($"Verifying package {packageName}");
+			var testDirectory = BuildSettings.PackageTestDirectory + package.PackageId;
+			Check.That(testDirectory, package.PackageChecks);
+			Information("  SUCCESS: All checks were successful");
+		}
 	});
 
 //////////////////////////////////////////////////////////////////////
 // TEST PACKAGES
 //////////////////////////////////////////////////////////////////////
 
-Task("TestNuGetPackage")
-	.IsDependentOn("InstallNuGetPackage")
-	.Does<BuildSettings>((settings) =>
+Task("TestPackages")
+	.IsDependentOn("InstallPackages")
+	.Does(() =>
 	{
-		new NuGetPackageTester(settings).RunAllTests();
+		foreach (var package in BuildSettings.Packages)
+			if (package.IsNuGetPackage)
+				new NuGetPackageTester(package).RunAllTests();
+			else if (package.IsChocolateyPackage)
+				new ChocolateyPackageTester(package).RunAllTests();
 	});
-
-Task("TestChocolateyPackage")
-	.IsDependentOn("InstallChocolateyPackage")
-	.Does<BuildSettings>((settings) =>
-	{
-		new ChocolateyPackageTester(settings).RunAllTests();
-	});
+*/

@@ -20,20 +20,29 @@ Task("Publish")
 // which depends on it, or directly when recovering from errors.
 Task("PublishToMyGet")
 	.Description("Publish packages to MyGet")
-	.Does<BuildSettings>((settings) =>
+	.Does(() =>
 	{
-		if (!settings.IsProductionRelease && !settings.IsDevelopmentRelease)
+		if (!BuildSettings.ShouldPublishToMyGet)
 			Information("Nothing to publish to MyGet from this run.");
+		else if (BuildSettings.NoPush)
+			Information("NoPush option suppressing publication to MyGet");
 		else
-			try
+			foreach (var package in BuildSettings.Packages)
 			{
-				PushNuGetPackage(settings.NuGetPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
-				PushChocolateyPackage(settings.ChocolateyPackage, settings.MyGetApiKey, settings.MyGetPushUrl);
-			}
-			catch (Exception ex)
-			{
-				Error(ex.Message);
-				hadPublishingErrors = true;
+				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+				var packagePath = BuildSettings.PackageDirectory + packageName;
+				try
+				{
+					if (package.IsNuGetPackage)
+						PushNuGetPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
+					else if (package.IsChocolateyPackage)
+						PushChocolateyPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
+				}
+				catch (Exception ex)
+				{
+					Error(ex.Message);
+					hadPublishingErrors = true;
+				}
 			}
 	});
 
@@ -41,19 +50,27 @@ Task("PublishToMyGet")
 // which depends on it, or directly when recovering from errors.
 Task("PublishToNuGet")
 	.Description("Publish packages to NuGet")
-	.Does<BuildSettings>((settings) =>
+	.Does(() =>
 	{
-		if (!settings.IsProductionRelease)
+		if (!BuildSettings.ShouldPublishToNuGet)
 			Information("Nothing to publish to NuGet from this run.");
+		else if (BuildSettings.NoPush)
+			Information("NoPush option suppressing publication to NuGet");
 		else
-			try
+			foreach (var package in BuildSettings.Packages)
 			{
-				PushNuGetPackage(settings.NuGetPackage, settings.NuGetApiKey, settings.NuGetPushUrl);
-			}
-			catch (Exception ex)
-			{
-				Error(ex.Message);
-				hadPublishingErrors = true;
+				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+				var packagePath = BuildSettings.PackageDirectory + packageName;
+				try
+				{
+					if (package.IsNuGetPackage)
+						PushNuGetPackage(packagePath, BuildSettings.NuGetApiKey, BuildSettings.NuGetPushUrl);
+				}
+				catch (Exception ex)
+				{
+					Error(ex.Message);
+					hadPublishingErrors = true;
+				}
 			}
 	});
 
@@ -61,19 +78,27 @@ Task("PublishToNuGet")
 // which depends on it, or directly when recovering from errors.
 Task("PublishToChocolatey")
 	.Description("Publish packages to Chocolatey")
-	.Does<BuildSettings>((settings) =>
+	.Does(() =>
 	{
-		if (!settings.IsProductionRelease)
+		if (!BuildSettings.ShouldPublishToChocolatey)
 			Information("Nothing to publish to Chocolatey from this run.");
+		else if (BuildSettings.NoPush)
+			Information("NoPush option suppressing publication to NuGet");
 		else
-			try
+			foreach (var package in BuildSettings.Packages)
 			{
-				PushChocolateyPackage(settings.ChocolateyPackage, settings.ChocolateyApiKey, settings.ChocolateyPushUrl);
-			}
-			catch (Exception ex)
-			{
-				Error(ex.Message);
-				hadPublishingErrors = true;
+				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+				var packagePath = BuildSettings.PackageDirectory + packageName;
+				try
+				{
+					if (package.IsChocolateyPackage)
+						PushChocolateyPackage(packagePath, BuildSettings.ChocolateyApiKey, BuildSettings.ChocolateyPushUrl);
+				}
+				catch (Exception ex)
+				{
+					Error(ex.Message);
+					hadPublishingErrors = true;
+				}
 			}
 	});
 
