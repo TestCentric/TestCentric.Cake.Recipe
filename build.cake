@@ -26,7 +26,7 @@ const string RECIPE_DIR = "recipe/";
 #load recipe/utilities.cake
 #load recipe/versioning.cake
 
-var target = Argument("target", "Default");
+var target = Argument("target", Argument("t", "Default"));
 
 //////////////////////////////////////////////////////////////////////
 // INITIALIZE BUILD SETTINGS
@@ -36,7 +36,7 @@ BuildSettings.Initialize(
 	Context,
 	"TestCentric.Cake.Recipe");
 
-BuildSettings.Packages.Add( new NuGetPackage
+var recipePackage = new NuGetPackage
 (
 	id: "TestCentric.Cake.Recipe",
 	source: "nuget/TestCentric.Cake.Recipe.nuspec",
@@ -50,14 +50,16 @@ BuildSettings.Packages.Add( new NuGetPackage
 			"test-results.cake",
 			"test-reports.cake",
 			"package-tests.cake",
-			"testcentric-gui.cake",
+			"test-runners.cake",
 			"versioning.cake",
 			"building.cake",
 			"testing.cake",
 			"packaging.cake",
 			"publishing.cake",
 			"releasing.cake")
-	}));
+	});
+
+	BuildSettings.Packages.Add(recipePackage);
 
 	Information($"{BuildSettings.Title} {BuildSettings.Configuration} version {BuildSettings.PackageVersion}");
 
@@ -71,18 +73,8 @@ BuildSettings.Packages.Add( new NuGetPackage
 Task("PackageRecipe")
 	.Does(() =>
 	{
-		CreateDirectory(BuildSettings.PackageDirectory);
-
-		NuGetPack("nuget/TestCentric.Cake.Recipe.nuspec", new NuGetPackSettings()
-		{
-			Version = BuildSettings.PackageVersion,
-			OutputDirectory = BuildSettings.PackageDirectory,
-			NoPackageAnalysis = true
-		});
+		recipePackage.BuildVerifyAndTest();
 	});
-
-Task("TestRecipe")
-	.IsDependentOn("PackageRecipe");
 
 //////////////////////////////////////////////////////////////////////
 // PUBLISH PACKAGE
@@ -90,20 +82,8 @@ Task("TestRecipe")
 
 Task("PublishRecipe")
 	.IsDependentOn("PackageRecipe")
-	.Does(() =>
-	{
-		if (!BuildSettings.ShouldPublishToMyGet)
-			Information("Nothing to publish. Not on main branch.");
-		else
-		{
-			var recipePackage = $"{ BuildSettings.PackageDirectory}{BuildSettings.Title}.{BuildSettings.PackageVersion}.nupkg";
-			NuGetPush(recipePackage, new NuGetPushSettings()
-			{
-				ApiKey = BuildSettings.MyGetApiKey,
-				Source = BuildSettings.MyGetPushUrl
-			});
-		}
-	});
+	.IsDependentOn("PublishToMyGet")
+	.IsDependentOn("PublishToNuGet");
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
