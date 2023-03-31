@@ -6,7 +6,7 @@
 
 const string RECIPE_DIR = "recipe/";
 
-// We use the some files for testing. In addition, loading the
+// We use some recipe files for testing. In addition, loading the
 // entire recipe gives us an error if any references are missing.
 #load recipe/building.cake
 #load recipe/build-settings.cake
@@ -44,19 +44,23 @@ var recipePackage = new NuGetPackage
 	checks: new PackageCheck[] {
 		HasFiles("LICENSE.txt", "testcentric.png"),
 		HasDirectory("content").WithFiles(
+			"building.cake",
+			"build-settings.cake",
 			"check-headers.cake",
+			"constants.cake",
 			"package-checks.cake",
 			"package-definition.cake",
-			"test-results.cake",
-			"test-reports.cake",
 			"package-tests.cake",
-			"test-runners.cake",
-			"versioning.cake",
-			"building.cake",
-			"testing.cake",
 			"packaging.cake",
 			"publishing.cake",
-			"releasing.cake")
+			"releasing.cake",
+			"setup.cake",
+			"testing.cake",
+			"test-reports.cake",
+			"test-results.cake",
+			"test-runners.cake",
+			"utilities.cake",
+			"versioning.cake")
 	});
 
 	BuildSettings.Packages.Add(recipePackage);
@@ -64,7 +68,7 @@ var recipePackage = new NuGetPackage
 	Information($"{BuildSettings.Title} {BuildSettings.Configuration} version {BuildSettings.PackageVersion}");
 
 	if (BuildSystem.IsRunningOnAppVeyor)
-		AppVeyor.UpdateBuildVersion(BuildSettings.PackageVersion);
+		AppVeyor.UpdateBuildVersion(BuildSettings.PackageVersion + "-" + AppVeyor.Environment.Build.Number);
 
 //////////////////////////////////////////////////////////////////////
 // BUILD PACKAGE
