@@ -2,26 +2,17 @@
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
 
-private class HeaderCheck
-{
-    private BuildSettings _settings;
-    private ICakeContext _context;
-
-    public HeaderCheck(BuildSettings settings)
-    {
-        _settings = settings;
-        _context = settings.Context;
-    }
-
-    public void CheckHeaders()
-    {
+Task("CheckHeaders")
+	.WithCriteria(() => System.IO.Directory.Exists(BuildSettings.SourceDirectory))
+	.Does(() =>
+	{
         var NoHeader = new List<FilePath>();
         var NonStandard = new List<FilePath>();
         var Exempted = new List<FilePath>();
         int examined = 0;
 
-        var sourceFiles = _context.GetFiles(_settings.SourceDirectory + "**/*.cs");
-        var exemptFiles = _settings.ExemptFiles;
+        var sourceFiles = GetFiles(BuildSettings.SourceDirectory + "**/*.cs");
+        var exemptFiles = BuildSettings.ExemptFiles;
         foreach (var file in sourceFiles)
         {
             var path = file.ToString();
@@ -44,66 +35,70 @@ private class HeaderCheck
                 Exempted.Add(file);
             else if (header.Count == 0)
                 NoHeader.Add(file);
-            else if (!header.SequenceEqual(_settings.StandardHeader))
+            else if (!header.SequenceEqual(BuildSettings.StandardHeader))
                 NonStandard.Add(file);
         }
 
+        Information("\nSTANDARD HEADER\n");
+        foreach (string line in BuildSettings.StandardHeader)
+            Information(line);
+        Information("");
+
         if (NoHeader.Count > 0)
         {
-            _context.Information("\nFILES WITH NO HEADER\n");
+            Information("\nFILES WITH NO HEADER\n");
             foreach (var file in NoHeader)
-                _context.Information(RelPathTo(file));
+                Information(RelPathTo(file));
         }
 
         if (NonStandard.Count > 0)
         {
-            _context.Information("\nFILES WITH A NON-STANDARD HEADER\n");
+            Information("\nFILES WITH A NON-STANDARD HEADER\n");
             foreach (var file in NonStandard)
             {
-                _context.Information(RelPathTo(file));
-                _context.Information("");
+                Information(RelPathTo(file));
+                Information("");
                 foreach (string line in GetHeader(file))
-                    _context.Information(line);
-                _context.Information("");
+                    Information(line);
+                Information("");
             }
         }
 
         if (Exempted.Count > 0)
         {
-            _context.Information("\nEXEMPTED FILES (NO CHECK MADE)\n");
+            Information("\nEXEMPTED FILES (NO CHECK MADE)\n");
             foreach (var file in Exempted)
-                _context.Information(RelPathTo(file));
+                Information(RelPathTo(file));
         }
 
-        _context.Information($"\nFiles Examined: {examined}");
-        _context.Information($"Missing Headers: {NoHeader.Count}");
-        _context.Information($"Non-Standard Headers: {NonStandard.Count}");
-        _context.Information($"Exempted Files: {Exempted.Count}");
+        Information($"\nFiles Examined: {examined}");
+        Information($"Missing Headers: {NoHeader.Count}");
+        Information($"Non-Standard Headers: {NonStandard.Count}");
+        Information($"Exempted Files: {Exempted.Count}");
 
         if (NoHeader.Count > 0 || NonStandard.Count > 0)
             throw new Exception("Missing or invalid file headers found");
-    }
 
-    private List<string> GetHeader(FilePath file)
-    {
-        var header = new List<string>();
-        var lines = System.IO.File.ReadLines(file.ToString());
-
-        foreach (string line in lines)
+        List<string> GetHeader(FilePath file)
         {
-            if (!line.StartsWith("//"))
-                break;
+            var header = new List<string>();
+            var lines = System.IO.File.ReadLines(file.ToString());
 
-            header.Add(line);
+            foreach (string line in lines)
+            {
+                if (!line.StartsWith("//"))
+                    break;
+
+                header.Add(line);
+            }
+
+            return header;
         }
 
-        return header;
-    }
+        string RelPathTo(FilePath file)
+        {
+            int CD_LENGTH = Environment.CurrentDirectory.Length + 1;
 
-    private string RelPathTo(FilePath file)
-    {
-        int CD_LENGTH = Environment.CurrentDirectory.Length + 1;
-
-        return file.ToString().Substring(CD_LENGTH);
-    }
-}
+            return file.ToString().Substring(CD_LENGTH);
+        }
+	});

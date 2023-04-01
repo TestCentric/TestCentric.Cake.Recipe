@@ -1,4 +1,5 @@
-#tool nuget:?package=GitVersion.CommandLine&version=5.0.0
+#tool NuGet.CommandLine&version=6.0.0
+#tool nuget:?package=GitVersion.CommandLine&version=5.6.3
 
 //////////////////////////////////////////////////////////////////////
 // CONSTANTS
@@ -6,58 +7,88 @@
 
 const string RECIPE_DIR = "recipe/";
 
-// We use the some files for testing. In addition, loading the
+// We use some recipe files for testing. In addition, loading the
 // entire recipe gives us an error if any references are missing.
+#load recipe/building.cake
 #load recipe/build-settings.cake
+#load recipe/check-headers.cake
+#load recipe/constants.cake
+#load recipe/package-checks.cake
+#load recipe/package-definition.cake
+#load recipe/package-tests.cake
+#load recipe/packaging.cake
+#load recipe/publishing.cake
+#load recipe/releasing.cake
+#load recipe/setup.cake
+#load recipe/testing.cake
+#load recipe/test-reports.cake
+#load recipe/test-results.cake
+#load recipe/test-runners.cake
+#load recipe/utilities.cake
+#load recipe/versioning.cake
 
-var target = Argument("target", "Default");
+var target = Argument("target", Argument("t", "Default"));
 
 //////////////////////////////////////////////////////////////////////
-// SETUP
+// INITIALIZE BUILD SETTINGS
 //////////////////////////////////////////////////////////////////////
 
-Setup<BuildSettings>((context) =>
-{
-	var settings = BuildSettings.Initialize(
-		context: context,
-		title: "TestCentric.Cake.Recipe",
-		guiVersion: "2.0.0-dev00081",
-		packages: new[] { new NuGetPackage
-		(
-			id: "TestCentric.Cake.Recipe",
-			source: "nuget/TestCentric.Cake.Recipe.nuspec",
-			checks: new PackageCheck[] {
-				HasFiles("LICENSE.txt", "testcentric.png"),
-				HasDirectory("content").WithFiles(
-					"check-headers.cake",
-					"package-checks.cake",
-					"package-definition.cake",
-					"test-results.cake",
-					"test-reports.cake",
-					"package-tests.cake",
-					"testcentric-gui.cake",
-					"versioning.cake",
-					"building.cake",
-					"testing.cake",
-					"packaging.cake",
-					"publishing.cake",
-					"releasing.cake")
-			}
-		)}
-	);
+BuildSettings.Initialize(
+	Context,
+	"TestCentric.Cake.Recipe");
 
-	Information($"{settings.Title} {settings.Configuration} version {settings.PackageVersion}");
+var recipePackage = new NuGetPackage
+(
+	id: "TestCentric.Cake.Recipe",
+	source: "nuget/TestCentric.Cake.Recipe.nuspec",
+	basePath: "nuget",
+	checks: new PackageCheck[] {
+		HasFiles("LICENSE.txt", "testcentric.png"),
+		HasDirectory("content").WithFiles(
+			"building.cake",
+			"build-settings.cake",
+			"check-headers.cake",
+			"constants.cake",
+			"package-checks.cake",
+			"package-definition.cake",
+			"package-tests.cake",
+			"packaging.cake",
+			"publishing.cake",
+			"releasing.cake",
+			"setup.cake",
+			"testing.cake",
+			"test-reports.cake",
+			"test-results.cake",
+			"test-runners.cake",
+			"utilities.cake",
+			"versioning.cake")
+	});
+
+	BuildSettings.Packages.Add(recipePackage);
+
+	Information($"{BuildSettings.Title} {BuildSettings.Configuration} version {BuildSettings.PackageVersion}");
 
 	if (BuildSystem.IsRunningOnAppVeyor)
-		AppVeyor.UpdateBuildVersion(settings.PackageVersion);
-
-	return settings;
-});
+		AppVeyor.UpdateBuildVersion(BuildSettings.PackageVersion + "-" + AppVeyor.Environment.Build.Number);
 
 //////////////////////////////////////////////////////////////////////
-// TEST PACKAGE
+// BUILD PACKAGE
 //////////////////////////////////////////////////////////////////////
 
+Task("PackageRecipe")
+	.Does(() =>
+	{
+		recipePackage.BuildVerifyAndTest();
+	});
+
+//////////////////////////////////////////////////////////////////////
+// PUBLISH PACKAGE
+//////////////////////////////////////////////////////////////////////
+
+Task("PublishRecipe")
+	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("PublishToMyGet")
+	.IsDependentOn("PublishToNuGet");
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
@@ -68,11 +99,11 @@ Setup<BuildSettings>((context) =>
 // sequence used when creating binary packages.
 
 Task("Appveyor")
-	.IsDependentOn("Package")
-	.IsDependentOn("Publish");
+	.IsDependentOn("PackageRecipe")
+	.IsDependentOn("PublishRecipe");
 
 Task("Default")
-    .IsDependentOn("Package");
+    .IsDependentOn("PackageRecipe");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION

@@ -21,6 +21,7 @@ public class PackageTestReport
 		var expectedResult = test.ExpectedResult;
 
 		ReportMissingFiles();
+
 		if (actualResult.OverallResult == null)
 			Errors.Add("   The test-run element has no result attribute.");
 		else if (expectedResult.OverallResult != actualResult.OverallResult)
@@ -97,7 +98,9 @@ public class PackageTestReport
 			string site = suite.Attributes["site"]?.Value ?? "Test";
 			if (runState == "NotRunnable" || suiteResult == "Failed" && site == "Test" && (label == "Invalid" || label == "Error"))
 			{
-				string message = suite.SelectSingleNode("reason/message")?.InnerText;
+				string message =
+					suite.SelectSingleNode("failure/message")?.InnerText ??
+					suite.SelectSingleNode("reason/message")?.InnerText;
 				Errors.Add($"   {message}");
 			}
 		}
