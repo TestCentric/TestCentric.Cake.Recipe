@@ -240,48 +240,50 @@ public static class BuildSettings
 
 	public static void DumpSettings()
     {
-		Console.WriteLine("\nTASKS");
-		Console.WriteLine("Target:                       " + Target);
-		Console.WriteLine("TasksToExecute:               " + string.Join(", ", TasksToExecute));
+		DisplayHeading("TASKS");
+		DisplaySetting("Target:                       ", Target ?? "NOT SET");
+		DisplaySetting("TasksToExecute:               ", TasksToExecute != null
+			? string.Join(", ", TasksToExecute)
+			: "NOT SET");
 
-		Console.WriteLine("\nENVIRONMENT");
-		Console.WriteLine("IsLocalBuild:                 " + IsLocalBuild);
-		Console.WriteLine("IsRunningOnWindows:           " + IsRunningOnWindows);
-		Console.WriteLine("IsRunningOnUnix:              " + IsRunningOnUnix);
-		Console.WriteLine("IsRunningOnAppVeyor:          " + IsRunningOnAppVeyor);
+		DisplayHeading("ENVIRONMENT");
+		DisplaySetting("IsLocalBuild:                 ", IsLocalBuild);
+		DisplaySetting("IsRunningOnWindows:           ", IsRunningOnWindows);
+		DisplaySetting("IsRunningOnUnix:              ", IsRunningOnUnix);
+		DisplaySetting("IsRunningOnAppVeyor:          ", IsRunningOnAppVeyor);
 
-		Console.WriteLine("\nVERSIONING");
-		Console.WriteLine("PackageVersion:               " + PackageVersion);
-		Console.WriteLine("AssemblyVersion:              " + AssemblyVersion);
-		Console.WriteLine("AssemblyFileVersion:          " + AssemblyFileVersion);
-		Console.WriteLine("AssemblyInformationalVersion: " + AssemblyInformationalVersion);
-		Console.WriteLine("SemVer:                       " + BuildVersion.SemVer);
-		Console.WriteLine("IsPreRelease:                 " + BuildVersion.IsPreRelease);
-		Console.WriteLine("PreReleaseLabel:              " + BuildVersion.PreReleaseLabel);
-		Console.WriteLine("PreReleaseSuffix:             " + BuildVersion.PreReleaseSuffix);
+		DisplayHeading("VERSIONING");
+		DisplaySetting("PackageVersion:               ", PackageVersion);
+		DisplaySetting("AssemblyVersion:              ", AssemblyVersion);
+		DisplaySetting("AssemblyFileVersion:          ", AssemblyFileVersion);
+		DisplaySetting("AssemblyInformationalVersion: ", AssemblyInformationalVersion);
+		DisplaySetting("SemVer:                       ", BuildVersion.SemVer);
+		DisplaySetting("IsPreRelease:                 ", BuildVersion.IsPreRelease);
+		DisplaySetting("PreReleaseLabel:              ", BuildVersion.PreReleaseLabel);
+		DisplaySetting("PreReleaseSuffix:             ", BuildVersion.PreReleaseSuffix);
 
-		Console.WriteLine("\nDIRECTORIES");
-		Console.WriteLine("Project:   " + ProjectDirectory);
-		Console.WriteLine("Output:    " + OutputDirectory);
-		Console.WriteLine("Source:    " + SourceDirectory);
-		Console.WriteLine("NuGet:     " + NuGetDirectory);
-		Console.WriteLine("Choco:     " + ChocoDirectory);
-		Console.WriteLine("Package:   " + PackageDirectory);
-		Console.WriteLine("ZipImage:  " + ZipImageDirectory);
-		Console.WriteLine("ZipTest:   " + ZipTestDirectory);
-		Console.WriteLine("NuGetTest: " + NuGetTestDirectory);
-		Console.WriteLine("ChocoTest: " + ChocolateyTestDirectory);
+		DisplayHeading("DIRECTORIES");
 
-		Console.WriteLine("\nBUILD");
-		Console.WriteLine("Title:           " + Title);
-		Console.WriteLine("SolutionFile:    " + SolutionFile ?? "NULL");
-		Console.WriteLine("Configuration:   " + Configuration);
+		DisplaySetting("Project:   ", ProjectDirectory);
+		DisplaySetting("Output:    ", OutputDirectory);
+		DisplaySetting("Source:    ", SourceDirectory);
+		DisplaySetting("NuGet:     ", NuGetDirectory);
+		DisplaySetting("Choco:     ", ChocoDirectory);
+		DisplaySetting("Package:   ", PackageDirectory);
+		DisplaySetting("ZipImage:  ", ZipImageDirectory);
+		DisplaySetting("ZipTest:   ", ZipTestDirectory);
+		DisplaySetting("NuGetTest: ", NuGetTestDirectory);
+		DisplaySetting("ChocoTest: ", ChocolateyTestDirectory);
 
-		Console.WriteLine("\nTESTING");
-		Console.WriteLine("UnitTests:       " + UnitTests ?? "DEFAULT");
+		DisplayHeading("BUILD");
+		DisplaySetting("Title:           ", Title);
+		DisplaySetting("SolutionFile:    ", SolutionFile);
+		DisplaySetting("Configuration:   ", Configuration);
 
+		DisplayHeading("TESTING");
+		DisplaySetting("UnitTests:       ", UnitTests, "DEFAULT");
 
-		Console.WriteLine("\nPACKAGES");
+		DisplayHeading("PACKAGES");
 		if (Packages == null)
 			Console.WriteLine("NULL");
 		else if (Packages.Count == 0)
@@ -289,25 +291,40 @@ public static class BuildSettings
 		else
 			foreach (PackageDefinition package in Packages)
 			{
-				Console.WriteLine($"{package.PackageId}");
-				Console.WriteLine($"  FileName: {package.PackageFileName}");
-				Console.WriteLine($"  FilePath: {package.PackageFilePath}");
+				DisplaySetting("", package?.PackageId);
+				DisplaySetting($"  FileName: ", package?.PackageFileName);
+				DisplaySetting($"  FilePath: ", package?.PackageFilePath);
 			}
 
-		Console.WriteLine("\nPUBLISHING");
-		Console.WriteLine("ShouldPublishToMyGet:   " + ShouldPublishToMyGet);
-		Console.WriteLine("  MyGetPushUrl:         " + MyGetPushUrl);
-		Console.WriteLine("  MyGetApiKey:          " + KeyAvailable(MYGET_API_KEY));
-		Console.WriteLine("ShouldPublishToNuGet:   " + ShouldPublishToNuGet);
-		Console.WriteLine("  NuGetPushUrl:         " + NuGetPushUrl);
-		Console.WriteLine("  NuGetApiKey:          " + KeyAvailable(NUGET_API_KEY));
-		Console.WriteLine("NoPush:                 " + NoPush);
+		DisplayHeading("PUBLISHING");
+		DisplaySetting("ShouldPublishToMyGet:   ", ShouldPublishToMyGet);
+		DisplaySetting("  MyGetPushUrl:         ", MyGetPushUrl);
+		DisplaySetting("  MyGetApiKey:          ", KeyAvailable(MYGET_API_KEY));
+		DisplaySetting("ShouldPublishToNuGet:   ", ShouldPublishToNuGet);
+		DisplaySetting("  NuGetPushUrl:         ", NuGetPushUrl);
+		DisplaySetting("  NuGetApiKey:          ", KeyAvailable(NUGET_API_KEY));
+		DisplaySetting("NoPush:                 ", NoPush);
 
-		Console.WriteLine("\nRELEASING");
-		Console.WriteLine("BranchName:             " + BranchName);
-		Console.WriteLine("IsReleaseBranch:        " + IsReleaseBranch);
-		Console.WriteLine("IsProductionRelease:    " + IsProductionRelease);
-		Console.WriteLine("GitHubAccessToken:      " + KeyAvailable(GITHUB_ACCESS_TOKEN));
+		DisplayHeading("\nRELEASING");
+		DisplaySetting("BranchName:             ", BranchName);
+		DisplaySetting("IsReleaseBranch:        ", IsReleaseBranch);
+		DisplaySetting("IsProductionRelease:    ", IsProductionRelease);
+		DisplaySetting("GitHubAccessToken:      ", KeyAvailable(GITHUB_ACCESS_TOKEN));
+	}
+
+	private static void DisplayHeading(string heading)
+	{
+		Console.WriteLine($"\n{heading}");
+	}
+
+	private static void DisplaySetting(string label, string setting, string notset="NOT SET")
+	{
+		Console.WriteLine(label + (setting ?? notset));
+	}
+
+	private static void DisplaySetting(string label, bool setting)
+	{
+		Console.WriteLine(label + setting.ToString());
 	}
 
     private static string GetApiKey(string name, string fallback=null)
