@@ -183,15 +183,15 @@ public static class BuildSettings
 
 	// Publishing - MyGet
 	public static string MyGetPushUrl => MYGET_PUSH_URL;
-	public static string MyGetApiKey => Context.EnvironmentVariable(MYGET_API_KEY);
+	public static string MyGetApiKey => GetApiKey(MYGET_API_KEY, FALLBACK_MYGET_API_KEY);
 
 	// Publishing - NuGet
 	public static string NuGetPushUrl => NUGET_PUSH_URL;
-	public static string NuGetApiKey => Context.EnvironmentVariable(NUGET_API_KEY);
+	public static string NuGetApiKey => GetApiKey(NUGET_API_KEY, FALLBACK_NUGET_API_KEY);
 
 	// Publishing - Chocolatey
 	public static string ChocolateyPushUrl => CHOCO_PUSH_URL;
-	public static string ChocolateyApiKey => Context.EnvironmentVariable(CHOCO_API_KEY);
+	public static string ChocolateyApiKey => GetApiKey(CHOCO_API_KEY, FALLBACK_CHOCO_API_KEY);
 
 	// Publishing - GitHub
 	public static string GitHubOwner { get; set; }
@@ -285,9 +285,9 @@ public static class BuildSettings
 
 		DisplayHeading("PACKAGES");
 		if (Packages == null)
-			Console.WriteLine("NULL");
+			Context.Error("NULL");
 		else if (Packages.Count == 0)
-			Console.WriteLine("NONE");
+			Context.Information("NONE");
 		else
 			foreach (PackageDefinition package in Packages)
 			{
@@ -297,13 +297,16 @@ public static class BuildSettings
 			}
 
 		DisplayHeading("PUBLISHING");
-		DisplaySetting("ShouldPublishToMyGet:   ", ShouldPublishToMyGet);
-		DisplaySetting("  MyGetPushUrl:         ", MyGetPushUrl);
-		DisplaySetting("  MyGetApiKey:          ", KeyAvailable(MYGET_API_KEY));
-		DisplaySetting("ShouldPublishToNuGet:   ", ShouldPublishToNuGet);
-		DisplaySetting("  NuGetPushUrl:         ", NuGetPushUrl);
-		DisplaySetting("  NuGetApiKey:          ", KeyAvailable(NUGET_API_KEY));
-		DisplaySetting("NoPush:                 ", NoPush);
+		DisplaySetting("ShouldPublishToMyGet:      ", ShouldPublishToMyGet);
+		DisplaySetting("  MyGetPushUrl:            ", MyGetPushUrl);
+		DisplaySetting("  MyGetApiKey:             ", KeyAvailable(MYGET_API_KEY));
+		DisplaySetting("ShouldPublishToNuGet:      ", ShouldPublishToNuGet);
+		DisplaySetting("  NuGetPushUrl:            ", NuGetPushUrl);
+		DisplaySetting("  NuGetApiKey:             ", KeyAvailable(NUGET_API_KEY));
+		DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToNuGet);
+		DisplaySetting("  ChocolateyPushUrl:       ", NuGetPushUrl);
+		DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(NUGET_API_KEY));
+		DisplaySetting("NoPush:                    ", NoPush);
 
 		DisplayHeading("\nRELEASING");
 		DisplaySetting("BranchName:             ", BranchName);
@@ -314,17 +317,13 @@ public static class BuildSettings
 
 	private static void DisplayHeading(string heading)
 	{
-		Console.WriteLine($"\n{heading}");
+		Context.Information($"\n{heading}");
 	}
 
-	private static void DisplaySetting(string label, string setting, string notset="NOT SET")
+	private static void DisplaySetting<T>(string label, T setting, string notset="NOT SET")
 	{
-		Console.WriteLine(label + (setting ?? notset));
-	}
-
-	private static void DisplaySetting(string label, bool setting)
-	{
-		Console.WriteLine(label + setting.ToString());
+		var fmtSetting = setting == null ? notset : setting.ToString(); 
+		Context.Information(label + fmtSetting);
 	}
 
     private static string GetApiKey(string name, string fallback=null)
@@ -337,8 +336,8 @@ public static class BuildSettings
         return apikey;
     }
 
-	private static string KeyAvailable(string name)
+	private static string KeyAvailable(string name, string fallback=null)
 	{
-		return !string.IsNullOrEmpty(GetApiKey(name)) ? "AVAILABLE" : "NOT AVAILABLE";
+		return !string.IsNullOrEmpty(GetApiKey(name, fallback)) ? "AVAILABLE" : "NOT AVAILABLE";
 	}
 }
