@@ -183,20 +183,20 @@ public static class BuildSettings
 
 	// Publishing - MyGet
 	public static string MyGetPushUrl => MYGET_PUSH_URL;
-	public static string MyGetApiKey => GetApiKey(MYGET_API_KEY, FALLBACK_MYGET_API_KEY);
+	public static string MyGetApiKey => GetApiKey(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY);
 
 	// Publishing - NuGet
 	public static string NuGetPushUrl => NUGET_PUSH_URL;
-	public static string NuGetApiKey => GetApiKey(NUGET_API_KEY, FALLBACK_NUGET_API_KEY);
+	public static string NuGetApiKey => GetApiKey(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY);
 
 	// Publishing - Chocolatey
 	public static string ChocolateyPushUrl => CHOCO_PUSH_URL;
-	public static string ChocolateyApiKey => GetApiKey(CHOCO_API_KEY, FALLBACK_CHOCO_API_KEY);
+	public static string ChocolateyApiKey => GetApiKey(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY);
 
 	// Publishing - GitHub
 	public static string GitHubOwner { get; set; }
 	public static string GitHubRepository { get; set; }
-	public static string GitHubAccessToken => Context.EnvironmentVariable(GITHUB_ACCESS_TOKEN);
+	public static string GitHubAccessToken => GetApiKey(GITHUB_ACCESS_TOKEN);
 
 	public static bool IsPreRelease => BuildVersion.IsPreRelease;
 	public static bool ShouldPublishToMyGet =>
@@ -299,13 +299,13 @@ public static class BuildSettings
 		DisplayHeading("PUBLISHING");
 		DisplaySetting("ShouldPublishToMyGet:      ", ShouldPublishToMyGet);
 		DisplaySetting("  MyGetPushUrl:            ", MyGetPushUrl);
-		DisplaySetting("  MyGetApiKey:             ", KeyAvailable(MYGET_API_KEY));
+		DisplaySetting("  MyGetApiKey:             ", KeyAvailable(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY));
 		DisplaySetting("ShouldPublishToNuGet:      ", ShouldPublishToNuGet);
 		DisplaySetting("  NuGetPushUrl:            ", NuGetPushUrl);
-		DisplaySetting("  NuGetApiKey:             ", KeyAvailable(NUGET_API_KEY));
+		DisplaySetting("  NuGetApiKey:             ", KeyAvailable(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY));
 		DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToNuGet);
 		DisplaySetting("  ChocolateyPushUrl:       ", NuGetPushUrl);
-		DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(NUGET_API_KEY));
+		DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY));
 		DisplaySetting("NoPush:                    ", NoPush);
 
 		DisplayHeading("\nRELEASING");

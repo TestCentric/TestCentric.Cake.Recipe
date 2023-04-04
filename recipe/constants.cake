@@ -7,13 +7,14 @@ private const string NUGET_PUSH_URL = "https://api.nuget.org/v3/index.json";
 private const string CHOCO_PUSH_URL = "https://push.chocolatey.org/";
 
 // Environment Variable names holding API keys
-private const string MYGET_API_KEY = "TESTCENTRIC_MYGET_API_KEY";
-private const string NUGET_API_KEY = "TESTCENTRIC_NUGET_API_KEY";
-private const string CHOCO_API_KEY = "TESTCENTRIC_CHOCO_API_KEY";
-private const string FALLBACK_MYGET_API_KEY = "MYGET_API_KEY";
-private const string FALLBACK_NUGET_API_KEY = "NUGET_API_KEY";
-private const string FALLBACK_CHOCO_API_KEY = "CHOCO_API_KEY";
+private const string TESTCENTRIC_MYGET_API_KEY = "TESTCENTRIC_MYGET_API_KEY";
+private const string TESTCENTRIC_NUGET_API_KEY = "TESTCENTRIC_NUGET_API_KEY";
+private const string TESTCENTRIC_CHOCO_API_KEY = "TESTCENTRIC_CHOCO_API_KEY";
 private const string GITHUB_ACCESS_TOKEN = "GITHUB_ACCESS_TOKEN";
+// Older names used for fallback
+private const string MYGET_API_KEY = "MYGET_API_KEY";
+private const string NUGET_API_KEY = "NUGET_API_KEY";
+private const string CHOCO_API_KEY = "CHOCO_API_KEY";
 
 // Pre-release labels that we publish
 private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
