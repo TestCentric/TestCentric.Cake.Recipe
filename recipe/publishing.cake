@@ -16,7 +16,7 @@ Task("Publish")
 			throw new Exception("One of the publishing steps failed.");
 	});
 
-// This task may either be run by the PublishPackages task,
+// This task may either be run by the Publish task,
 // which depends on it, or directly when recovering from errors.
 Task("PublishToMyGet")
 	.Description("Publish packages to MyGet")

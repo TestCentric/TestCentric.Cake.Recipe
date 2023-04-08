@@ -334,7 +334,8 @@ public class ChocolateyPackage : PackageDefinition
         var chocolateyPackSettings = new ChocolateyPackSettings()
         {
             Version = PackageVersion,
-            OutputDirectory = BuildSettings.PackageDirectory
+            OutputDirectory = BuildSettings.PackageDirectory,
+            ArgumentCustomization = args => args.Append($"BIN={BasePath}")
         };
 
         _context.ChocolateyPack(PackageSource, chocolateyPackSettings);

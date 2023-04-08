@@ -9,6 +9,8 @@ Task("CreateDraftRelease")
 		{
 			Information("Skipping Release creation because this is not a release branch");
 		}
+		else if (BuildSettings.NoPush)
+			Information($"NoPush option skipping creation of draft release for version {BuildSettings.PackageVersion}");
 		else
 		{
 			// NOTE: Since this is a release branch, the pre-release label
@@ -19,27 +21,22 @@ Task("CreateDraftRelease")
 			string milestone = BuildSettings.BranchName.Substring(8);
 			string releaseName = $"{BuildSettings.Title} {milestone}";
 
-		    if (BuildSettings.NoPush)
-				Information($"NoPush option skipping creation of draft release for {releaseName}");
-			else
-			{
-				Information($"Creating draft release for {releaseName}");
+			Information($"Creating draft release for {releaseName}");
 
-				try
+			try
+			{
+				GitReleaseManagerCreate(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, new GitReleaseManagerCreateSettings()
 				{
-					GitReleaseManagerCreate(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, new GitReleaseManagerCreateSettings()
-					{
-						Name = releaseName,
-						Milestone = milestone
-					});
-				}
-				catch
-				{
-					Error($"Unable to create draft release for {releaseName}.");
-					Error($"Check that there is a {milestone} milestone with at least one closed issue.");
-					Error("");
-					throw;
-				}
+					Name = releaseName,
+					Milestone = milestone
+				});
+			}
+			catch
+			{
+				Error($"Unable to create draft release for {releaseName}.");
+				Error($"Check that there is a {milestone} milestone with at least one closed issue.");
+				Error("");
+				throw;
 			}
 		}
 	});
@@ -72,24 +69,24 @@ Task("CreateProductionRelease")
 		{
 			Information("Skipping CreateProductionRelease because this is not a production release");
 		}
+		else if (BuildSettings.NoPush)
+			Information($"NoPush option skipping creation of production release for version {BuildSettings.PackageVersion}");
 		else
 		{
 			string token = BuildSettings.GitHubAccessToken;
 			string owner = BuildSettings.GitHubOwner;
 			string repository = BuildSettings.GitHubRepository;
 			string tagName = BuildSettings.PackageVersion;
-            //string assets = IsRunningOnWindows()
+            string assets = string.Join<string>(',', BuildSettings.Packages.Select(p => p.PackageFilePath));
+
+			//IsRunningOnWindows()
             //	? $"\"{BuildSettings.NuGetPackage},{BuildSettings.ChocolateyPackage}\""
             //	: $"\"{BuildSettings.NuGetPackage}\"";
 
-			if (BuildSettings.NoPush)
-				Information($"NoPush option skipping creation of production release for version {tagName}");
-			else
-			{
-				Information($"Publishing release {tagName} to GitHub");
+			Information($"Publishing release {tagName} to GitHub");
+			Information($"  Assets: {assets}");
 
-				//GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
-				//GitReleaseManagerClose(token, owner, repository, tagName);
-			}
+			GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
+			GitReleaseManagerClose(token, owner, repository, tagName);
 		}
 	});
