@@ -21,12 +21,13 @@
 	<file src="../LICENSE.txt" />
 	<file src="../testcentric.png" />
 	<file src="../recipe/building.cake" target="content" />
-	<file src="../recipe/build-settings.cake" target="content" />
+	<file src="../recipe/BuildSettings.cake" target="content" />
 	<file src="../recipe/check-headers.cake" target="content" />
+	<file src="../recipe/ConsoleReporter.cake" target="content" />
 	<file src="../recipe/constants.cake" target="content" />
 	<file src="../recipe/package-checks.cake" target="content" />
 	<file src="../recipe/package-definition.cake" target="content" />
-	<file src="../recipe/package-tests.cake" target="content" />
+	<file src="../recipe/PackageTest.cake" target="content" />
 	<file src="../recipe/packaging.cake" target="content" />
 	<file src="../recipe/publishing.cake" target="content" />
 	<file src="../recipe/releasing.cake" target="content" />
