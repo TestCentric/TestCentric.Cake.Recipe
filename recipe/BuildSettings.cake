@@ -20,6 +20,7 @@ public static class BuildSettings
 		// Optional named parameters
 		string solutionFile = null,
         string unitTests = null,
+		TestRunner unitTestRunner = null,
 		string guiVersion = null,
 		string githubOwner = "TestCentric",
 		string githubRepository = null,
@@ -48,6 +49,7 @@ public static class BuildSettings
 				SolutionFile = sln;
 		}
 		UnitTests = unitTests;
+		UnitTestRunner = unitTestRunner;
 
 		BuildVersion = new BuildVersion(context);
 
@@ -131,7 +133,7 @@ public static class BuildSettings
 	public static string OutputDirectory => ProjectDirectory + "bin/" + Configuration + "/";
 	public static string ZipDirectory => ProjectDirectory + "zip/";
 	public static string NuGetDirectory => ProjectDirectory + "nuget/";
-	public static string ChocoDirectory => ProjectDirectory + "choco/";
+	public static string ChocolateyDirectory => ProjectDirectory + "choco/";
 	public static string PackageDirectory => ProjectDirectory + "package/";
 	public static string ZipImageDirectory => PackageDirectory + "zipimage/";
 	public static string ToolsDirectory => ProjectDirectory + "tools/";
@@ -163,6 +165,7 @@ public static class BuildSettings
 
 	//Testing
 	public static string UnitTests { get; set; }
+	public static TestRunner UnitTestRunner {get; private set; }
 
 	// Checking 
 	public static string[] StandardHeader { get; private set; }
@@ -264,16 +267,16 @@ public static class BuildSettings
 
 		DisplayHeading("DIRECTORIES");
 
-		DisplaySetting("Project:   ", ProjectDirectory);
-		DisplaySetting("Output:    ", OutputDirectory);
-		DisplaySetting("Source:    ", SourceDirectory);
-		DisplaySetting("NuGet:     ", NuGetDirectory);
-		DisplaySetting("Choco:     ", ChocoDirectory);
-		DisplaySetting("Package:   ", PackageDirectory);
-		DisplaySetting("ZipImage:  ", ZipImageDirectory);
-		DisplaySetting("ZipTest:   ", ZipTestDirectory);
-		DisplaySetting("NuGetTest: ", NuGetTestDirectory);
-		DisplaySetting("ChocoTest: ", ChocolateyTestDirectory);
+		DisplaySetting("Project:         ", ProjectDirectory);
+		DisplaySetting("Output:          ", OutputDirectory);
+		DisplaySetting("Source:          ", SourceDirectory);
+		DisplaySetting("NuGet:           ", NuGetDirectory);
+		DisplaySetting("Chocolatey:      ", ChocolateyDirectory);
+		DisplaySetting("Package:         ", PackageDirectory);
+		DisplaySetting("ZipImage:        ", ZipImageDirectory);
+		DisplaySetting("ZipTest:         ", ZipTestDirectory);
+		DisplaySetting("NuGetTest:       ", NuGetTestDirectory);
+		DisplaySetting("ChocolateyTest:  ", ChocolateyTestDirectory);
 
 		DisplayHeading("BUILD");
 		DisplaySetting("Title:           ", Title);

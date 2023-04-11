@@ -4,23 +4,51 @@
 /// </summary>
 public abstract class TestRunner
 {
-	protected ICakeContext _context;
-	
-	protected TestRunner()
-	{
-		_context = BuildSettings.Context;
-	}
-
 	protected string ExecutablePath { get; set; }
 
-	public abstract int Run(string args);
+	public virtual int Run(string arguments)
+	{
+		if (ExecutablePath == null)
+			throw new InvalidOperationException("Unable to run tests. TestRunner.Executable path has not been set.");
+
+		int rc = BuildSettings.Context.StartProcess(ExecutablePath, new ProcessSettings()
+		{
+			Arguments = arguments,
+			WorkingDirectory = BuildSettings.OutputDirectory
+		});
+
+		return rc;
+	}
+}
+
+/// <summary>
+/// The InstallableTestRunner class is the abstract base for TestRunners which
+/// must be installed using a published package before they can be used.
+/// </summary>
+public abstract class InstallableTestRunner : TestRunner
+{
+	public InstallableTestRunner(string packageId, string version)
+	{
+		if (packageId == null)
+			throw new ArgumentNullException(nameof(packageId));
+		if (version == null)
+			throw new ArgumentNullException(nameof(version));
+
+		PackageId = packageId;
+		Version = version;
+	}
+
+	public string PackageId { get; }
+	public string Version { get; }
+
+	public abstract string InstallPath { get; }
 }
 
 /// <summary>
 /// Class that knows how to install and run the TestCentric GUI,
 /// using either the NuGet or the Chocolatey package.
 /// </summary>
-public class GuiRunner : TestRunner
+public class GuiRunner : InstallableTestRunner
 {
 	public const string NuGetId = "TestCentric.GuiRunner";
 	public const string ChocoId = "testcentric-gui";
@@ -30,23 +58,15 @@ public class GuiRunner : TestRunner
 	private bool _installed = false;
 
 	public GuiRunner(string packageId, string version)
+		: base(packageId, version)
 	{
-		if (packageId == null)
-			throw new ArgumentNullException(nameof(packageId));
 		if (packageId != NuGetId && packageId != ChocoId)
 			throw new ArgumentException($"Package Id invalid: {packageId}", nameof(packageId));
-		if (version == null)
-			throw new ArgumentNullException(nameof(version));
-
-		PackageId = packageId;
-		Version = version;
 
 		ExecutablePath = $"{InstallPath}{PackageId}.{Version}/tools/{RUNNER_EXE}";
 	}
 
-	public string PackageId { get; }
-	public string Version { get; }
-	public string InstallPath => PackageId == ChocoId
+	public override string InstallPath => PackageId == ChocoId
 		? BuildSettings.ChocolateyTestRunnerDirectory
 		: BuildSettings.NuGetTestRunnerDirectory;
 
@@ -69,20 +89,16 @@ public class GuiRunner : TestRunner
 			// Only try this once
 			_installed = true;
 
-		// Use NuGet for installation even if using the Chocolatey 
-		// package in order to avoid running as administrator.
-		_context.NuGetInstall(PackageId,
-			new NuGetInstallSettings()
-			{
-				Version = Version,
-				OutputDirectory = InstallPath
-			});
+			// Use NuGet for installation even if using the Chocolatey 
+			// package in order to avoid running as administrator.
+			BuildSettings.Context.NuGetInstall(PackageId,
+				new NuGetInstallSettings()
+				{
+					Version = Version,
+					OutputDirectory = InstallPath
+				});
 		}
 
-		return _context.StartProcess(ExecutablePath, new ProcessSettings()
-		{
-			Arguments = arguments,
-			WorkingDirectory = BuildSettings.OutputDirectory
-		});
+		return base.Run(arguments);
 	}
 }

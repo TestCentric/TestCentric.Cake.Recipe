@@ -10,12 +10,13 @@ const string RECIPE_DIR = "recipe/";
 // We use some recipe files for testing. In addition, loading the
 // entire recipe gives us an error if any references are missing.
 #load recipe/building.cake
-#load recipe/build-settings.cake
+#load recipe/BuildSettings.cake
 #load recipe/check-headers.cake
+#load recipe/ConsoleReporter.cake
 #load recipe/constants.cake
 #load recipe/package-checks.cake
 #load recipe/package-definition.cake
-#load recipe/package-tests.cake
+#load recipe/PackageTest.cake
 #load recipe/packaging.cake
 #load recipe/publishing.cake
 #load recipe/releasing.cake
