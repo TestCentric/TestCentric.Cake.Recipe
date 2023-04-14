@@ -20,6 +20,7 @@
   <files>
 	<file src="../LICENSE.txt" />
 	<file src="../testcentric.png" />
+	<file src="../recipe/arguments.cake" target="content" />
 	<file src="../recipe/building.cake" target="content" />
 	<file src="../recipe/BuildSettings.cake" target="content" />
 	<file src="../recipe/check-headers.cake" target="content" />
