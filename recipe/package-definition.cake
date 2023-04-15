@@ -164,6 +164,9 @@ public abstract class PackageDefinition
 
         foreach (var packageTest in PackageTests)
         {
+            if (packageTest.Level > BuildSettings.PackageTestLevel)
+                continue;
+
             foreach (ExtensionSpecifier extension in packageTest.ExtensionsNeeded)
                 CheckExtensionIsInstalled(extension);
 
