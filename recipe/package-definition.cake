@@ -144,6 +144,7 @@ public abstract class PackageDefinition
     public void RunPackageTests()
     {
         DisplayAction("Testing");
+        _context.Information($"Package tests will run at level {BuildSettings.PackageTestLevel}");
 
         var reporter = new ResultReporter(PackageFileName);
 

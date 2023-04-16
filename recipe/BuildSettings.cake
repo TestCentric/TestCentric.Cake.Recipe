@@ -60,6 +60,10 @@ public static class BuildSettings
 		if (PackageTestLevel == 0) // Use defaults
 			if (!BuildVersion.IsPreRelease)
 				PackageTestLevel = 3;
+			// TODO: The prerelease label is no longer being set to pr by GitVersion
+			// for some reason. Check on AppVeyor is a workaround.
+			else if (IsRunningOnAppVeyor && _buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest)
+				PackageTestLevel = 2;
 			else switch (BuildVersion.PreReleaseLabel)
 			{
 				case "pre":
@@ -111,6 +115,12 @@ public static class BuildSettings
 	public static string Configuration { get; private set; }
 	public static bool NoPush => Context.HasArgument("nopush");
 
+	// Build Environment
+	public static bool IsLocalBuild => _buildSystem.IsLocalBuild;
+	public static bool IsRunningOnUnix => Context.IsRunningOnUnix();
+	public static bool IsRunningOnWindows => Context.IsRunningOnWindows();
+	public static bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
+
 	// Versioning
 	public static BuildVersion BuildVersion { get; private set; }
 	public static string BranchName => BuildVersion.BranchName;
@@ -120,12 +130,6 @@ public static class BuildSettings
 	public static string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
 	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
 	public static bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
-
-	// Build System
-	public static bool IsLocalBuild => _buildSystem.IsLocalBuild;
-	public static bool IsRunningOnUnix => Context.IsRunningOnUnix();
-	public static bool IsRunningOnWindows => Context.IsRunningOnWindows();
-	public static bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
 
 	// Standard Directory Structure - not changeable by user
 	public static string ProjectDirectory => Context.Environment.WorkingDirectory.FullPath + "/";
@@ -260,7 +264,6 @@ public static class BuildSettings
 		DisplaySetting("PreReleaseSuffix:             ", BuildVersion.PreReleaseSuffix);
 
 		DisplayHeading("DIRECTORIES");
-
 		DisplaySetting("Project:         ", ProjectDirectory);
 		DisplaySetting("Output:          ", OutputDirectory);
 		DisplaySetting("Source:          ", SourceDirectory);

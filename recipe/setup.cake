@@ -35,15 +35,14 @@ Setup((context) =>
 
 	void DisplayError(string message)
 	{
-		context.Error(message);
 
-		try
-		{
-			BuildSettings.DumpSettings();
-		}
-		finally
-		{
-			throw new Exception(message);
-		}
+		string line2 = "TasksToExecute: " +
+			tasksToExecute != null
+				? string.Join(", ", tasksToExecute)
+				: "NOT SET";
+		message += $"\r\n  {line2}";
+
+		context.Error(message);
+		throw new Exception(message);
 	}
 });
