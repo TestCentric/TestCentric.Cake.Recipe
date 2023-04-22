@@ -109,7 +109,7 @@ public abstract class PackageDefinition
     {
         DisplayAction("Installing");
         Console.WriteLine($"Installing package to {PackageInstallDirectory}");
-        _context.CleanDirectory(PackageInstallDirectory);
+        _context.CleanDirectory(PackageInstallDirectory + PackageId);
         doInstallPackage();
     }
 
