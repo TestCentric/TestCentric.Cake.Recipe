@@ -40,6 +40,7 @@ public static class BuildSettings
 		Context = context;
 		_buildSystem = context.BuildSystem();
 
+
 		Title = title;
 		SolutionFile = solutionFile;
 		if (solutionFile == null && title != null)
