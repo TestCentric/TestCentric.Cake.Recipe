@@ -35,8 +35,9 @@ var target = Argument("target", Argument("t", "Default"));
 //////////////////////////////////////////////////////////////////////
 
 BuildSettings.Initialize(
-	Context,
-	"TestCentric.Cake.Recipe");
+	context: Context,
+	title: "TestCentric.Cake.Recipe",
+	githubRepository: "TestCentric.Cake.Recipe");
 
 var recipePackage = new NuGetPackage
 (

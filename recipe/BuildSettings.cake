@@ -14,16 +14,17 @@ public static class BuildSettings
 	private static BuildSystem _buildSystem;
 
 	public static void Initialize(
-		// Required parameters
+	    // Required parameters
 		ICakeContext context,
 		string title,
-		// Optional named parameters
+		string githubRepository = null,
+
+		// Optional paramteters:
 		string solutionFile = null,
         string unitTests = null,
 		TestRunner unitTestRunner = null,
 		string guiVersion = null,
 		string githubOwner = "TestCentric",
-		string githubRepository = null,
 		string copyright = null,
 		string[] standardHeader = null,
 		string[] exemptFiles = null,
@@ -36,52 +37,22 @@ public static class BuildSettings
 			throw new ArgumentNullException(nameof(context));
 		if (title == null)
 			throw new ArgumentNullException(nameof(title));
+		if (githubRepository == null)
+			throw new ArgumentNullException(nameof(githubRepository));
 
 		Context = context;
 		_buildSystem = context.BuildSystem();
 
 
 		Title = title;
-		SolutionFile = solutionFile;
-		if (solutionFile == null && title != null)
-		{
-			var sln = title + ".sln";
-			if (System.IO.File.Exists(sln))
-				SolutionFile = sln;
-		}
+		SolutionFile = solutionFile ?? DeduceSolutionFile();
+
 		UnitTests = unitTests;
 		UnitTestRunner = unitTestRunner;
 
 		BuildVersion = new BuildVersion(context);
 
-		// Command-line argument
-		PackageTestLevel = context.Argument("testLevel", context.Argument("level", 0));
-		if (PackageTestLevel == 0) // Argument supplied in build.cake
-			PackageTestLevel = packageTestLevel;
-		if (PackageTestLevel == 0) // Use defaults
-			if (!BuildVersion.IsPreRelease)
-				PackageTestLevel = 3;
-			// TODO: The prerelease label is no longer being set to pr by GitVersion
-			// for some reason. Check on AppVeyor is a workaround.
-			else if (IsRunningOnAppVeyor && _buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest)
-				PackageTestLevel = 2;
-			else switch (BuildVersion.PreReleaseLabel)
-			{
-				case "pre":
-				case "rc":
-				case "alpha":
-				case "beta":
-					PackageTestLevel = 3;
-					break;
-				case "dev":
-				case "pr":
-					PackageTestLevel = 2;
-					break;
-				case "ci":
-				default:
-					PackageTestLevel = 1;
-					break;
-			}
+		PackageTestLevel = CalcPackageTestLevel(packageTestLevel);
 
 		GitHubOwner = githubOwner;
 		GitHubRepository = githubRepository;
@@ -103,6 +74,61 @@ public static class BuildSettings
 		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
 
 		ValidateSettings();
+	}
+
+	// Try to figure out solution file when not provided
+	private static string DeduceSolutionFile()			
+	{
+		string solutionFile = null;
+
+		if (System.IO.File.Exists(Title + ".sln"))
+			solutionFile = Title + ".sln";
+		else
+		{
+			var files = System.IO.Directory.GetFiles(ProjectDirectory, "*.sln");
+			if (files.Count() == 1 && System.IO.File.Exists(files[0]))
+				solutionFile = files[0];
+		}
+
+		if (solutionFile != null)
+			Context.Warning($"  Will use solution '{solutionFile}'");
+		return solutionFile;
+	}
+
+	private static int CalcPackageTestLevel(int initializeArgument)
+	{
+		// Command-line argument takes precedence
+		int commandLineArgument = Context.Argument("testLevel", Context.Argument("level", 0));
+		if (commandLineArgument > 0)
+			return commandLineArgument;
+
+		if (initializeArgument > 0)
+			return initializeArgument;
+
+		if (!BuildVersion.IsPreRelease)
+			return 3;
+
+		// TODO: The prerelease label is no longer being set to pr by GitVersion
+		// for some reason. This check in AppVeyor is a workaround.
+		if (IsRunningOnAppVeyor && _buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest)
+			return 2;
+		
+		switch (BuildVersion.PreReleaseLabel)
+		{
+			case "pre":
+			case "rc":
+			case "alpha":
+			case "beta":
+				return 3;
+
+			case "dev":
+			case "pr":
+				return 2;
+
+			case "ci":
+			default:
+				return 1;
+		}
 	}
 
 	// Cake Context
@@ -265,24 +291,26 @@ public static class BuildSettings
 		DisplaySetting("PreReleaseSuffix:             ", BuildVersion.PreReleaseSuffix);
 
 		DisplayHeading("DIRECTORIES");
-		DisplaySetting("Project:         ", ProjectDirectory);
-		DisplaySetting("Output:          ", OutputDirectory);
-		DisplaySetting("Source:          ", SourceDirectory);
-		DisplaySetting("NuGet:           ", NuGetDirectory);
-		DisplaySetting("Chocolatey:      ", ChocolateyDirectory);
-		DisplaySetting("Package:         ", PackageDirectory);
-		DisplaySetting("ZipImage:        ", ZipImageDirectory);
-		DisplaySetting("ZipTest:         ", ZipTestDirectory);
-		DisplaySetting("NuGetTest:       ", NuGetTestDirectory);
-		DisplaySetting("ChocolateyTest:  ", ChocolateyTestDirectory);
+		DisplaySetting("Project:          ", ProjectDirectory);
+		DisplaySetting("Output:           ", OutputDirectory);
+		DisplaySetting("Source:           ", SourceDirectory);
+		DisplaySetting("NuGet:            ", NuGetDirectory);
+		DisplaySetting("Chocolatey:       ", ChocolateyDirectory);
+		DisplaySetting("Package:          ", PackageDirectory);
+		DisplaySetting("ZipImage:         ", ZipImageDirectory);
+		DisplaySetting("ZipTest:          ", ZipTestDirectory);
+		DisplaySetting("NuGetTest:        ", NuGetTestDirectory);
+		DisplaySetting("ChocolateyTest:   ", ChocolateyTestDirectory);
 
 		DisplayHeading("BUILD");
-		DisplaySetting("Title:           ", Title);
-		DisplaySetting("SolutionFile:    ", SolutionFile);
-		DisplaySetting("Configuration:   ", Configuration);
+		DisplaySetting("Title:            ", Title);
+		DisplaySetting("SolutionFile:     ", SolutionFile);
+		DisplaySetting("Configuration:    ", Configuration);
 
 		DisplayHeading("TESTING");
-		DisplaySetting("UnitTests:       ", UnitTests, "DEFAULT");
+		DisplaySetting("UnitTests:        ", UnitTests, "DEFAULT");
+		DisplaySetting("UnitTestRunner:   ", UnitTestRunner, "NUNITLITE");
+		DisplaySetting("PackageTestLevel: ", PackageTestLevel);
 
 		DisplayHeading("PACKAGES");
 		if (Packages == null)
