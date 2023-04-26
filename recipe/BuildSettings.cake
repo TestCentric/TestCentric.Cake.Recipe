@@ -74,6 +74,19 @@ public static class BuildSettings
 		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
 
 		ValidateSettings();
+
+		context.Information($"{Title} {Configuration} version {PackageVersion}");
+
+		// Output like this should go after the run title display
+		if (solutionFile == null && SolutionFile != null)
+			Context.Warning($"  SolutionFile: '{SolutionFile}'");
+		Context.Information($"  PackageTestLevel: {PackageTestLevel}");
+
+		if (IsRunningOnAppVeyor)
+		{
+			var buildNumber = _buildSystem.AppVeyor.Environment.Build.Number;
+			_buildSystem.AppVeyor.UpdateBuildVersion($"{PackageVersion}-{buildNumber}");
+		}
 	}
 
 	// Try to figure out solution file when not provided
@@ -90,8 +103,6 @@ public static class BuildSettings
 				solutionFile = files[0];
 		}
 
-		if (solutionFile != null)
-			Context.Warning($"  Will use solution '{solutionFile}'");
 		return solutionFile;
 	}
 

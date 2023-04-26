@@ -69,11 +69,6 @@ var recipePackage = new NuGetPackage
 
 	BuildSettings.Packages.Add(recipePackage);
 
-	Information($"{BuildSettings.Title} {BuildSettings.Configuration} version {BuildSettings.PackageVersion}");
-
-	if (BuildSystem.IsRunningOnAppVeyor)
-		AppVeyor.UpdateBuildVersion(BuildSettings.PackageVersion + "-" + AppVeyor.Environment.Build.Number);
-
 //////////////////////////////////////////////////////////////////////
 // BUILD PACKAGE
 //////////////////////////////////////////////////////////////////////
