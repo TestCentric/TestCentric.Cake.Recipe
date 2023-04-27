@@ -27,6 +27,8 @@ public abstract class TestRunner
 /// </summary>
 public abstract class InstallableTestRunner : TestRunner
 {
+	protected bool _installationRequired = true;
+
 	public InstallableTestRunner(string packageId, string version)
 	{
 		if (packageId == null)
@@ -42,6 +44,16 @@ public abstract class InstallableTestRunner : TestRunner
 	public string Version { get; }
 
 	public abstract string InstallPath { get; }
+
+	public override int Run(string arguments)
+	{
+		if (_installationRequired)
+			PerformInstallation();
+
+		return base.Run(arguments);
+	}
+
+	protected abstract void PerformInstallation();
 }
 
 /// <summary>
@@ -54,8 +66,6 @@ public class GuiRunner : InstallableTestRunner
 	public const string ChocoId = "testcentric-gui";
 
 	private const string RUNNER_EXE = "testcentric.exe";
-
-	private bool _installed = false;
 
 	public GuiRunner(string packageId, string version)
 		: base(packageId, version)
@@ -80,25 +90,28 @@ public class GuiRunner : InstallableTestRunner
 		if (!arguments.Contains(" --unattended"))
 			arguments += " --unattended";
 
-		Console.WriteLine(ExecutablePath);
-		Console.WriteLine(arguments);
-		Console.WriteLine();
-
-		if (!_installed)
-		{
-			// Only try this once
-			_installed = true;
-
-			// Use NuGet for installation even if using the Chocolatey 
-			// package in order to avoid running as administrator.
-			BuildSettings.Context.NuGetInstall(PackageId,
-				new NuGetInstallSettings()
-				{
-					Version = Version,
-					OutputDirectory = InstallPath
-				});
-		}
-
 		return base.Run(arguments);
+	}
+
+	protected override void PerformInstallation()
+	{
+		var packageSources = new []
+		{
+			"https://www.myget.org/F/testcentric/api/v3/index.json",
+			PackageId == ChocoId
+				? "https://community.chocolatey.org/api/v2/"
+				: "https://api.nuget.org/v3/index.json"
+		};
+
+		// Use NuGet for installation even if using the Chocolatey 
+		// package in order to avoid running as administrator.
+		BuildSettings.Context.NuGetInstall(
+			PackageId, 
+			new NuGetInstallSettings()
+			{
+				Version = Version,
+				OutputDirectory = InstallPath,
+				Source = packageSources
+			});
 	}
 }

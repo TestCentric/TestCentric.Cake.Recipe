@@ -33,9 +33,9 @@ Task("PublishToMyGet")
 				var packagePath = BuildSettings.PackageDirectory + packageName;
 				try
 				{
-					if (package.IsNuGetPackage)
+					if (package.PackageType == PackageType.NuGet)
 						PushNuGetPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
-					else if (package.IsChocolateyPackage)
+					else if (package.PackageType == PackageType.Chocolatey)
 						PushChocolateyPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
 				}
 				catch (Exception ex)
@@ -63,7 +63,7 @@ Task("PublishToNuGet")
 				var packagePath = BuildSettings.PackageDirectory + packageName;
 				try
 				{
-					if (package.IsNuGetPackage)
+					if (package.PackageType == PackageType.NuGet)
 						PushNuGetPackage(packagePath, BuildSettings.NuGetApiKey, BuildSettings.NuGetPushUrl);
 				}
 				catch (Exception ex)
@@ -91,7 +91,7 @@ Task("PublishToChocolatey")
 				var packagePath = BuildSettings.PackageDirectory + packageName;
 				try
 				{
-					if (package.IsChocolateyPackage)
+					if (package.PackageType == PackageType.Chocolatey)
 						PushChocolateyPackage(packagePath, BuildSettings.ChocolateyApiKey, BuildSettings.ChocolateyPushUrl);
 				}
 				catch (Exception ex)

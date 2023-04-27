@@ -15,7 +15,7 @@ const string RECIPE_DIR = "recipe/";
 #load recipe/ConsoleReporter.cake
 #load recipe/constants.cake
 #load recipe/package-checks.cake
-#load recipe/package-definition.cake
+#load recipe/package-definitions.cake
 #load recipe/PackageTest.cake
 #load recipe/packaging.cake
 #load recipe/publishing.cake
@@ -53,7 +53,7 @@ var recipePackage = new NuGetPackage
 			"ConsoleReporter.cake",
 			"constants.cake",
 			"package-checks.cake",
-			"package-definition.cake",
+			"package-definitions.cake",
 			"PackageTest.cake",
 			"packaging.cake",
 			"publishing.cake",

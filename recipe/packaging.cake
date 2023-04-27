@@ -41,7 +41,7 @@ Task("BuildPackages")
 	.Does(() =>
 	{
 		foreach (var package in BuildSettings.Packages)
-			if (package.IsNuGetPackage)
+			if (package.PackageTYpe == PackageTYpe.NuGet)
 			{
 				CreateDirectory(BuildSettings.PackageDirectory);
 				NuGetPack(package.PackageSource, new NuGetPackSettings()
@@ -51,7 +51,7 @@ Task("BuildPackages")
 					NoPackageAnalysis = true
 				});
 			}
-			else if (package.IsChocolateyPackage)
+			else if (package.PackageType == PackageType.Chocolatey)
 			{
                 CreateDirectory(BuildSettings.PackageDirectory);
                 ChocolateyPack(package.PackageSource, new ChocolateyPackSettings()
