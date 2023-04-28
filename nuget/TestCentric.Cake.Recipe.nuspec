@@ -27,7 +27,7 @@
 	<file src="../recipe/ConsoleReporter.cake" target="content" />
 	<file src="../recipe/constants.cake" target="content" />
 	<file src="../recipe/package-checks.cake" target="content" />
-	<file src="../recipe/package-definition.cake" target="content" />
+	<file src="../recipe/package-definitions.cake" target="content" />
 	<file src="../recipe/PackageTest.cake" target="content" />
 	<file src="../recipe/packaging.cake" target="content" />
 	<file src="../recipe/publishing.cake" target="content" />
