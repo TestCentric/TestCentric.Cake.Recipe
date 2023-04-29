@@ -4,7 +4,7 @@
 
 public static class Check
 {
-	public static void That(string testDir, IList<PackageCheck> checks)
+	public static void That(DirectoryPath testDirPath, IList<PackageCheck> checks)
 	{
 		if (checks == null)
 			throw new ArgumentNullException(nameof(checks));
@@ -12,16 +12,16 @@ public static class Check
 		bool allOK = true;
 
 		foreach (var check in checks)
-			allOK &= check.ApplyTo(testDir);
+			allOK &= check.ApplyTo(testDirPath);
 
         if (!allOK) throw new Exception("Verification failed!");
     }
 }
 
-public static FileCheck HasFile(string file) => HasFiles(new[] { file });
-public static FileCheck HasFiles(params string[] files) => new FileCheck(files);
+public static FileCheck HasFile(FilePath file) => HasFiles(new[] { file });
+public static FileCheck HasFiles(params FilePath[] files) => new FileCheck(files);
 
-public static DirectoryCheck HasDirectory(string dir) => new DirectoryCheck(dir);
+public static DirectoryCheck HasDirectory(DirectoryPath dir) => new DirectoryCheck(dir);
 
 //////////////////////////////////////////////////////////////////////
 // PACKAGECHECK CLASS
@@ -29,7 +29,14 @@ public static DirectoryCheck HasDirectory(string dir) => new DirectoryCheck(dir)
 
 public abstract class PackageCheck
 {
-	public abstract bool ApplyTo(string testDir);
+	protected ICakeContext _context;
+
+	public PackageCheck()
+	{
+		_context = BuildSettings.Context;
+	}
+	
+	public abstract bool ApplyTo(DirectoryPath testDirPath);
 
     protected static void RecordError(string msg)
     {
@@ -43,22 +50,22 @@ public abstract class PackageCheck
 
 public class FileCheck : PackageCheck
 {
-	string[] _files;
+	FilePath[] _files;
 
-	public FileCheck(string[] files)
+	public FileCheck(FilePath[] files)
 	{
 		_files = files;
 	}
 
-	public override bool ApplyTo(string testDir)
+	public override bool ApplyTo(DirectoryPath testDirPath)
 	{
 		bool isOK = true;
 
-		foreach (string file in _files)
+		foreach (FilePath relFilePath in _files)
 		{
-			if (!System.IO.File.Exists(System.IO.Path.Combine(testDir, file)))
+			if (!_context.FileExists(testDirPath.CombineWithFilePath(relFilePath)))
 			{
-				RecordError($"File {file} was not found.");
+				RecordError($"File {relFilePath} was not found.");
 				isOK = false;
 			}
 		}
@@ -73,43 +80,43 @@ public class FileCheck : PackageCheck
 
 public class DirectoryCheck : PackageCheck
 {
-	private string _path;
-	private List<string> _files = new List<string>();
+	private DirectoryPath _relDirPath;
+	private List<FilePath> _files = new List<FilePath>();
 
-	public DirectoryCheck(string path)
+	public DirectoryCheck(DirectoryPath relDirPath)
 	{
-		_path = path;
+		_relDirPath = relDirPath;
 	}
 
-	public DirectoryCheck WithFiles(params string[] files)
+	public DirectoryCheck WithFiles(params FilePath[] files)
 	{
 		_files.AddRange(files);
 		return this;
 	}
 
-    public DirectoryCheck AndFiles(params string[] files)
+    public DirectoryCheck AndFiles(params FilePath[] files)
     {
         return WithFiles(files);
     }
 
-	public DirectoryCheck WithFile(string file)
+	public DirectoryCheck WithFile(FilePath file)
 	{
 		_files.Add(file);
 		return this;
 	}
 
-    public DirectoryCheck AndFile(string file)
+    public DirectoryCheck AndFile(FilePath file)
     {
         return AndFiles(file);
     }
 
-	public override bool ApplyTo(string testDir)
+	public override bool ApplyTo(DirectoryPath testDirPath)
 	{
-		string combinedPath = System.IO.Path.Combine(testDir, _path);
+		DirectoryPath absDirPath = testDirPath.Combine(_relDirPath);
 
-		if (!System.IO.Directory.Exists(combinedPath))
+		if (!_context.DirectoryExists(absDirPath))
 		{
-			RecordError($"Directory {_path} was not found.");
+			RecordError($"Directory {_relDirPath} was not found.");
 			return false;
 		}
 
@@ -117,11 +124,11 @@ public class DirectoryCheck : PackageCheck
 
 		if (_files != null)
 		{
-			foreach (var file in _files)
+			foreach (var relFilePath in _files)
 			{
-				if (!System.IO.File.Exists(System.IO.Path.Combine(combinedPath, file)))
+				if (!BuildSettings.Context.FileExists(absDirPath.CombineWithFilePath(relFilePath)))
 				{
-					RecordError($"File {file} was not found in directory {_path}.");
+					RecordError($"File {relFilePath} was not found in directory {_relDirPath}.");
 					isOK = false;
 				}
 			}

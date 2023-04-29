@@ -31,8 +31,9 @@
 	<file src="../recipe/PackageTest.cake" target="content" />
 	<file src="../recipe/packaging.cake" target="content" />
 	<file src="../recipe/publishing.cake" target="content" />
-	<file src="../recipe/releasing.cake" target="content" />
-	<file src="../recipe/setup.cake" target="content" />
+	  <file src="../recipe/RecipePackage.cake" target="content" />
+	  <file src="../recipe/releasing.cake" target="content" />
+	  <file src="../recipe/setup.cake" target="content" />
 	<file src="../recipe/testing.cake" target="content" />
 	<file src="../recipe/test-reports.cake" target="content" />
 	<file src="../recipe/test-results.cake" target="content" />
