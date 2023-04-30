@@ -58,7 +58,7 @@ public abstract class PackageDefinition
 	public string PackageSource { get; }
     public string BasePath { get; protected set; }
     public TestRunner TestRunner { get; protected set; }
-	public PackageCheck[] PackageChecks { get; }
+	public PackageCheck[] PackageChecks { get; protected set; }
     public PackageCheck[] SymbolChecks { get; protected set; }
     public IEnumerable<PackageTest> PackageTests { get; set; }
     public bool HasTests => PackageTests != null;

@@ -51,6 +51,7 @@ Task("DeleteObjectDirectories")
 //////////////////////////////////////////////////////////////////////
 
 Task("NuGetRestore")
+	.WithCriteria(() => BuildSettings.SolutionFile != null)
 	.Does(() =>
 	{
 		NuGetRestore(BuildSettings.SolutionFile, BuildSettings.RestoreSettings);
@@ -61,14 +62,12 @@ Task("NuGetRestore")
 //////////////////////////////////////////////////////////////////////
 
 Task("Build")
+	.WithCriteria(() => BuildSettings.SolutionFile != null)
 	.IsDependentOn("Clean")
 	.IsDependentOn("NuGetRestore")
 	.IsDependentOn("CheckHeaders")
 	.Does(() =>
 	{
-		if (BuildSettings.SolutionFile == null)
-			throw new Exception("Unable to perform Build. No solution file was provided.");
-
 		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings
 			.WithProperty("Version", BuildSettings.PackageVersion));
 	});
