@@ -31,7 +31,9 @@ BuildSettings.Packages.Add(recipePackage);
 
 Task("Appveyor")
 	.IsDependentOn("Package")
-	.IsDependentOn("Publish");
+	.IsDependentOn("Publish")
+	.IsDependentOn("CreateDraftRelease")
+	.IsDependentOn("CreateProductionRelease");
 
 Task("Default")
     .IsDependentOn("Package");
