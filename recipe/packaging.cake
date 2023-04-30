@@ -4,7 +4,10 @@
 
 Task("Package")
 	.IsDependentOn("Build")
-	.IsDependentOn("PackageExistingBuild");
+	.Does(() => {
+		foreach(var package in BuildSettings.Packages)
+			package.BuildVerifyAndTest();
+	});
 
 Task("PackageExistingBuild")
 	.Does(() => {

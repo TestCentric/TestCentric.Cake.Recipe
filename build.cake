@@ -20,30 +20,10 @@ var recipePackage = new RecipePackage
 (
 	id: "TestCentric.Cake.Recipe",
 	source: "nuget/TestCentric.Cake.Recipe.nuspec",
-	basePath: "nuget",
-	content: new FilePath[] {
-		"building.cake",
-		"BuildSettings.cake",
-		"check-headers.cake",
-		"ConsoleReporter.cake",
-		"constants.cake",
-		"package-checks.cake",
-		"package-definitions.cake",
-		"PackageTest.cake",
-		"packaging.cake",
-		"publishing.cake",
-		"RecipePackage.cake",
-		"releasing.cake",
-		"setup.cake",
-		"testing.cake",
-		"test-reports.cake",
-		"test-results.cake",
-		"test-runners.cake",
-		"utilities.cake",
-		"versioning.cake"
-	});
+	basePath: "nuget"
+);
 
-	BuildSettings.Packages.Add(recipePackage);
+BuildSettings.Packages.Add(recipePackage);
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
