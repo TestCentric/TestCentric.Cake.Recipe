@@ -16,7 +16,7 @@ public class RecipePackage : NuGetPackage
         RecipeContent = content ?? _context.GetFiles($"{RECIPE_DIR}/*.cake").ToArray();
 
         PackageChecks = new PackageCheck[] {
-		    HasFiles("LICENSE.txt", "testcentric.png"),
+		    HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
             HasDirectory(RECIPE_DIR).WithFiles(RecipeContent)
         };
     }

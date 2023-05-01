@@ -19,6 +19,7 @@
 	</metadata>
 	<files>
 		<file src="../LICENSE.txt" />
+		<file src="../README.md" />
 		<file src="../testcentric.png" />
 		<file src="../recipe/arguments.cake" target="content" />
 		<file src="../recipe/Banner.cake" target="content" />
