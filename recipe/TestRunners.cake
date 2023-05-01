@@ -9,7 +9,7 @@ public abstract class TestRunner
 	public virtual int Run(string arguments)
 	{
 		if (ExecutablePath == null)
-			throw new InvalidOperationException("Unable to run tests. TestRunner.Executable path has not been set.");
+			throw new InvalidOperationException("Unable to run tests. Executable path has not been set.");
 
 		int rc = BuildSettings.Context.StartProcess(ExecutablePath, new ProcessSettings()
 		{
