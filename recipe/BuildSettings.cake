@@ -17,20 +17,28 @@ public static class BuildSettings
 	    // Required parameters
 		ICakeContext context,
 		string title,
-		string githubRepository = null,
+		string githubRepository,
 
-		// Optional paramteters:
+		// Optional parameters
+
+		// If not specified, uses TITLE.sln if it exists or uses solution
+		// found in the root directory provided there is only one. 
 		string solutionFile = null,
-        string unitTests = null,
+        // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
+		string unitTests = null,
+		// Defaults to NUnitLite runner
 		TestRunner unitTestRunner = null,
-		string guiVersion = null,
 		string githubOwner = "TestCentric",
-		string copyright = null,
+		// Defaults to our standard header
 		string[] standardHeader = null,
-		string[] exemptFiles = null,
+		// Ignored if non-standard header is specified otherwise replaces line 2 of standard header
+		string copyright = null,
+		string[] exemptFiles = null, 
 		bool msbuildAllowPreviewVersion = false,
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
+		// Defaults to Debug and Release
 		string[] validConfigurations = null,
+		// If 0, is calculated based on branch name and package version
 		int packageTestLevel = 0)
 	{
 		if (context == null)
