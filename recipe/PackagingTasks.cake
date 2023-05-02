@@ -15,6 +15,11 @@ Task("PackageExistingBuild")
 			package.BuildVerifyAndTest();
 	});
 
+Task("BuildTestAndPackage")
+	.IsDependentOn("Build")
+	.IsDependentOn("Test")
+	.IsDependentOn("Package");
+
 Task("BuildPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
@@ -33,4 +38,11 @@ Task("VerifyPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 			package.VerifyPackage();
+	});
+
+Task("TestPackages")
+	.IsDependentOn("InstallPackages")
+	.Does(() => {
+		foreach(var package in BuildSettings.Packages)
+			package.RunPackageTests();
 	});
