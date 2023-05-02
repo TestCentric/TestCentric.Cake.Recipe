@@ -43,6 +43,7 @@
 		<file src="../recipe/TestResults.cake" target="content" />
 		<file src="../recipe/TestRunners.cake" target="content" />
 		<file src="../recipe/TestTask.cake" target="content" />
+		<file src="../recipe/Tools.cake" target="content" />
 		<file src="../recipe/ZipPackage.cake" target="content" />
 	</files>
 </package>
