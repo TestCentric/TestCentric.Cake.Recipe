@@ -6,6 +6,7 @@ Task("CheckHeaders")
 	.WithCriteria(() => System.IO.Directory.Exists(BuildSettings.SourceDirectory))
 	.Does(() =>
 	{
+        // TODO: Extract a class for use by the task
         var NoHeader = new List<FilePath>();
         var NonStandard = new List<FilePath>();
         var Exempted = new List<FilePath>();
