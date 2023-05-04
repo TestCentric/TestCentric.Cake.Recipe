@@ -73,7 +73,12 @@ public static class EngineExtensions
 		Define("NUnitV2Driver", new ExtensionSpecifier("NUnit.Extension.NUnitV2Driver", "nunit-extension-nunit-v2-driver", "3.9.0"));
 		Define("NUnitProjectLoader", new ExtensionSpecifier("NUnit.Extension.NUnitProjectLoader", "nunit-extension-nunit-project-loader", "3.7.1"));
 		Define("Net20PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.0.0"));
+		Define("Net462PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.0.0"));
 		Define("NetCore21PluggableAgent", new ExtensionSpecifier("NUnit.Extension.NetCore21PluggableAgent", "nunit-extension-netcore21-pluggable-agent", "2.1.0"));
+		Define("NetCore31PluggableAgent", new ExtensionSpecifier("NUnit.Extension.NetCore31PluggableAgent", "nunit-extension-netcore31-pluggable-agent", "2.0.0"));
+		Define("Net50PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net50PluggableAgent", "nunit-extension-net50-pluggable-agent", "2.0.0"));
+		Define("Net60PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net60PluggableAgent", "nunit-extension-net60-pluggable-agent", "2.0.0"));
+		Define("Net70PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net70PluggableAgent", "nunit-extension-net70-pluggable-agent", "2.0.0"));
 		Define("Net80PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net80PluggableAgent", "nunit-extension-net80-pluggable-agent", "2.1.0"));
 	}
 
@@ -81,7 +86,12 @@ public static class EngineExtensions
 	public static ExtensionSpecifier NUnitV2Driver => Extension(nameof(NUnitV2Driver));
 	public static ExtensionSpecifier NUnitProjectLoader => Extension(nameof(NUnitProjectLoader));
 	public static ExtensionSpecifier Net20PluggableAgent => Extension(nameof(Net20PluggableAgent));
+	public static ExtensionSpecifier Net462PluggableAgent => Extension(nameof(Net462PluggableAgent));
 	public static ExtensionSpecifier NetCore21PluggableAgent => Extension(nameof(NetCore21PluggableAgent));
+	public static ExtensionSpecifier NetCore31PluggableAgent => Extension(nameof(NetCore31PluggableAgent));
+	public static ExtensionSpecifier Net50PluggableAgent => Extension(nameof(Net50PluggableAgent));
+	public static ExtensionSpecifier Net60PluggableAgent => Extension(nameof(Net60PluggableAgent));
+	public static ExtensionSpecifier Net70PluggableAgent => Extension(nameof(Net70PluggableAgent));
 	public static ExtensionSpecifier Net80PluggableAgent => Extension(nameof(Net80PluggableAgent));
 
 	// Retrieve an extension specifier by name
