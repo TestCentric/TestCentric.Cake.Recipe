@@ -112,11 +112,22 @@ public abstract class PackageDefinition
 
     protected virtual void doInstallPackage()
     {
+        // Target Package is in package directory but may have dependencies
+		var packageSources = new []
+		{
+            BuildSettings.PackageDirectory,
+			"https://www.myget.org/F/testcentric/api/v3/index.json",
+			PackageType == PackageType.Chocolatey
+				? "https://community.chocolatey.org/api/v2/"
+				: "https://api.nuget.org/v3/index.json"
+		};
+
         // Install using nuget to avoid need for admin level
         _context.NuGetInstall(PackageId, new NuGetInstallSettings
         {
-            Source = new[] { BuildSettings.PackageDirectory },
+            Source = packageSources,
             Prerelease = true,
+            Verbosity = BuildSettings.NuGetVerbosity,
             NoCache = true,
             OutputDirectory = PackageInstallDirectory,
             ExcludeVersion = true

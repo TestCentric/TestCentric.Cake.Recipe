@@ -36,6 +36,7 @@ public static class BuildSettings
 		string[] exemptFiles = null, 
 		bool msbuildAllowPreviewVersion = false,
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
+		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
 		// Defaults to Debug and Release
 		string[] validConfigurations = null,
 		// If 0, is calculated based on branch name and package version
@@ -77,6 +78,8 @@ public static class BuildSettings
 
 		MSBuildVerbosity = msbuildVerbosity;
 		MSBuildAllowPreviewVersion = msbuildAllowPreviewVersion;
+
+		NuGetVerbosity = nugetVerbosity;
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
 		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
@@ -211,7 +214,16 @@ public static class BuildSettings
 		PlatformTarget = PlatformTarget.MSIL,
 		AllowPreviewVersion = MSBuildAllowPreviewVersion
 	};
-	public static NuGetRestoreSettings RestoreSettings => new NuGetRestoreSettings();
+
+	public static NuGetVerbosity NuGetVerbosity{ get; set; }
+	public static NuGetRestoreSettings RestoreSettings => new NuGetRestoreSettings
+	{
+		Verbosity = NuGetVerbosity
+	};
+	public static NuGetInstallSettings NuGetInstallSettings => new NuGetInstallSettings
+	{
+		Verbosity = NuGetVerbosity
+	};
 
 	//Testing
 	public static string UnitTests { get; set; }
