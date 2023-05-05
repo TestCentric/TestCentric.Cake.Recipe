@@ -29,6 +29,7 @@
 		<file src="../recipe/ChocolateyPackage.cake" target="content" />
 		<file src="../recipe/ConsoleReporter.cake" target="content" />
 		<file src="../recipe/ConstantDefinitions.cake" target="content" />
+		<file src="../recipe/EngineExtensions.cake" target="content" />
 		<file src="../recipe/NuGetPackage.cake" target="content" />
 		<file src="../recipe/NUnitLite.cake" target="content" />
 		<file src="../recipe/PackageChecks.cake" target="content" />

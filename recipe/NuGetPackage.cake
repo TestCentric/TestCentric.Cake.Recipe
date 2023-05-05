@@ -18,10 +18,11 @@ public class NuGetPackage : PackageDefinition
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
+    /// <param name="preLoad">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
 	public NuGetPackage(
         string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, PackageCheck[] symbols = null, IEnumerable<PackageTest> tests = null)
-      : base (PackageType.NuGet, id, source, basePath, testRunner: testRunner, checks: checks, symbols: symbols, tests: tests)
+        PackageCheck[] checks = null, PackageCheck[] symbols = null, IEnumerable<PackageTest> tests = null, IEnumerable<PackageSpecifier> preload = null)
+      : base (PackageType.NuGet, id, source, basePath, testRunner: testRunner, checks: checks, symbols: symbols, tests: tests, preload: preload)
     {
     }
 

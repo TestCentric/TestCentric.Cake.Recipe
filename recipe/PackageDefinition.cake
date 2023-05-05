@@ -25,7 +25,8 @@ public abstract class PackageDefinition
     /// <param name="testRunner">A TestRunner instance used to run package tests.</param>
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
-    /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
+    /// <param name="tests">An collection of PackageTests to be run against the package. Optional.</param>
+    /// <param name="preload">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
@@ -34,7 +35,8 @@ public abstract class PackageDefinition
         TestRunner testRunner = null,
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
-		IEnumerable<PackageTest> tests = null)
+		IEnumerable<PackageTest> tests = null,
+        IEnumerable<PackageSpecifier> preload = null)
 	{
         if (testRunner == null && tests != null)
             throw new System.ArgumentException($"Unable to create {packageType} package {id}: TestRunner must be provided if there are tests", nameof(testRunner));
@@ -49,6 +51,7 @@ public abstract class PackageDefinition
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
+        PreLoadedExtensions = preload;
 		SymbolChecks = symbols;
 	}
 
@@ -61,6 +64,7 @@ public abstract class PackageDefinition
 	public PackageCheck[] PackageChecks { get; protected set; }
     public PackageCheck[] SymbolChecks { get; protected set; }
     public IEnumerable<PackageTest> PackageTests { get; set; }
+    public IEnumerable<PackageSpecifier> PreLoadedExtensions { get; set; }
     public bool HasTests => PackageTests != null;
     public bool HasChecks => PackageChecks != null;
     public bool HasSymbols => SymbolChecks != null;
@@ -126,6 +130,7 @@ public abstract class PackageDefinition
         _context.NuGetInstall(PackageId, new NuGetInstallSettings
         {
             Source = packageSources,
+            Version = PackageVersion,
             Prerelease = true,
             Verbosity = BuildSettings.NuGetVerbosity,
             NoCache = true,
@@ -171,13 +176,24 @@ public abstract class PackageDefinition
 			}
 		}
 
+        // Pre-install any required extensions specified in BuildSettings.
+        // Individual tests may still call for additional extensions.
+        foreach(PackageSpecifier package in PreLoadedExtensions)
+            package.Install(ExtensionInstallDirectory);
+
         foreach (var packageTest in PackageTests)
         {
             if (packageTest.Level > BuildSettings.PackageTestLevel)
                 continue;
 
-            foreach (ExtensionSpecifier extension in packageTest.ExtensionsNeeded)
-                CheckExtensionIsInstalled(extension);
+            foreach (ExtensionSpecifier extensionSpecifier in packageTest.ExtensionsNeeded)
+            {
+                PackageSpecifier package = PackageType == PackageType.Chocolatey
+                    ? extensionSpecifier.ChocoPackage
+                    : extensionSpecifier.NuGetPackage;
+                
+                package.Install(ExtensionInstallDirectory);
+            }
 
             var testResultDir = $"{PackageResultDirectory}/{packageTest.Name}/";
             var resultFile = testResultDir + "TestResult.xml";
@@ -230,23 +246,4 @@ public abstract class PackageDefinition
 	}
 
     public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
-
-    private void CheckExtensionIsInstalled(ExtensionSpecifier extension)
-    {
-        string extensionId = PackageType == PackageType.Chocolatey ? extension.ChocoId : extension.NuGetId;
-
-        bool alreadyInstalled = _context.GetDirectories($"{ExtensionInstallDirectory}{extensionId}.*").Count > 0;
-
-        if (!alreadyInstalled)
-        {
-            Banner.Display($"Installing {extensionId} version {extension.Version}");
-
-            _context.NuGetInstall(extensionId,
-                new NuGetInstallSettings()
-                {
-                    OutputDirectory = ExtensionInstallDirectory,
-                    Version = extension.Version
-                });
-        }
-    }
 }
