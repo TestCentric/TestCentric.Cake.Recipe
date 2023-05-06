@@ -26,7 +26,7 @@ public abstract class PackageDefinition
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">An collection of PackageTests to be run against the package. Optional.</param>
-    /// <param name="preload">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
+    /// <param name="preload">An array of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
@@ -36,7 +36,7 @@ public abstract class PackageDefinition
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
 		IEnumerable<PackageTest> tests = null,
-        IEnumerable<PackageSpecifier> preloadedExtensions = null)
+        ExtensionSpecifier[] preloadedExtensions = null)
 	{
         if (testRunner == null && tests != null)
             throw new System.ArgumentException($"Unable to create {packageType} package {id}: TestRunner must be provided if there are tests", nameof(testRunner));
@@ -51,7 +51,7 @@ public abstract class PackageDefinition
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
-        PreLoadedExtensions = preloadedExtensions ?? new PackageSpecifier[0];
+        PreLoadedExtensions = preloadedExtensions ?? new ExtensionSpecifier[0];
 		SymbolChecks = symbols;
 	}
 
@@ -64,7 +64,7 @@ public abstract class PackageDefinition
 	public PackageCheck[] PackageChecks { get; protected set; }
     public PackageCheck[] SymbolChecks { get; protected set; }
     public IEnumerable<PackageTest> PackageTests { get; set; }
-    public IEnumerable<PackageSpecifier> PreLoadedExtensions { get; set; }
+    public ExtensionSpecifier[] PreLoadedExtensions { get; set; }
     public bool HasTests => PackageTests != null;
     public bool HasChecks => PackageChecks != null;
     public bool HasSymbols => SymbolChecks != null;
@@ -142,7 +142,6 @@ public abstract class PackageDefinition
     public void VerifyPackage()
     {
         DisplayAction("Verifying");
-        Console.WriteLine($"Base Directory: {PackageInstallDirectory + PackageId}");
 
         bool allOK = true;
         foreach (var check in PackageChecks)
@@ -178,33 +177,8 @@ public abstract class PackageDefinition
 
         // Pre-install any required extensions specified in BuildSettings.
         // Individual tests may still call for additional extensions.
-        foreach(PackageSpecifier package in PreLoadedExtensions)
-            package.Install(ExtensionInstallDirectory);
-
-#if false
-        foreach (string name in PreLoadedExtensions)
-        {
-            // TODO: Move part of this to ExtensionSpecifier
-            var extension = EngineExtensions.ByName(name);
-            var package = extension?. PackageType == PackageType.Chocolatey
-                ? extension.ChocoPackage
-                : extension.NuGetPackage;
-            package.Install(ExtensionInstallDirectory);
-        }
-
-        // TODO: Move this to PackageSpecifier
-        PackageSpecifier GetPackage(ExtensionSpecifier extension, PackageType type)
-        {
-            switch(type)
-            {
-                case PackageType.Chocolatey:
-                    return extension.ChocoPackage;
-                case PackageType.Zip:
-                case PackageType.NuGet:
-                    return extension.NuGetPackage;
-            }
-        }
-#endif
+        foreach(ExtensionSpecifier extensionSpecifier in PreLoadedExtensions)
+            extensionSpecifier.InstallExtension(this);
 
         foreach (var packageTest in PackageTests)
         {
@@ -212,13 +186,7 @@ public abstract class PackageDefinition
                 continue;
 
             foreach (ExtensionSpecifier extensionSpecifier in packageTest.ExtensionsNeeded)
-            {
-                PackageSpecifier package = PackageType == PackageType.Chocolatey
-                    ? extensionSpecifier.ChocoPackage
-                    : extensionSpecifier.NuGetPackage;
-                
-                package.Install(ExtensionInstallDirectory);
-            }
+                extensionSpecifier.InstallExtension(this);
 
             var testResultDir = $"{PackageResultDirectory}/{packageTest.Name}/";
             var resultFile = testResultDir + "TestResult.xml";

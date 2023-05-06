@@ -17,8 +17,11 @@ public class ChocolateyPackage : PackageDefinition
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
 	public ChocolateyPackage(
         string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, PackageCheck[] symbols = null, IEnumerable<PackageTest> tests = null, IEnumerable<PackageSpecifier> preloadedExtensions = null)
-      : base (PackageType.Chocolatey, id, source, basePath, testRunner: testRunner, checks: checks, symbols: symbols, tests: tests, preloadedExtensions: preloadedExtensions)
+        PackageCheck[] checks = null, PackageCheck[] symbols = null,
+        IEnumerable<PackageTest> tests = null,
+        ExtensionSpecifier[] preloadedExtensions = null)
+      : base (PackageType.Chocolatey, id, source, basePath, testRunner: testRunner,
+        checks: checks, symbols: symbols, tests: tests, preloadedExtensions: preloadedExtensions)
     {
     }
 

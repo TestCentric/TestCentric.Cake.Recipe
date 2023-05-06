@@ -17,8 +17,10 @@ public class ZipPackage : PackageDefinition
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
 	public ZipPackage(
         string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, IEnumerable<PackageTest> tests = null, IEnumerable<PackageSpecifier> preloadedExtensions = null)
-      : base (PackageType.Zip, id, source, basePath, testRunner: testRunner, checks: checks, tests: tests, preloadedExtensions: preloadedExtensions)
+        PackageCheck[] checks = null, IEnumerable<PackageTest> tests = null,
+        ExtensionSpecifier[] preloadedExtensions = null)
+      : base (PackageType.Zip, id, source, basePath, testRunner: testRunner, 
+        checks: checks, tests: tests, preloadedExtensions: preloadedExtensions)
     {
     }
 

@@ -62,7 +62,39 @@ public class ExtensionSpecifier
 	{
 		return new ExtensionSpecifier(NuGetId, ChocoId, version);
 	}
+
+	// Install this extension for a package
+	public void InstallExtension(PackageDefinition package)
+	{
+		if (package.PackageType == PackageType.Chocolatey)
+			ChocoPackage.Install(package.PackageInstallDirectory);
+		else
+			NuGetPackage.Install(package.PackageInstallDirectory);
+	}
 }
+
+// Static Variables representing well-known Extensions
+public static ExtensionSpecifier NUnitV2Driver = new ExtensionSpecifier(
+	"NUnit.Extension.NUnitV2Driver", "nunit-extension-nunit-v2-driver", "3.9.0");
+public static ExtensionSpecifier NUnitProjectLoader = new ExtensionSpecifier(
+	"NUnit.Extension.NUnitProjectLoader", "nunit-extension-nunit-project-loader", "3.7.1");
+public static ExtensionSpecifier Net20PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.0.0");
+public static ExtensionSpecifier Net462PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.0.0");
+public static ExtensionSpecifier NetCore21PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.NetCore21PluggableAgent", "nunit-extension-netcore21-pluggable-agent", "2.1.0");
+public static ExtensionSpecifier NetCore31PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.NetCore31PluggableAgent", "nunit-extension-netcore31-pluggable-agent", "2.0.0");
+public static ExtensionSpecifier Net50PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.Net50PluggableAgent", "nunit-extension-net50-pluggable-agent", "2.0.0");
+public static ExtensionSpecifier Net60PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.Net60PluggableAgent", "nunit-extension-net60-pluggable-agent", "2.0.0");
+public static ExtensionSpecifier Net70PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.Net70PluggableAgent", "nunit-extension-net70-pluggable-agent", "2.0.0");
+public static ExtensionSpecifier Net80PluggableAgent = new ExtensionSpecifier(
+	"NUnit.Extension.Net80PluggableAgent", "nunit-extension-net80-pluggable-agent", "2.1.0");
+
 
 // Static class holding information about known extensions. A default
 // set of extensions are provided and may be accessed via properties.
@@ -75,33 +107,21 @@ public static class EngineExtensions
 	{
 		_extensions = new Dictionary<string,ExtensionSpecifier>();
 
-		// Define well-known extensions - these should match the built-in extension properties
-		Define("NUnitV2Driver", new ExtensionSpecifier("NUnit.Extension.NUnitV2Driver", "nunit-extension-nunit-v2-driver", "3.9.0"));
-		Define("NUnitProjectLoader", new ExtensionSpecifier("NUnit.Extension.NUnitProjectLoader", "nunit-extension-nunit-project-loader", "3.7.1"));
-		Define("Net20PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.0.0"));
-		Define("Net462PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.0.0"));
-		Define("NetCore21PluggableAgent", new ExtensionSpecifier("NUnit.Extension.NetCore21PluggableAgent", "nunit-extension-netcore21-pluggable-agent", "2.1.0"));
-		Define("NetCore31PluggableAgent", new ExtensionSpecifier("NUnit.Extension.NetCore31PluggableAgent", "nunit-extension-netcore31-pluggable-agent", "2.0.0"));
-		Define("Net50PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net50PluggableAgent", "nunit-extension-net50-pluggable-agent", "2.0.0"));
-		Define("Net60PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net60PluggableAgent", "nunit-extension-net60-pluggable-agent", "2.0.0"));
-		Define("Net70PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net70PluggableAgent", "nunit-extension-net70-pluggable-agent", "2.0.0"));
-		Define("Net80PluggableAgent", new ExtensionSpecifier("NUnit.Extension.Net80PluggableAgent", "nunit-extension-net80-pluggable-agent", "2.1.0"));
+		// Add well-known extensions to the dictionary
+		Define(nameof(NUnitV2Driver), NUnitV2Driver);
+		Define(nameof(NUnitProjectLoader), NUnitProjectLoader);
+		Define(nameof(Net20PluggableAgent), Net20PluggableAgent);
+		Define(nameof(Net462PluggableAgent), Net462PluggableAgent);
+		Define(nameof(NetCore21PluggableAgent), NetCore21PluggableAgent);
+		Define(nameof(NetCore31PluggableAgent), NetCore31PluggableAgent);
+		Define(nameof(Net50PluggableAgent), Net50PluggableAgent);
+		Define(nameof(Net60PluggableAgent), Net60PluggableAgent);
+		Define(nameof(Net70PluggableAgent), Net70PluggableAgent);
+		Define(nameof(Net80PluggableAgent), Net80PluggableAgent);
 	}
 
-	// Built-In Extension Properties
-	public static ExtensionSpecifier NUnitV2Driver => Extension(nameof(NUnitV2Driver));
-	public static ExtensionSpecifier NUnitProjectLoader => Extension(nameof(NUnitProjectLoader));
-	public static ExtensionSpecifier Net20PluggableAgent => Extension(nameof(Net20PluggableAgent));
-	public static ExtensionSpecifier Net462PluggableAgent => Extension(nameof(Net462PluggableAgent));
-	public static ExtensionSpecifier NetCore21PluggableAgent => Extension(nameof(NetCore21PluggableAgent));
-	public static ExtensionSpecifier NetCore31PluggableAgent => Extension(nameof(NetCore31PluggableAgent));
-	public static ExtensionSpecifier Net50PluggableAgent => Extension(nameof(Net50PluggableAgent));
-	public static ExtensionSpecifier Net60PluggableAgent => Extension(nameof(Net60PluggableAgent));
-	public static ExtensionSpecifier Net70PluggableAgent => Extension(nameof(Net70PluggableAgent));
-	public static ExtensionSpecifier Net80PluggableAgent => Extension(nameof(Net80PluggableAgent));
-
 	// Retrieve an extension specifier by name
-	public static ExtensionSpecifier Extension(string name)
+	public static ExtensionSpecifier ByName(string name)
 	{
 		if (!_extensions.ContainsKey(name))
 			throw new ArgumentException($"Extension '{name}' is not registered", nameof(name));
