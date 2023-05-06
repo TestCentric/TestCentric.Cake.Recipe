@@ -51,7 +51,7 @@ public abstract class PackageDefinition
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
-        PreLoadedExtensions = preload;
+        PreLoadedExtensions = preload ?? new PackageSpecifier[0];
 		SymbolChecks = symbols;
 	}
 
