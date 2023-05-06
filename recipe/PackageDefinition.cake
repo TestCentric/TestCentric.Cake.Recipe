@@ -36,7 +36,7 @@ public abstract class PackageDefinition
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
 		IEnumerable<PackageTest> tests = null,
-        IEnumerable<PackageSpecifier> preload = null)
+        IEnumerable<PackageSpecifier> preloadedExtensions = null)
 	{
         if (testRunner == null && tests != null)
             throw new System.ArgumentException($"Unable to create {packageType} package {id}: TestRunner must be provided if there are tests", nameof(testRunner));
@@ -51,7 +51,7 @@ public abstract class PackageDefinition
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
-        PreLoadedExtensions = preload ?? new PackageSpecifier[0];
+        PreLoadedExtensions = preloadedExtensions ?? new PackageSpecifier[0];
 		SymbolChecks = symbols;
 	}
 
@@ -180,6 +180,31 @@ public abstract class PackageDefinition
         // Individual tests may still call for additional extensions.
         foreach(PackageSpecifier package in PreLoadedExtensions)
             package.Install(ExtensionInstallDirectory);
+
+#if false
+        foreach (string name in PreLoadedExtensions)
+        {
+            // TODO: Move part of this to ExtensionSpecifier
+            var extension = EngineExtensions.ByName(name);
+            var package = extension?. PackageType == PackageType.Chocolatey
+                ? extension.ChocoPackage
+                : extension.NuGetPackage;
+            package.Install(ExtensionInstallDirectory);
+        }
+
+        // TODO: Move this to PackageSpecifier
+        PackageSpecifier GetPackage(ExtensionSpecifier extension, PackageType type)
+        {
+            switch(type)
+            {
+                case PackageType.Chocolatey:
+                    return extension.ChocoPackage;
+                case PackageType.Zip:
+                case PackageType.NuGet:
+                    return extension.NuGetPackage;
+            }
+        }
+#endif
 
         foreach (var packageTest in PackageTests)
         {

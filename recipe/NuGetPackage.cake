@@ -21,8 +21,8 @@ public class NuGetPackage : PackageDefinition
     /// <param name="preLoad">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
 	public NuGetPackage(
         string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, PackageCheck[] symbols = null, IEnumerable<PackageTest> tests = null, IEnumerable<PackageSpecifier> preload = null)
-      : base (PackageType.NuGet, id, source, basePath, testRunner: testRunner, checks: checks, symbols: symbols, tests: tests, preload: preload)
+        PackageCheck[] checks = null, PackageCheck[] symbols = null, IEnumerable<PackageTest> tests = null, IEnumerable<PackageSpecifier> preloadedExtensions = null)
+      : base (PackageType.NuGet, id, source, basePath, testRunner: testRunner, checks: checks, symbols: symbols, tests: tests, preloadedExtensions: preloadedExtensions)
     {
     }
 
