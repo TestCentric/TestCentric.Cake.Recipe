@@ -81,7 +81,7 @@ public static ExtensionSpecifier NUnitProjectLoader = new ExtensionSpecifier(
 public static ExtensionSpecifier Net20PluggableAgent = new ExtensionSpecifier(
 	"NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.0.0");
 public static ExtensionSpecifier Net462PluggableAgent = new ExtensionSpecifier(
-	"NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.0.0");
+	"NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.0.1");
 public static ExtensionSpecifier NetCore21PluggableAgent = new ExtensionSpecifier(
 	"NUnit.Extension.NetCore21PluggableAgent", "nunit-extension-netcore21-pluggable-agent", "2.1.0");
 public static ExtensionSpecifier NetCore31PluggableAgent = new ExtensionSpecifier(
