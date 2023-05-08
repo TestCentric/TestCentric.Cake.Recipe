@@ -67,9 +67,9 @@ public class ExtensionSpecifier
 	public void InstallExtension(PackageDefinition package)
 	{
 		if (package.PackageType == PackageType.Chocolatey)
-			ChocoPackage.Install(package.PackageInstallDirectory);
+			ChocoPackage.Install(package.ExtensionInstallDirectory);
 		else
-			NuGetPackage.Install(package.PackageInstallDirectory);
+			NuGetPackage.Install(package.ExtensionInstallDirectory);
 	}
 }
 
