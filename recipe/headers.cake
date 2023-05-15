@@ -2,17 +2,23 @@
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
 
-Task("CheckHeaders")
-	.WithCriteria(() => System.IO.Directory.Exists(BuildSettings.SourceDirectory))
-	.Does(() =>
-	{
-        // TODO: Extract a class for use by the task
+public static class Headers
+{
+    private static ICakeContext _context;
+
+    static Headers()
+    {
+        _context = BuildSettings.Context;
+    }
+
+    public static void Check()
+    {
         var NoHeader = new List<FilePath>();
         var NonStandard = new List<FilePath>();
         var Exempted = new List<FilePath>();
         int examined = 0;
 
-        var sourceFiles = GetFiles(BuildSettings.SourceDirectory + "**/*.cs");
+        var sourceFiles = _context.GetFiles(BuildSettings.SourceDirectory + "**/*.cs");
         var exemptFiles = BuildSettings.ExemptFiles;
         foreach (var file in sourceFiles)
         {
@@ -40,42 +46,42 @@ Task("CheckHeaders")
                 NonStandard.Add(file);
         }
 
-        Information("\nSTANDARD HEADER\n");
+        _context.Information("\nSTANDARD HEADER\n");
         foreach (string line in BuildSettings.StandardHeader)
-            Information(line);
-        Information("");
+            _context.Information(line);
+        _context.Information("");
 
         if (NoHeader.Count > 0)
         {
-            Information("\nFILES WITH NO HEADER\n");
+            _context.Information("\nFILES WITH NO HEADER\n");
             foreach (var file in NoHeader)
-                Information(RelPathTo(file));
+                _context.Information(RelPathTo(file));
         }
 
         if (NonStandard.Count > 0)
         {
-            Information("\nFILES WITH A NON-STANDARD HEADER\n");
+            _context.Information("\nFILES WITH A NON-STANDARD HEADER\n");
             foreach (var file in NonStandard)
             {
-                Information(RelPathTo(file));
-                Information("");
+                _context.Information(RelPathTo(file));
+                _context.Information("");
                 foreach (string line in GetHeader(file))
-                    Information(line);
-                Information("");
+                    _context.Information(line);
+                _context.Information("");
             }
         }
 
         if (Exempted.Count > 0)
         {
-            Information("\nEXEMPTED FILES (NO CHECK MADE)\n");
+            _context.Information("\nEXEMPTED FILES (NO CHECK MADE)\n");
             foreach (var file in Exempted)
-                Information(RelPathTo(file));
+                _context.Information(RelPathTo(file));
         }
 
-        Information($"\nFiles Examined: {examined}");
-        Information($"Missing Headers: {NoHeader.Count}");
-        Information($"Non-Standard Headers: {NonStandard.Count}");
-        Information($"Exempted Files: {Exempted.Count}");
+        _context.Information($"\nFiles Examined: {examined}");
+        _context.Information($"Missing Headers: {NoHeader.Count}");
+        _context.Information($"Non-Standard Headers: {NonStandard.Count}");
+        _context.Information($"Exempted Files: {Exempted.Count}");
 
         if (NoHeader.Count > 0 || NonStandard.Count > 0)
             throw new Exception("Missing or invalid file headers found");
@@ -102,4 +108,5 @@ Task("CheckHeaders")
 
             return file.ToString().Substring(CD_LENGTH);
         }
-	});
+	}
+}
