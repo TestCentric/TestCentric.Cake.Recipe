@@ -2,9 +2,6 @@
 // DUMP SETTINGS
 //////////////////////////////////////////////////////////////////////
 
-Task("DumpSettings")
-	.Does(() => BuildSettings.DumpSettings());
-
 //////////////////////////////////////////////////////////////////////
 // BUILD SETTINGS
 //////////////////////////////////////////////////////////////////////
@@ -12,6 +9,11 @@ Task("DumpSettings")
 public static class BuildSettings
 {
 	private static BuildSystem _buildSystem;
+
+	static BuildSettings()
+	{
+		Tasks = new BuildTasks();
+	}
 
 	public static void Initialize(
 	    // Required parameters
@@ -86,6 +88,9 @@ public static class BuildSettings
 
 		ValidateSettings();
 
+		// Fix up dependencies that depend on the settings
+		Tasks.FixupDependencies();
+
 		context.Information($"{Title} {Configuration} version {PackageVersion}");
 
 		// Output like this should go after the run title display
@@ -159,6 +164,9 @@ public static class BuildSettings
 	// Targets - not set until Setup runs
 	public static string Target { get; set; }
 	public static IEnumerable<string> TasksToExecute { get; set; }
+
+	// Task Definitions
+	public static BuildTasks Tasks { get; }
 	
 	// Arguments
 	public static string Configuration { get; private set; }

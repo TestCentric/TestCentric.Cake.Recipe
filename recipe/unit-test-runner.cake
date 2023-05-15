@@ -1,11 +1,18 @@
 //////////////////////////////////////////////////////////////////////
-// UNIT TESTS
+// UNIT TEST RUNNER
 //////////////////////////////////////////////////////////////////////
 
-Task("Test")
-	.IsDependentOn("Build")
-	.Does(() =>
-	{
+public static class UnitTestRunner
+{
+    static ICakeContext _context;
+
+    static UnitTestRunner()
+    {
+        _context = BuildSettings.Context;
+    }
+
+    public static void RunUnitTests()
+    {
         // TODO: Make a TestRunner for NUnitLite
         if (BuildSettings.UnitTestRunner == null)
         {
@@ -42,7 +49,7 @@ Task("Test")
             { 
                 // User supplied a set of patterns for the unit tests
                 foreach (string filePattern in patternSet.Split('|'))
-                    foreach (var testPath in GetFiles(BuildSettings.OutputDirectory + filePattern))
+                    foreach (var testPath in _context.GetFiles(BuildSettings.OutputDirectory + filePattern))
                         result.Add(testPath);
             }
             else
@@ -52,7 +59,7 @@ Task("Test")
                 var defaultPatterns = new [] { "**/*.tests.dll", "**/*.tests.exe" };
                 var globberSettings = new GlobberSettings { IsCaseSensitive = false };
                 foreach (string filePattern in defaultPatterns)
-                    foreach (var testPath in GetFiles(BuildSettings.OutputDirectory + filePattern, globberSettings))
+                    foreach (var testPath in _context.GetFiles(BuildSettings.OutputDirectory + filePattern, globberSettings))
                         result.Add(testPath);
             }
 
@@ -77,4 +84,5 @@ Task("Test")
 
             return VALID_RUNTIMES.Contains(text);
         }
-    });
+    }
+}
