@@ -13,12 +13,9 @@ public static class PackageReleaseManager
 	{
 		_hadErrors = false;
 
-		if (BuildSettings.ShouldPublishToMyGet)
-			PublishToMyGet();
-		if (BuildSettings.ShouldPublishToNuGet)
-			PublishToNuGet();
-		if (BuildSettings.ShouldPublishToChocolatey)
-			PublishToChocolatey();
+		PublishToMyGet();
+		PublishToNuGet();
+		PublishToChocolatey();
 
 		if (_hadErrors)
 			throw new Exception("One of the publishing steps failed.");
