@@ -1,7 +1,5 @@
 public class RecipePackage : NuGetPackage
 {
-    const string RECIPE_DIR = "content";
-
     /// <summary>
     /// Construct passing all required arguments
     /// </summary>
@@ -13,11 +11,11 @@ public class RecipePackage : NuGetPackage
         string id, string source, string basePath, FilePath[] content = null)
       : base (id, source, basePath)
     {
-        RecipeContent = content ?? _context.GetFiles($"{RECIPE_DIR}/*.cake").ToArray();
+        RecipeContent = content ?? _context.GetFiles($"./recipe/*.cake").Select(f => f.GetFilename()).ToArray();
 
         PackageChecks = new PackageCheck[] {
 		    HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
-            HasDirectory(RECIPE_DIR).WithFiles(RecipeContent)
+            HasDirectory("content").WithFiles(RecipeContent)
         };
     }
 
