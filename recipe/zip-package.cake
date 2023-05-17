@@ -29,7 +29,7 @@ public class ZipPackage : PackageDefinition
     public override string PackageResultDirectory => $"{BuildSettings.ZipResultDirectory}{PackageId}/";
     public override string ExtensionInstallDirectory => $"{BuildSettings.ZipTestDirectory}{PackageId}/bin/addins/";
   
-    protected override void doBuildPackage()
+    public override void BuildPackage()
     {
         // Get zip specification, which tells what to put in the zip
 		var spec = new ZipSpecification(PackageSource);
@@ -60,7 +60,7 @@ public class ZipPackage : PackageDefinition
 		bool IsPattern(string s) => s.IndexOfAny(new [] {'*', '?' }) >0;
     }
 
-    protected override void doInstallPackage()
+    public override void InstallPackage()
     {
         _context.Unzip(BuildSettings.PackageDirectory + PackageFileName, PackageInstallDirectory + PackageId);
     }

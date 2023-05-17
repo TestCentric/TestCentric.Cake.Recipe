@@ -36,7 +36,7 @@ public class ChocolateyPackage : PackageDefinition
     // The directory into which extensions to the test runner are installed
     public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
 
-    protected override void doBuildPackage()
+    public override void BuildPackage()
     {
         var chocolateyPackSettings = new ChocolateyPackSettings()
         {
@@ -46,5 +46,28 @@ public class ChocolateyPackage : PackageDefinition
         };
 
         _context.ChocolateyPack(PackageSource, chocolateyPackSettings);
+    }
+
+    public override void InstallPackage()
+    {
+        // Target Package is in package directory but may have dependencies
+		var packageSources = new []
+		{
+            BuildSettings.PackageDirectory,
+			"https://www.myget.org/F/testcentric/api/v3/index.json",
+			"https://community.chocolatey.org/api/v2/"
+		};
+
+        // Install using nuget to avoid need for admin level
+        _context.NuGetInstall(PackageId, new NuGetInstallSettings
+        {
+            Source = packageSources,
+            Version = PackageVersion,
+            Prerelease = true,
+            Verbosity = BuildSettings.NuGetVerbosity,
+            NoCache = true,
+            OutputDirectory = PackageInstallDirectory,
+            ExcludeVersion = true
+        });
     }
 }

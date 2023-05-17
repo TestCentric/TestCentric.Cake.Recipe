@@ -81,68 +81,41 @@ public abstract class PackageDefinition
 
     public string PackageFilePath => BuildSettings.PackageDirectory + PackageFileName;
 
-    protected abstract void doBuildPackage();
-
     public void BuildVerifyAndTest()
     {
         _context.EnsureDirectoryExists(BuildSettings.PackageDirectory);
 
+        Banner.Display($"Building {PackageFileName}");
         BuildPackage();
+
+        Banner.Display($"Installing {PackageFileName}");
         InstallPackage();
 
         if (HasChecks)
+        {
+            Banner.Display($"Verifying {PackageFileName}");
             VerifyPackage();
+        }
 
         if (HasSymbols)
+        {
+            // TODO: Override this in NuGetPackage
             VerifySymbolPackage();
+        }
 
         if (HasTests)
-            RunPackageTests();
-    }
-
-    public void BuildPackage()
-    {
-        DisplayAction("Building");
-        doBuildPackage();
-    }
-
-    public void InstallPackage()
-    {
-        DisplayAction("Installing");
-        Console.WriteLine($"Installing package to {PackageInstallDirectory}");
-        _context.CleanDirectory(PackageInstallDirectory + PackageId);
-        doInstallPackage();
-    }
-
-    protected virtual void doInstallPackage()
-    {
-        // Target Package is in package directory but may have dependencies
-		var packageSources = new []
-		{
-            BuildSettings.PackageDirectory,
-			"https://www.myget.org/F/testcentric/api/v3/index.json",
-			PackageType == PackageType.Chocolatey
-				? "https://community.chocolatey.org/api/v2/"
-				: "https://api.nuget.org/v3/index.json"
-		};
-
-        // Install using nuget to avoid need for admin level
-        _context.NuGetInstall(PackageId, new NuGetInstallSettings
         {
-            Source = packageSources,
-            Version = PackageVersion,
-            Prerelease = true,
-            Verbosity = BuildSettings.NuGetVerbosity,
-            NoCache = true,
-            OutputDirectory = PackageInstallDirectory,
-            ExcludeVersion = true
-        });
+            Banner.Display($"Testing {PackageFileName}");
+            RunPackageTests();
+        }
     }
+
+    public abstract void BuildPackage();
+
+    public abstract void InstallPackage();
 
     public void VerifyPackage()
     {
-        DisplayAction("Verifying");
-
         bool allOK = true;
         foreach (var check in PackageChecks)
             allOK &= check.ApplyTo(PackageInstallDirectory + PackageId);
@@ -155,7 +128,6 @@ public abstract class PackageDefinition
 
     public void RunPackageTests()
     {
-        DisplayAction("Testing");
         _context.Information($"Package tests will run at level {BuildSettings.PackageTestLevel}");
 
         var reporter = new ResultReporter(PackageFileName);
@@ -192,7 +164,13 @@ public abstract class PackageDefinition
             var resultFile = testResultDir + "TestResult.xml";
 
             Banner.Display(packageTest.Description);
-			DisplayTestEnvironment(packageTest);
+
+            // Display Test Environment
+		    Console.WriteLine("Test Environment");
+		    Console.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
+		    Console.WriteLine($"  CLR Version: {Environment.Version}");
+		    Console.WriteLine($"    Arguments: {packageTest.Arguments}");
+		    Console.WriteLine();
 
 			_context.CreateDirectory(testResultDir);
             string arguments = packageTest.Arguments + $" --work={testResultDir}";
@@ -223,20 +201,6 @@ public abstract class PackageDefinition
         if (hadErrors)
             throw new Exception("One or more package tests had errors!");
     }
-
-    public void DisplayAction(string action)
-    {
-        Banner.Display($"{action} package {PackageFileName}");
-    }
-
-	private void DisplayTestEnvironment(PackageTest test)
-	{
-		Console.WriteLine("Test Environment");
-		Console.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
-		Console.WriteLine($"  CLR Version: {Environment.Version}");
-		Console.WriteLine($"    Arguments: {test.Arguments}");
-		Console.WriteLine();
-	}
 
     public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
 }

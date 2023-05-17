@@ -158,30 +158,43 @@ BuildSettings.Tasks.BuildTestAndPackageTask = Task("BuildTestAndPackage")
 	.IsDependentOn("Package");
 
 BuildSettings.Tasks.BuildPackagesTask = Task("BuildPackages")
+	.IsDependentOn("CleanPackageDirectory")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
+		{
+	        Banner.Display($"Building {package.PackageFileName}");
 			package.BuildPackage();
+		}
 	});
 
 BuildSettings.Tasks.InstallPackagesTask = Task("InstallPackages")
 	.IsDependentOn("BuildPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
+		{
+	        Banner.Display($"Installing {package.PackageFileName}");
 			package.InstallPackage();
+		}
 	});
 
 BuildSettings.Tasks.VerifyPackagesTask = Task("VerifyPackages")
 	.IsDependentOn("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
+		{
+	        Banner.Display($"Verifying {package.PackageFileName}");
 			package.VerifyPackage();
+		}
 	});
 
 BuildSettings.Tasks.TestPackagesTask = Task("TestPackages")
 	.IsDependentOn("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
+		{
+	        Banner.Display($"Testing {package.PackageFileName}");
 			package.RunPackageTests();
+		}
 	});
 
 //////////////////////////////////////////////////////////////////////
