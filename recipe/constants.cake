@@ -39,8 +39,18 @@ const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
 // Standard values for TestCentric packages
 static readonly string[] TESTCENTRIC_AUTHORS = new[] { "Charlie Poole" };
 static readonly string[] TESTCENTRIC_OWNERS = new[] { "Charlie Poole" };
-const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2023 Charlie Poole";
-static readonly Uri TESTCENTRIC_PROJECT_URL = new Uri("https://test-centric.org/recipe");
 static readonly NuSpecLicense TESTCENTRIC_LICENSE = new NuSpecLicense() { Type = "expression", Value="MIT" };
-static readonly Uri TESTCENTRIC_ICON_URL = new Uri("https://test-centric.org/assets/img/testcentric_128x128.png");
 static readonly string TESTCENTRIC_ICON = "testcentric.png";
+
+const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2023 Charlie Poole";
+const string TESTCENTRIC_PROJECT_URL = "https://test-centric.org";
+const string TESTCENTRIC_GITHUB_URL = "https://github.com/TestCentric";
+const string TESTCENTRIC_DOCS_URL = TESTCENTRIC_PROJECT_URL;
+
+static readonly string TESTCENTRIC_ICON_URL = TESTCENTRIC_PROJECT_URL + "/assets/img/testcentric_128x128.png";
+static readonly string TESTCENTRIC_PROJECT_SOURCE_URL = TESTCENTRIC_GITHUB_URL + BuildSettings.GitHubRepository;
+static readonly string TESTCENTRIC_PACKAGE_SOURCE_URL = TESTCENTRIC_PROJECT_SOURCE_URL;
+static readonly string TESTCENTRIC_BUG_TRACKER_URL = TESTCENTRIC_PROJECT_SOURCE_URL + "issues";
+
+static readonly string TESTCENTRIC_LICENSE_URL = "https://raw.githubusercontent.com/TestCentric/" + BuildSettings.GitHubRepository + "/main/LICENSE.txt";
+const string TESTCENTRIC_MAILING_LIST_URL = "https://groups.google.com/forum/#!forum/nunit-discuss";

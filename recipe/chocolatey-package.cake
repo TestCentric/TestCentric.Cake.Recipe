@@ -36,16 +36,33 @@ public class ChocolateyPackage : PackageDefinition
     // The directory into which extensions to the test runner are installed
     public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
 
-    public override void BuildPackage()
+	public ChocolateyPackSettings DefaultPackSettings()
     {
-        var chocolateyPackSettings = new ChocolateyPackSettings()
-        {
+        return new ChocolateyPackSettings
+	    {
+		    Id = PackageId,
             Version = PackageVersion,
+            Authors = TESTCENTRIC_AUTHORS,
+		    Owners = TESTCENTRIC_OWNERS,
+		    Copyright =TESTCENTRIC_COPYRIGHT,
+		    ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
+		    LicenseUrl = new Uri(TESTCENTRIC_LICENSE_URL),
+		    RequireLicenseAcceptance = false,
+		    IconUrl = new Uri(TESTCENTRIC_ICON_URL),
+            ProjectSourceUrl = new Uri(TESTCENTRIC_PROJECT_SOURCE_URL),
+            PackageSourceUrl = new Uri(TESTCENTRIC_PACKAGE_SOURCE_URL),
+            DocsUrl = new Uri(TESTCENTRIC_DOCS_URL),
+            MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
+            BugTrackerUrl = new Uri(TESTCENTRIC_BUG_TRACKER_URL),
+		    //Verbosity = BuildSettings.NuGetVerbosity,
             OutputDirectory = BuildSettings.PackageDirectory,
             ArgumentCustomization = args => args.Append($"BIN={BasePath}")
-        };
+	    };
+    }
 
-        _context.ChocolateyPack(PackageSource, chocolateyPackSettings);
+    public override void BuildPackage()
+    {
+        _context.ChocolateyPack(PackageSource, DefaultPackSettings());
     }
 
     public override void InstallPackage()
