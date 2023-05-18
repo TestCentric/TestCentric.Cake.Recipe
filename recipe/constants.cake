@@ -35,3 +35,12 @@ static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
 };
 
 const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
+
+// Standard values for TestCentric packages
+static readonly string[] TESTCENTRIC_AUTHORS = new[] { "Charlie Poole" };
+static readonly string[] TESTCENTRIC_OWNERS = new[] { "Charlie Poole" };
+const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2023 Charlie Poole";
+static readonly Uri TESTCENTRIC_PROJECT_URL = new Uri("https://test-centric.org/recipe");
+static readonly NuSpecLicense TESTCENTRIC_LICENSE = new NuSpecLicense() { Type = "expression", Value="MIT" };
+static readonly Uri TESTCENTRIC_ICON_URL = new Uri("https://test-centric.org/assets/img/testcentric_128x128.png");
+static readonly string TESTCENTRIC_ICON = "testcentric.png";

@@ -32,31 +32,14 @@ public class RecipePackage : NuGetPackage
         foreach (FilePath filePath in _cakeFiles)
             files.Add(new NuSpecContent() { Source=$"recipe/{filePath}", Target="content" });
 
-        var nugetPackSettings = new NuGetPackSettings()
-        {
-            Id = PackageId,
-            Version = PackageVersion,
-            Title = "TestCentric Cake Recipe",
-            Authors = new [] { "Charlie Poole" },
-            Owners = new [] { "Charlie Poole" },
-            Description = "Cake Recipe used for building TestCentric applications and extensions",
-            Copyright = "Copyright (c) 2021-2023 Charlie Poole",
-            ProjectUrl = new Uri("https://test-centric.org/recipe"),
-            License = new NuSpecLicense() { Type = "expression", Value="MIT" },
-            RequireLicenseAcceptance = false,
-            Repository = new NuGetRepository() { Type="Git", Url="https://github.com/TestCentric/TestCentric.Cake.Recipe" },
-            IconUrl = new Uri("https://test-centric.org/assets/img/testcentric_128x128.png"),
-            Icon = "testcentric.png",
-            Language = "en-US",
-            Tags = new [] { "testcentric", "cake", "recipe" },
-            //ReleaseNotes = new [] { "" },
-            OutputDirectory = BuildSettings.PackageDirectory,
-            BasePath = BasePath,
-            NoPackageAnalysis = true,
-            Symbols = HasSymbols,
-            Files = files
-        };
+        var settings = DefaultPackSettings();
+        settings.Title = "TestCentric Cake Recipe";
+        settings.Description = "Cake Recipe used for building TestCentric applications and extensions";
+        settings.Repository = new NuGetRepository() { Type="Git", Url="https://github.com/TestCentric/TestCentric.Cake.Recipe" };
+        settings.Tags = new [] { "testcentric", "cake", "recipe" };
+        //settings.ReleaseNotes = new [] { "" };
+        settings.Files = files;
 
-        _context.NuGetPack(nugetPackSettings);
+        _context.NuGetPack(settings);
     }
 }

@@ -40,21 +40,37 @@ public class NuGetPackage : PackageDefinition
     // The directory into which extensions to the test runner are installed
     public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
 
-    public override void BuildPackage()
+	public NuGetPackSettings DefaultPackSettings()
     {
-        var nugetPackSettings = new NuGetPackSettings()
-        {
+        var settings = new NuGetPackSettings
+	    {
+		    Id = PackageId,
             Version = PackageVersion,
-            OutputDirectory = BuildSettings.PackageDirectory,
+            Authors = TESTCENTRIC_AUTHORS,
+		    Owners = TESTCENTRIC_OWNERS,
+		    Copyright =TESTCENTRIC_COPYRIGHT,
+		    ProjectUrl = TESTCENTRIC_PROJECT_URL,
+		    License = TESTCENTRIC_LICENSE,
+		    RequireLicenseAcceptance = false,
+		    IconUrl = TESTCENTRIC_ICON_URL,
+		    Icon = TESTCENTRIC_ICON,
+		    Language = "en-US",
             BasePath = BasePath,
-            NoPackageAnalysis = true,
-            Symbols = HasSymbols
-        };
+            Symbols = HasSymbols,
+		    Verbosity = BuildSettings.NuGetVerbosity,
+            OutputDirectory = BuildSettings.PackageDirectory,
+            NoPackageAnalysis = true
+	    };
 
         if (HasSymbols)
-            nugetPackSettings.SymbolPackageFormat = "snupkg";
+            settings.SymbolPackageFormat = "snupkg";
 
-        _context.NuGetPack(PackageSource, nugetPackSettings);
+        return settings;
+    }
+
+    public override void BuildPackage()
+    {
+        _context.NuGetPack(PackageSource, DefaultPackSettings());
     }
 
     public override void InstallPackage()
