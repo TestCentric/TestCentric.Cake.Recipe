@@ -1,5 +1,7 @@
 public class RecipePackage : NuGetPackage
 {
+    private IEnumerable<FilePath> _cakeFiles;
+
     /// <summary>
     /// Construct passing all required arguments
     /// </summary>
@@ -11,13 +13,50 @@ public class RecipePackage : NuGetPackage
         string id, string source, string basePath, FilePath[] content = null)
       : base (id, source, basePath)
     {
-        RecipeContent = content ?? _context.GetFiles($"./recipe/*.cake").Select(f => f.GetFilename()).ToArray();
+        _cakeFiles = content ?? _context.GetFiles($"./recipe/*.cake").Select(f => f.GetFilename());
 
         PackageChecks = new PackageCheck[] {
 		    HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
-            HasDirectory("content").WithFiles(RecipeContent)
+            HasDirectory("content").WithFiles(_cakeFiles.ToArray())
         };
     }
 
-    public FilePath[] RecipeContent { get; }
+    public override void BuildPackage()
+    {
+        Console.WriteLine("Override called");
+
+        var files = new List<NuSpecContent>();
+        files.Add(new NuSpecContent() { Source="LICENSE.txt" });
+        files.Add(new NuSpecContent() { Source="README.md" });
+        files.Add(new NuSpecContent() { Source="testcentric.png" });
+        foreach (FilePath filePath in _cakeFiles)
+            files.Add(new NuSpecContent() { Source=$"recipe/{filePath}", Target="content" });
+
+        var nugetPackSettings = new NuGetPackSettings()
+        {
+            Id = PackageId,
+            Version = PackageVersion,
+            Title = "TestCentric Cake Recipe",
+            Authors = new [] { "Charlie Poole" },
+            Owners = new [] { "Charlie Poole" },
+            Description = "Cake Recipe used for building TestCentric applications and extensions",
+            Copyright = "Copyright (c) 2021-2023 Charlie Poole",
+            ProjectUrl = new Uri("https://test-centric.org/recipe"),
+            License = new NuSpecLicense() { Type = "expression", Value="MIT" },
+            RequireLicenseAcceptance = false,
+            Repository = new NuGetRepository() { Type="Git", Url="https://github.com/TestCentric/TestCentric.Cake.Recipe" },
+            IconUrl = new Uri("https://test-centric.org/assets/img/testcentric_128x128.png"),
+            Icon = "testcentric.png",
+            Language = "en-US",
+            Tags = new [] { "testcentric", "cake", "recipe" },
+            //ReleaseNotes = new [] { "" },
+            OutputDirectory = BuildSettings.PackageDirectory,
+            BasePath = BasePath,
+            NoPackageAnalysis = true,
+            Symbols = HasSymbols,
+            Files = files
+        };
+
+        _context.NuGetPack(nugetPackSettings);
+    }
 }

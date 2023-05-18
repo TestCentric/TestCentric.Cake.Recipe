@@ -20,7 +20,7 @@ var recipePackage = new RecipePackage
 (
 	id: "TestCentric.Cake.Recipe",
 	source: "nuget/TestCentric.Cake.Recipe.nuspec",
-	basePath: "nuget"
+	basePath: "."
 );
 
 BuildSettings.Packages.Add(recipePackage);
