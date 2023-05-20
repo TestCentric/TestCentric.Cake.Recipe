@@ -10,10 +10,24 @@ public class RecipePackage : NuGetPackage
     /// <param name="basePath">Path used in locating binaries for the package</param>
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
 	public RecipePackage(
-        string id, string source, string basePath, FilePath[] content = null)
-      : base (id, source, basePath)
+        string id,
+        string basePath = null,
+        string content = "./recipe/*.cake",
+        string title = null,
+        string summary = null,
+        string description = null,
+        string[] releaseNotes = null,
+        string[] tags = null)
+    : base (
+        id, 
+        basePath: basePath ?? BuildSettings.ProjectDirectory,
+        title: title ?? id.Replace(".", " "),
+        summary: summary ?? "No summary provided.",
+        description: description ?? "No description provided.",
+        releaseNotes: releaseNotes ?? new [] { "No release notes provided." },
+        tags: tags)
     {
-        _cakeFiles = content ?? _context.GetFiles($"./recipe/*.cake").Select(f => f.GetFilename());
+        _cakeFiles = _context.GetFiles(content).Select(f => f.GetFilename());
 
         PackageChecks = new PackageCheck[] {
 		    HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
@@ -21,25 +35,19 @@ public class RecipePackage : NuGetPackage
         };
     }
 
-    public override void BuildPackage()
+    protected override NuGetPackSettings NuGetPackSettings
     {
-        Console.WriteLine("Override called");
+        get
+        {
+            var settings = base.NuGetPackSettings;
 
-        var files = new List<NuSpecContent>();
-        files.Add(new NuSpecContent() { Source="LICENSE.txt" });
-        files.Add(new NuSpecContent() { Source="README.md" });
-        files.Add(new NuSpecContent() { Source="testcentric.png" });
-        foreach (FilePath filePath in _cakeFiles)
-            files.Add(new NuSpecContent() { Source=$"recipe/{filePath}", Target="content" });
+            settings.Files.Add(new NuSpecContent() { Source="LICENSE.txt" });
+            settings.Files.Add(new NuSpecContent() { Source="README.md" });
+            settings.Files.Add(new NuSpecContent() { Source="testcentric.png" });
+            foreach (FilePath filePath in _cakeFiles)
+                settings.Files.Add(new NuSpecContent() { Source=$"recipe/{filePath}", Target="content" });
 
-        var settings = DefaultPackSettings();
-        settings.Title = "TestCentric Cake Recipe";
-        settings.Description = "Cake Recipe used for building TestCentric applications and extensions";
-        settings.Repository = new NuGetRepository() { Type="Git", Url="https://github.com/TestCentric/TestCentric.Cake.Recipe" };
-        settings.Tags = new [] { "testcentric", "cake", "recipe" };
-        //settings.ReleaseNotes = new [] { "" };
-        settings.Files = files;
-
-        _context.NuGetPack(settings);
+            return settings;
+        }
     }
 }

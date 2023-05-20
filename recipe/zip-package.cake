@@ -34,6 +34,7 @@ public class ZipPackage : PackageDefinition
         // Get zip specification, which tells what to put in the zip
 		var spec = new ZipSpecification(PackageSource);
 
+        string baseDir = BuildSettings.OutputDirectory;
 	    string zipImageDir = BuildSettings.ZipImageDirectory;
         _context.CreateDirectory(zipImageDir);
         _context.CleanDirectory(zipImageDir);
@@ -43,7 +44,7 @@ public class ZipPackage : PackageDefinition
 		{
             //Console.WriteLine(fileItem.ToString());
 
-			var source = BasePath + fileItem.Source?.Trim();
+			var source = baseDir + fileItem.Source?.Trim();
 			var target = zipImageDir + fileItem.Target?.Trim();
 
 			_context.CreateDirectory(target);

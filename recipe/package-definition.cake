@@ -30,8 +30,8 @@ public abstract class PackageDefinition
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
-		string source,
-		string basePath,
+		string source = null,
+		string basePath = null,
         TestRunner testRunner = null,
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
@@ -47,7 +47,7 @@ public abstract class PackageDefinition
 		PackageId = id;
 		PackageVersion = BuildSettings.PackageVersion;
 		PackageSource = source;
-		BasePath = basePath;
+        BasePath = basePath;
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
@@ -59,7 +59,7 @@ public abstract class PackageDefinition
 	public string PackageId { get; }
 	public string PackageVersion { get; }
 	public string PackageSource { get; }
-    public string BasePath { get; protected set; }
+    public string BasePath { get; }
     public TestRunner TestRunner { get; protected set; }
 	public PackageCheck[] PackageChecks { get; protected set; }
     public PackageCheck[] SymbolChecks { get; protected set; }

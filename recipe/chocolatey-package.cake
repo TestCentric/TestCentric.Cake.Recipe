@@ -16,14 +16,43 @@ public class ChocolateyPackage : PackageDefinition
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
 	public ChocolateyPackage(
-        string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, PackageCheck[] symbols = null,
+        string id, 
+        string source = null, 
+        string basePath = null,
+        TestRunner testRunner = null,
+        PackageCheck[] checks = null,
+        PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null)
-      : base (PackageType.Chocolatey, id, source, basePath, testRunner: testRunner,
-        checks: checks, symbols: symbols, tests: tests, preloadedExtensions: preloadedExtensions)
+        ExtensionSpecifier[] preloadedExtensions = null,
+        string title = null,
+        string summary = null,
+        string description = null,
+        string[] releaseNotes = null,
+        string[] tags = null,
+        PackageContent files = null)
+    : base (
+        PackageType.Chocolatey, id, source, basePath,
+        testRunner: testRunner,
+        checks: checks,
+        symbols: symbols,
+        tests: tests,
+        preloadedExtensions: preloadedExtensions)
     {
+        PackageTitle = title ?? id;
+        PackageSummary = summary;
+        PackageDescription = description;
+        ReleaseNotes = releaseNotes;
+        Tags = tags;
+        if (files != null)
+            Files.AddRange(files.GetChocolateyNuSpecContent());
     }
+
+    public string PackageTitle { get; }
+    public string PackageSummary { get; }
+    public string PackageDescription { get; }
+    public string[] ReleaseNotes { get; }
+    public string[] Tags { get; }
+    public List<ChocolateyNuSpecContent> Files { get; } = new List<ChocolateyNuSpecContent>();
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -36,33 +65,41 @@ public class ChocolateyPackage : PackageDefinition
     // The directory into which extensions to the test runner are installed
     public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
 
-	public ChocolateyPackSettings DefaultPackSettings()
+    public override void BuildPackage()
     {
-        return new ChocolateyPackSettings
+        var settings = new ChocolateyPackSettings
 	    {
 		    Id = PackageId,
             Version = PackageVersion,
-            Authors = TESTCENTRIC_AUTHORS,
-		    Owners = TESTCENTRIC_OWNERS,
-		    Copyright =TESTCENTRIC_COPYRIGHT,
+            Title = PackageTitle ?? PackageId,
+            Summary = PackageSummary,
+            Description = PackageDescription,
+            ReleaseNotes = ReleaseNotes,
+            Tags = Tags,
+            Authors = TESTCENTRIC_PACKAGE_AUTHORS,
+		    Owners = TESTCENTRIC_PACKAGE_OWNERS,
+		    Copyright = TESTCENTRIC_COPYRIGHT,
 		    ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
 		    LicenseUrl = new Uri(TESTCENTRIC_LICENSE_URL),
 		    RequireLicenseAcceptance = false,
 		    IconUrl = new Uri(TESTCENTRIC_ICON_URL),
-            ProjectSourceUrl = new Uri(TESTCENTRIC_PROJECT_SOURCE_URL),
-            PackageSourceUrl = new Uri(TESTCENTRIC_PACKAGE_SOURCE_URL),
-            DocsUrl = new Uri(TESTCENTRIC_DOCS_URL),
+            ProjectSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
+            PackageSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
+            DocsUrl = new Uri(TESTCENTRIC_PROJECT_URL),
             MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
-            BugTrackerUrl = new Uri(TESTCENTRIC_BUG_TRACKER_URL),
-		    //Verbosity = BuildSettings.NuGetVerbosity,
+            BugTrackerUrl = new Uri(PROJECT_REPOSITORY_URL + "issues"),
+		    Verbose = BuildSettings.ChocolateyVerbosity,
             OutputDirectory = BuildSettings.PackageDirectory,
-            ArgumentCustomization = args => args.Append($"BIN={BasePath}")
+            ArgumentCustomization = args => args.Append($"BIN={BuildSettings.OutputDirectory}"),
 	    };
-    }
 
-    public override void BuildPackage()
-    {
-        _context.ChocolateyPack(PackageSource, DefaultPackSettings());
+        foreach (var spec in Files)
+            settings.Files.Add(new ChocolateyNuSpecContent { Source=BuildSettings.OutputDirectory + spec.Source, Target=spec.Target });
+
+        if (!string.IsNullOrEmpty(PackageSource))
+            _context.ChocolateyPack(PackageSource, settings);
+        else
+            _context.ChocolateyPack(settings);
     }
 
     public override void InstallPackage()

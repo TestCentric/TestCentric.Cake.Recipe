@@ -13,14 +13,15 @@ var target = Argument("target", Argument("t", "Default"));
 
 BuildSettings.Initialize(
 	context: Context,
-	title: "TestCentric.Cake.Recipe",
+	title: "TestCentric Cake Recipe",
 	githubRepository: "TestCentric.Cake.Recipe");
 
 var recipePackage = new RecipePackage
 (
 	id: "TestCentric.Cake.Recipe",
-	source: "nuget/TestCentric.Cake.Recipe.nuspec",
-	basePath: "."
+    description: "Cake Recipe used for building TestCentric applications and extensions",
+	//releaseNotes: new [] {"line1", "line2", "line3"},
+    tags: new [] { "testcentric", "cake", "recipe" }
 );
 
 BuildSettings.Packages.Add(recipePackage);

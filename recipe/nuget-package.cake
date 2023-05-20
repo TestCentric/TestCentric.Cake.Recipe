@@ -20,14 +20,44 @@ public class NuGetPackage : PackageDefinition
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
     /// <param name="preLoad">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
 	public NuGetPackage(
-        string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, PackageCheck[] symbols = null,
+        string id,
+        string source = null,
+        string basePath = null,
+        TestRunner testRunner = null,
+        PackageCheck[] checks = null,
+        PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null, 
-        ExtensionSpecifier[] preloadedExtensions = null)
-      : base (PackageType.NuGet, id, source, basePath, testRunner: testRunner,
-        checks: checks, symbols: symbols, tests: tests, preloadedExtensions: preloadedExtensions)
+        ExtensionSpecifier[] preloadedExtensions = null,
+        string title = null,
+        string summary = null,
+        string description = null,
+        string[] releaseNotes = null,
+        string[] tags = null,
+        PackageContent files = null)
+    : base (
+        PackageType.NuGet, id, source,
+        basePath: basePath,
+        testRunner: testRunner,
+        checks: checks,
+        symbols: symbols,
+        tests: tests,
+        preloadedExtensions: preloadedExtensions)
     {
+        PackageTitle = title ?? id;
+        PackageSummary = summary;
+        PackageDescription = description;
+        ReleaseNotes = releaseNotes;
+        Tags = tags;
+        if (files != null)
+            Files.AddRange(files.GetNuSpecContent());
     }
+
+    public string PackageTitle { get; }
+    public string PackageSummary { get; }
+    public string PackageDescription { get; }
+    public string[] ReleaseNotes { get; }
+    public string[] Tags { get; }
+    public List<NuSpecContent> Files { get; } = new List<NuSpecContent>();
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -40,37 +70,50 @@ public class NuGetPackage : PackageDefinition
     // The directory into which extensions to the test runner are installed
     public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
 
-	public NuGetPackSettings DefaultPackSettings()
+	protected virtual NuGetPackSettings NuGetPackSettings
     {
-        var settings = new NuGetPackSettings
-	    {
-		    Id = PackageId,
-            Version = PackageVersion,
-            Authors = TESTCENTRIC_AUTHORS,
-		    Owners = TESTCENTRIC_OWNERS,
-		    Copyright =TESTCENTRIC_COPYRIGHT,
-		    ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
-		    License = TESTCENTRIC_LICENSE,
-		    RequireLicenseAcceptance = false,
-		    IconUrl = new Uri(TESTCENTRIC_ICON_URL),
-		    Icon = TESTCENTRIC_ICON,
-		    Language = "en-US",
-            BasePath = BasePath,
-            Symbols = HasSymbols,
-		    Verbosity = BuildSettings.NuGetVerbosity,
-            OutputDirectory = BuildSettings.PackageDirectory,
-            NoPackageAnalysis = true
-	    };
+        get
+        {
+            var settings = new NuGetPackSettings
+	        {
+		        Id = PackageId,
+                Version = PackageVersion,
+                Title = PackageTitle ?? PackageId,
+                // Deprecated by nuget: Summary = PackageSummary,
+                Description = PackageDescription,
+                ReleaseNotes = ReleaseNotes,
+                Tags = Tags,
+                Authors = TESTCENTRIC_PACKAGE_AUTHORS,
+		        // Deprecated by nuget: Owners = TESTCENTRIC_PACKAGE_OWNERS,
+		        Copyright = TESTCENTRIC_COPYRIGHT,
+		        ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
+		        License = TESTCENTRIC_LICENSE,
+                Repository = new NuGetRepository() { Type="Git", Url="https://github.com/TestCentric/TestCentric.Cake.Recipe" },
+		        RequireLicenseAcceptance = false,
+		        // Deprecated by nuget: IconUrl = new Uri(TESTCENTRIC_ICON_URL),
+		        Icon = TESTCENTRIC_ICON,
+		        Language = "en-US",
+                BasePath = BasePath,
+                Symbols = HasSymbols,
+		        Verbosity = BuildSettings.NuGetVerbosity,
+                OutputDirectory = BuildSettings.PackageDirectory,
+                NoPackageAnalysis = true,
+                Files = Files
+	        };
 
-        if (HasSymbols)
-            settings.SymbolPackageFormat = "snupkg";
+            if (HasSymbols)
+                settings.SymbolPackageFormat = "snupkg";
 
-        return settings;
+            return settings;
+        }
     }
 
     public override void BuildPackage()
     {
-        _context.NuGetPack(PackageSource, DefaultPackSettings());
+        if (!string.IsNullOrEmpty(PackageSource))
+            _context.NuGetPack(PackageSource, NuGetPackSettings);
+        else
+            _context.NuGetPack(NuGetPackSettings);
     }
 
     public override void InstallPackage()
