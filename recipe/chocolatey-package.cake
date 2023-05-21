@@ -17,6 +17,11 @@ public class ChocolateyPackage : PackageDefinition
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
 	public ChocolateyPackage(
         string id, 
+        string title = null,
+        string summary = null,
+        string description = null,
+        string[] releaseNotes = null,
+        string[] tags = null,
         string source = null, 
         string basePath = null,
         TestRunner testRunner = null,
@@ -24,14 +29,12 @@ public class ChocolateyPackage : PackageDefinition
         PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null,
         ExtensionSpecifier[] preloadedExtensions = null,
-        string title = null,
-        string summary = null,
-        string description = null,
-        string[] releaseNotes = null,
-        string[] tags = null,
-        PackageContent files = null)
+        PackageContent packageContent = null)
     : base (
-        PackageType.Chocolatey, id, source, basePath,
+        PackageType.Chocolatey,
+        id, 
+        source: source,
+        basePath: basePath ?? BuildSettings.OutputDirectory,
         testRunner: testRunner,
         checks: checks,
         symbols: symbols,
@@ -39,12 +42,12 @@ public class ChocolateyPackage : PackageDefinition
         preloadedExtensions: preloadedExtensions)
     {
         PackageTitle = title ?? id;
-        PackageSummary = summary;
-        PackageDescription = description;
+        PackageDescription = description ?? summary;
+        PackageSummary = summary ?? description;
         ReleaseNotes = releaseNotes;
-        Tags = tags;
-        if (files != null)
-            Files.AddRange(files.GetChocolateyNuSpecContent());
+        Tags = tags ?? new [] { "testcentric" };
+        if (packageContent != null)
+            Files.AddRange(packageContent.GetChocolateyNuSpecContent());
     }
 
     public string PackageTitle { get; }

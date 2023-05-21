@@ -8,11 +8,15 @@
 public class NuGetPackage : PackageDefinition
 {
     /// <summary>
-    /// Construct passing all required arguments
+    /// Construct passing all provided arguments
     /// </summary>
-    /// <param name="packageType">A PackageType value specifying one of the four known package types</param>
-    /// <param name="id">A string containing the package ID, used as the root of the PackageName</param>
-    /// <param name="source">A string representing the source used to create the package, e.g. a nuspec file</param>
+    /// <param name="id">A string containing the package ID, used as the root of the PackageName.</param>
+    /// <param name="title">Title of the package for use in certain repositories.</param>
+    /// <param name="description">A brief description of the package.</param>
+    /// <param name="summary">A brief description of the package.</param>
+    /// <param name="releaseNotes"></param>
+    /// <param name="tags"></param>
+    /// <param name="source">A string representing the source used to create the package, e.g. a nuspec file. Either this or packageContent must be provided.</param>
     /// <param name="basePath">Path used in locating binaries for the package</param>
     /// <param name="testRunner">A TestRunner instance used to run package tests.</param>
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
@@ -21,6 +25,11 @@ public class NuGetPackage : PackageDefinition
     /// <param name="preLoad">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
 	public NuGetPackage(
         string id,
+        string title = null,
+        string description = null,
+        string summary = null,
+        string[] releaseNotes = null,
+        string[] tags = null,
         string source = null,
         string basePath = null,
         TestRunner testRunner = null,
@@ -28,15 +37,12 @@ public class NuGetPackage : PackageDefinition
         PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null, 
         ExtensionSpecifier[] preloadedExtensions = null,
-        string title = null,
-        string summary = null,
-        string description = null,
-        string[] releaseNotes = null,
-        string[] tags = null,
-        PackageContent files = null)
+        PackageContent packageContent = null)
     : base (
-        PackageType.NuGet, id, source,
-        basePath: basePath,
+        PackageType.NuGet, 
+        id, 
+        source: source,
+        basePath: basePath ?? BuildSettings.OutputDirectory,
         testRunner: testRunner,
         checks: checks,
         symbols: symbols,
@@ -44,12 +50,12 @@ public class NuGetPackage : PackageDefinition
         preloadedExtensions: preloadedExtensions)
     {
         PackageTitle = title ?? id;
-        PackageSummary = summary;
-        PackageDescription = description;
+        PackageDescription = description ?? summary;
+        PackageSummary = summary ?? description;
         ReleaseNotes = releaseNotes;
-        Tags = tags;
-        if (files != null)
-            Files.AddRange(files.GetNuSpecContent());
+        Tags = tags ?? new [] { "testcentric" };
+        if (packageContent != null)
+            PackageContent.AddRange(packageContent.GetNuSpecContent());
     }
 
     public string PackageTitle { get; }
@@ -57,7 +63,7 @@ public class NuGetPackage : PackageDefinition
     public string PackageDescription { get; }
     public string[] ReleaseNotes { get; }
     public string[] Tags { get; }
-    public List<NuSpecContent> Files { get; } = new List<NuSpecContent>();
+    public List<NuSpecContent> PackageContent { get; } = new List<NuSpecContent>();
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -98,7 +104,7 @@ public class NuGetPackage : PackageDefinition
 		        Verbosity = BuildSettings.NuGetVerbosity,
                 OutputDirectory = BuildSettings.PackageDirectory,
                 NoPackageAnalysis = true,
-                Files = Files
+                Files = PackageContent
 	        };
 
             if (HasSymbols)

@@ -47,7 +47,7 @@ public abstract class PackageDefinition
 		PackageId = id;
 		PackageVersion = BuildSettings.PackageVersion;
 		PackageSource = source;
-        BasePath = basePath;
+        BasePath = basePath ?? BuildSettings.OutputDirectory;
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
