@@ -35,3 +35,19 @@ static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
 };
 
 const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
+
+// Common values used in all TestCentric packages
+static readonly string[] TESTCENTRIC_PACKAGE_AUTHORS = new[] { "Charlie Poole" };
+static readonly string[] TESTCENTRIC_PACKAGE_OWNERS = new[] { "Charlie Poole" };
+static readonly NuSpecLicense TESTCENTRIC_LICENSE = new NuSpecLicense() { Type = "expression", Value="MIT" };
+
+const string TESTCENTRIC_ICON = "testcentric.png";
+const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2023 Charlie Poole";
+const string TESTCENTRIC_PROJECT_URL = "https://test-centric.org/";
+const string TESTCENTRIC_GITHUB_URL = "https://github.com/TestCentric/";
+const string TESTCENTRIC_ICON_URL = "https://github.com/TestCentric/assets/img/testcentric_128x128.png";
+
+static readonly string PROJECT_REPOSITORY_URL = TESTCENTRIC_GITHUB_URL + BuildSettings.GitHubRepository + "/";
+
+static readonly string TESTCENTRIC_LICENSE_URL = "https://raw.githubusercontent.com/TestCentric/" + BuildSettings.GitHubRepository + "/main/LICENSE.txt";
+const string TESTCENTRIC_MAILING_LIST_URL = "https://groups.google.com/forum/#!forum/nunit-discuss";

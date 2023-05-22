@@ -39,6 +39,7 @@ public static class BuildSettings
 		bool msbuildAllowPreviewVersion = false,
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
+		bool chocolateyVerbosity = false,
 		// Defaults to Debug and Release
 		string[] validConfigurations = null,
 		// If 0, is calculated based on branch name and package version
@@ -82,6 +83,7 @@ public static class BuildSettings
 		MSBuildAllowPreviewVersion = msbuildAllowPreviewVersion;
 
 		NuGetVerbosity = nugetVerbosity;
+		ChocolateyVerbosity = chocolateyVerbosity;
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
 		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
@@ -232,6 +234,9 @@ public static class BuildSettings
 	{
 		Verbosity = NuGetVerbosity
 	};
+
+	// The chocolatey Setting is actually bool Verbose, but we use verbosity so it lines up with the settings
+	public static bool ChocolateyVerbosity { get; set; }
 
 	//Testing
 	public static string UnitTests { get; set; }

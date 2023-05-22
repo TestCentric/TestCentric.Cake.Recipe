@@ -30,13 +30,19 @@ public abstract class PackageDefinition
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
-		string source,
-		string basePath,
+        string title = null,
+        string description = null,
+        string summary = null,
+        string[] releaseNotes = null,
+        string[] tags = null,
+		string source = null,
+		string basePath = null,
         TestRunner testRunner = null,
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
 		IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null)
+        ExtensionSpecifier[] preloadedExtensions = null,
+        PackageContent packageContent = null)
 	{
         if (testRunner == null && tests != null)
             throw new System.ArgumentException($"Unable to create {packageType} package {id}: TestRunner must be provided if there are tests", nameof(testRunner));
@@ -46,28 +52,37 @@ public abstract class PackageDefinition
         PackageType = packageType;
 		PackageId = id;
 		PackageVersion = BuildSettings.PackageVersion;
+        PackageTitle = title ?? id;
+        PackageDescription = description ?? summary;
+        PackageSummary = summary ?? description;
+        ReleaseNotes = releaseNotes;
+        Tags = tags ?? new [] { "testcentric" };
 		PackageSource = source;
-		BasePath = basePath;
+        BasePath = basePath ?? BuildSettings.OutputDirectory;
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
         PreLoadedExtensions = preloadedExtensions ?? new ExtensionSpecifier[0];
 		SymbolChecks = symbols;
+        PackageContent = packageContent ?? new PackageContent();
 	}
 
     public PackageType PackageType { get; }
 	public string PackageId { get; }
 	public string PackageVersion { get; }
+    public string PackageTitle { get; }
+    public string PackageSummary { get; }
+    public string PackageDescription { get; }
+    public string[] ReleaseNotes { get; }
+    public string[] Tags { get; }
 	public string PackageSource { get; }
-    public string BasePath { get; protected set; }
+    public string BasePath { get; }
     public TestRunner TestRunner { get; protected set; }
 	public PackageCheck[] PackageChecks { get; protected set; }
     public PackageCheck[] SymbolChecks { get; protected set; }
     public IEnumerable<PackageTest> PackageTests { get; set; }
     public ExtensionSpecifier[] PreLoadedExtensions { get; set; }
-    public bool HasTests => PackageTests != null;
-    public bool HasChecks => PackageChecks != null;
-    public bool HasSymbols => SymbolChecks != null;
+    public PackageContent PackageContent { get; }
     public virtual string SymbolPackageName => throw new System.NotImplementedException($"Symbols are not available for this type of package.");
 
     // The file name of this package, including extension
@@ -81,71 +96,48 @@ public abstract class PackageDefinition
 
     public string PackageFilePath => BuildSettings.PackageDirectory + PackageFileName;
 
-    protected abstract void doBuildPackage();
-
     public void BuildVerifyAndTest()
     {
         _context.EnsureDirectoryExists(BuildSettings.PackageDirectory);
 
+        Banner.Display($"Building {PackageFileName}");
         BuildPackage();
+
+        Banner.Display($"Installing {PackageFileName}");
         InstallPackage();
 
-        if (HasChecks)
-            VerifyPackage();
-
-        if (HasSymbols)
-            VerifySymbolPackage();
-
-        if (HasTests)
-            RunPackageTests();
-    }
-
-    public void BuildPackage()
-    {
-        DisplayAction("Building");
-        doBuildPackage();
-    }
-
-    public void InstallPackage()
-    {
-        DisplayAction("Installing");
-        Console.WriteLine($"Installing package to {PackageInstallDirectory}");
-        _context.CleanDirectory(PackageInstallDirectory + PackageId);
-        doInstallPackage();
-    }
-
-    protected virtual void doInstallPackage()
-    {
-        // Target Package is in package directory but may have dependencies
-		var packageSources = new []
-		{
-            BuildSettings.PackageDirectory,
-			"https://www.myget.org/F/testcentric/api/v3/index.json",
-			PackageType == PackageType.Chocolatey
-				? "https://community.chocolatey.org/api/v2/"
-				: "https://api.nuget.org/v3/index.json"
-		};
-
-        // Install using nuget to avoid need for admin level
-        _context.NuGetInstall(PackageId, new NuGetInstallSettings
+        if (PackageChecks != null || PackageContent != null)
         {
-            Source = packageSources,
-            Version = PackageVersion,
-            Prerelease = true,
-            Verbosity = BuildSettings.NuGetVerbosity,
-            NoCache = true,
-            OutputDirectory = PackageInstallDirectory,
-            ExcludeVersion = true
-        });
+            Banner.Display($"Verifying {PackageFileName}");
+            VerifyPackage();
+        }
+
+        if (SymbolChecks != null)
+        {
+            // TODO: Override this in NuGetPackage
+            VerifySymbolPackage();
+        }
+
+        if (PackageTests != null)
+        {
+            Banner.Display($"Testing {PackageFileName}");
+            RunPackageTests();
+        }
     }
+
+    public abstract void BuildPackage();
+
+    public abstract void InstallPackage();
 
     public void VerifyPackage()
     {
-        DisplayAction("Verifying");
-
         bool allOK = true;
-        foreach (var check in PackageChecks)
-            allOK &= check.ApplyTo(PackageInstallDirectory + PackageId);
+
+        if (PackageChecks != null)
+            foreach (var check in PackageChecks)
+                allOK &= check.ApplyTo(PackageInstallDirectory + PackageId);
+        else // Use PackageContent
+            allOK = PackageContent.VerifyInstallation(PackageInstallDirectory + PackageId);
 
         if (allOK)
             Console.WriteLine("All checks passed!");
@@ -155,7 +147,6 @@ public abstract class PackageDefinition
 
     public void RunPackageTests()
     {
-        DisplayAction("Testing");
         _context.Information($"Package tests will run at level {BuildSettings.PackageTestLevel}");
 
         var reporter = new ResultReporter(PackageFileName);
@@ -192,7 +183,13 @@ public abstract class PackageDefinition
             var resultFile = testResultDir + "TestResult.xml";
 
             Banner.Display(packageTest.Description);
-			DisplayTestEnvironment(packageTest);
+
+            // Display Test Environment
+		    Console.WriteLine("Test Environment");
+		    Console.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
+		    Console.WriteLine($"  CLR Version: {Environment.Version}");
+		    Console.WriteLine($"    Arguments: {packageTest.Arguments}");
+		    Console.WriteLine();
 
 			_context.CreateDirectory(testResultDir);
             string arguments = packageTest.Arguments + $" --work={testResultDir}";
@@ -223,20 +220,6 @@ public abstract class PackageDefinition
         if (hadErrors)
             throw new Exception("One or more package tests had errors!");
     }
-
-    public void DisplayAction(string action)
-    {
-        Banner.Display($"{action} package {PackageFileName}");
-    }
-
-	private void DisplayTestEnvironment(PackageTest test)
-	{
-		Console.WriteLine("Test Environment");
-		Console.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
-		Console.WriteLine($"  CLR Version: {Environment.Version}");
-		Console.WriteLine($"    Arguments: {test.Arguments}");
-		Console.WriteLine();
-	}
 
     public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
 }
