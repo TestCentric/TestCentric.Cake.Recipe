@@ -54,8 +54,7 @@ public class NuGetPackage : PackageDefinition
         PackageSummary = summary ?? description;
         ReleaseNotes = releaseNotes;
         Tags = tags ?? new [] { "testcentric" };
-        if (packageContent != null)
-            PackageContent.AddRange(packageContent.GetNuSpecContent());
+        PackageContent = packageContent ?? new PackageContent();
     }
 
     public string PackageTitle { get; }
@@ -63,7 +62,7 @@ public class NuGetPackage : PackageDefinition
     public string PackageDescription { get; }
     public string[] ReleaseNotes { get; }
     public string[] Tags { get; }
-    public List<NuSpecContent> PackageContent { get; } = new List<NuSpecContent>();
+    public PackageContent PackageContent { get; }
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -104,7 +103,7 @@ public class NuGetPackage : PackageDefinition
 		        Verbosity = BuildSettings.NuGetVerbosity,
                 OutputDirectory = BuildSettings.PackageDirectory,
                 NoPackageAnalysis = true,
-                Files = PackageContent
+                Files = PackageContent.GetNuSpecContent()
 	        };
 
             if (HasSymbols)

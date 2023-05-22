@@ -46,8 +46,7 @@ public class ChocolateyPackage : PackageDefinition
         PackageSummary = summary ?? description;
         ReleaseNotes = releaseNotes;
         Tags = tags ?? new [] { "testcentric" };
-        if (packageContent != null)
-            Files.AddRange(packageContent.GetChocolateyNuSpecContent());
+        PackageContent = packageContent ?? new PackageContent();
     }
 
     public string PackageTitle { get; }
@@ -55,7 +54,7 @@ public class ChocolateyPackage : PackageDefinition
     public string PackageDescription { get; }
     public string[] ReleaseNotes { get; }
     public string[] Tags { get; }
-    public List<ChocolateyNuSpecContent> Files { get; } = new List<ChocolateyNuSpecContent>();
+    public PackageContent PackageContent { get; }
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -93,12 +92,11 @@ public class ChocolateyPackage : PackageDefinition
             BugTrackerUrl = new Uri(PROJECT_REPOSITORY_URL + "issues"),
 		    Verbose = BuildSettings.ChocolateyVerbosity,
             OutputDirectory = BuildSettings.PackageDirectory,
-            ArgumentCustomization = args => args.Append($"BIN={BuildSettings.OutputDirectory}"),
 	    };
 
-        foreach (var spec in Files)
-            settings.Files.Add(new ChocolateyNuSpecContent { Source=BuildSettings.OutputDirectory + spec.Source, Target=spec.Target });
-
+        foreach (var item in PackageContent.GetChocolateyNuSpecContent(BasePath))
+            settings.Files.Add(item);
+        
         if (!string.IsNullOrEmpty(PackageSource))
             _context.ChocolateyPack(PackageSource, settings);
         else

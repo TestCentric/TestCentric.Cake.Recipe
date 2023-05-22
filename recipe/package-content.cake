@@ -13,24 +13,32 @@ public class PackageContent
 	public FilePath[] RootFiles { get; set; }
 	public DirectoryContent[] Directories { get; set; }
 
-	public IEnumerable<NuSpecContent> GetNuSpecContent()
+	public List<NuSpecContent> GetNuSpecContent()
 	{
+		var result = new List<NuSpecContent>();
+
 		foreach (FilePath file in RootFiles)
-			yield return new NuSpecContent { Source=file.ToString() };
+			result.Add(new NuSpecContent { Source=file.ToString() });
 
 		foreach(DirectoryContent directory in Directories)
 			foreach(NuSpecContent item in directory.GetNuSpecContent())
-				yield return item;
+				result.Add(item);
+
+		return result;
 	}
 
-	public IEnumerable<ChocolateyNuSpecContent> GetChocolateyNuSpecContent()
+	public List<ChocolateyNuSpecContent> GetChocolateyNuSpecContent(string basePath)
 	{
+		var result = new List<ChocolateyNuSpecContent>();
+
 		foreach (FilePath file in RootFiles)
-			yield return new ChocolateyNuSpecContent { Source=file.ToString() };
+			result.Add(new ChocolateyNuSpecContent { Source=basePath + file.ToString() });
 
 		foreach(DirectoryContent directory in Directories)
-			foreach(ChocolateyNuSpecContent item in directory.GetChocolateyNuSpecContent())
-				yield return item;
+			foreach(ChocolateyNuSpecContent item in directory.GetChocolateyNuSpecContent(basePath))
+				result.Add(item);
+
+		return result;
 	}
 }
 
@@ -72,9 +80,9 @@ public class DirectoryContent
 			yield return new NuSpecContent { Source=file.ToString(), Target=_relDirPath.ToString() };
 	}
 
-	public IEnumerable<ChocolateyNuSpecContent> GetChocolateyNuSpecContent()
+	public IEnumerable<ChocolateyNuSpecContent> GetChocolateyNuSpecContent(string basePath)
 	{
 		foreach (FilePath file in _files)
-			yield return new ChocolateyNuSpecContent { Source=file.ToString(), Target=_relDirPath.ToString() };
+			yield return new ChocolateyNuSpecContent { Source = basePath + file.ToString(), Target = _relDirPath.ToString() };
 	}
 }
