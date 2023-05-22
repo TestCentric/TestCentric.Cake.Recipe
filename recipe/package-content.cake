@@ -1,6 +1,7 @@
 public class PackageContent
 {
 	private ICakeContext _context;
+	private List<FileSpec> _fileSpecs = new List<FileSpec>();
 
 	public PackageContent(FilePath[] rootFiles = null, params DirectoryContent[] directories)
 	{
@@ -8,6 +9,13 @@ public class PackageContent
 
 		RootFiles = rootFiles ?? new FilePath[0];
 		Directories = directories;
+
+		foreach (FilePath filePath in RootFiles)
+			_fileSpecs.Add(new FileSpec(filePath));
+
+		foreach (DirectoryContent content in Directories)
+			foreach (FilePath source in content.Files)
+				_fileSpecs.Add(new FileSpec(source, content.TargetDirectory));
 	}
 
 	public FilePath[] RootFiles { get; set; }
@@ -17,26 +25,19 @@ public class PackageContent
 	{
 		var result = new List<NuSpecContent>();
 
-		foreach (FilePath file in RootFiles)
-			result.Add(new NuSpecContent { Source=file.ToString() });
-
-		foreach(DirectoryContent directory in Directories)
-			foreach(NuSpecContent item in directory.GetNuSpecContent())
-				result.Add(item);
+		foreach (FileSpec spec in _fileSpecs)
+			result.Add(spec.AsNuSpecContent());
 
 		return result;
 	}
 
+	// NOTE: Chocolatey doesn't support BasePath, so we have to add it ourselves
 	public List<ChocolateyNuSpecContent> GetChocolateyNuSpecContent(string basePath)
 	{
 		var result = new List<ChocolateyNuSpecContent>();
 
-		foreach (FilePath file in RootFiles)
-			result.Add(new ChocolateyNuSpecContent { Source=basePath + file.ToString() });
-
-		foreach(DirectoryContent directory in Directories)
-			foreach(ChocolateyNuSpecContent item in directory.GetChocolateyNuSpecContent(basePath))
-				result.Add(item);
+		foreach (FileSpec spec in _fileSpecs)
+			result.Add(spec.AsChocolateyNuSpecContent(basePath));
 
 		return result;
 	}
@@ -44,21 +45,18 @@ public class PackageContent
 	public bool VerifyInstallation(DirectoryPath installDirectory)
 	{
 		bool isOK = true;
-
-		foreach(FilePath filePath in RootFiles)
+		foreach(FileSpec spec in _fileSpecs)
 		{
-			var fileName = filePath.GetFilename();
+			var fileName = spec.Source.GetFilename();
+			var dirPath = spec.Target == null ? installDirectory : installDirectory.Combine(spec.Target);
 
-			if (!_context.FileExists(installDirectory.CombineWithFilePath(fileName)))
+			if (!_context.FileExists(dirPath.CombineWithFilePath(fileName)))
 			{
 				RecordError($"File {fileName} was not found.");
 				isOK = false;
 			}
 		}
 
-		foreach (DirectoryContent directory in Directories)
-			isOK &= directory.VerifyInstallation(installDirectory);
-			
 		return isOK;
 	}
 
@@ -66,23 +64,43 @@ public class PackageContent
     {
         Console.WriteLine("  ERROR: " + msg);
     }
+
+	// Nested Class to hold file specifications
+	private class FileSpec
+	{
+		public FileSpec(FilePath source, DirectoryPath target=null)
+		{
+			Source = source;
+			Target = target;
+		}
+
+		public FilePath Source { get; }
+		public DirectoryPath Target { get; }
+
+		public NuSpecContent AsNuSpecContent() =>
+			new NuSpecContent { Source = Source.ToString(), Target = Target?.ToString() };
+
+		public ChocolateyNuSpecContent AsChocolateyNuSpecContent(string basePath) =>
+			new ChocolateyNuSpecContent { Source = basePath + Source.ToString(), Target = Target?.ToString() };
+	}
 }
 
 public class DirectoryContent
 {
 	private ICakeContext _context;
-	private DirectoryPath _relDirPath;
-	private List<FilePath> _files = new List<FilePath>();
 
 	public DirectoryContent(DirectoryPath relDirPath)
 	{
 		_context = BuildSettings.Context;
-		_relDirPath = relDirPath;
+		TargetDirectory = relDirPath;
 	}
+
+	public DirectoryPath TargetDirectory { get; }
+	public List<FilePath> Files { get; } = new List<FilePath>();
 
 	public DirectoryContent WithFiles(params FilePath[] files)
 	{
-		_files.AddRange(files);
+		Files.AddRange(files);
 		return this;
 	}
 
@@ -93,7 +111,7 @@ public class DirectoryContent
 
 	public DirectoryContent WithFile(FilePath file)
 	{
-		_files.Add(file);
+		Files.Add(file);
 		return this;
 	}
 
@@ -102,37 +120,25 @@ public class DirectoryContent
 		return AndFiles(file);
 	}
 
-	public IEnumerable<NuSpecContent> GetNuSpecContent()
-	{
-		foreach (FilePath file in _files)
-			yield return new NuSpecContent { Source=file.ToString(), Target=_relDirPath.ToString() };
-	}
-
-	public IEnumerable<ChocolateyNuSpecContent> GetChocolateyNuSpecContent(string basePath)
-	{
-		foreach (FilePath file in _files)
-			yield return new ChocolateyNuSpecContent { Source = basePath + file.ToString(), Target = _relDirPath.ToString() };
-	}
-
 	public bool VerifyInstallation(DirectoryPath installDirectory)
 	{
-		DirectoryPath absDirPath = installDirectory.Combine(_relDirPath);
+		DirectoryPath absDirPath = installDirectory.Combine(TargetDirectory);
 
 		if (!_context.DirectoryExists(absDirPath))
 		{
-			PackageContent.RecordError($"Directory {_relDirPath} was not found.");
+			PackageContent.RecordError($"Directory {TargetDirectory} was not found.");
 			return false;
 		}
 
 		bool isOK = true;
 
-		foreach (var relFilePath in _files)
+		foreach (var relFilePath in Files)
 		{
 			var fileName = relFilePath.GetFilename();
 
 			if (!_context.FileExists(absDirPath.CombineWithFilePath(fileName)))
 			{
-				PackageContent.RecordError($"File {fileName} was not found in directory {_relDirPath}.");
+				PackageContent.RecordError($"File {fileName} was not found in directory {TargetDirectory}.");
 				isOK = false;
 			}
 		}
