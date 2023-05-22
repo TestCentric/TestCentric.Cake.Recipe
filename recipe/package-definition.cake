@@ -30,13 +30,19 @@ public abstract class PackageDefinition
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
+        string title = null,
+        string description = null,
+        string summary = null,
+        string[] releaseNotes = null,
+        string[] tags = null,
 		string source = null,
 		string basePath = null,
         TestRunner testRunner = null,
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
 		IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null)
+        ExtensionSpecifier[] preloadedExtensions = null,
+        PackageContent packageContent = null)
 	{
         if (testRunner == null && tests != null)
             throw new System.ArgumentException($"Unable to create {packageType} package {id}: TestRunner must be provided if there are tests", nameof(testRunner));
@@ -46,6 +52,11 @@ public abstract class PackageDefinition
         PackageType = packageType;
 		PackageId = id;
 		PackageVersion = BuildSettings.PackageVersion;
+        PackageTitle = title ?? id;
+        PackageDescription = description ?? summary;
+        PackageSummary = summary ?? description;
+        ReleaseNotes = releaseNotes;
+        Tags = tags ?? new [] { "testcentric" };
 		PackageSource = source;
         BasePath = basePath ?? BuildSettings.OutputDirectory;
 		TestRunner = testRunner;
@@ -53,11 +64,17 @@ public abstract class PackageDefinition
 		PackageTests = tests;
         PreLoadedExtensions = preloadedExtensions ?? new ExtensionSpecifier[0];
 		SymbolChecks = symbols;
+        PackageContent = packageContent ?? new PackageContent();
 	}
 
     public PackageType PackageType { get; }
 	public string PackageId { get; }
 	public string PackageVersion { get; }
+    public string PackageTitle { get; }
+    public string PackageSummary { get; }
+    public string PackageDescription { get; }
+    public string[] ReleaseNotes { get; }
+    public string[] Tags { get; }
 	public string PackageSource { get; }
     public string BasePath { get; }
     public TestRunner TestRunner { get; protected set; }
@@ -65,9 +82,7 @@ public abstract class PackageDefinition
     public PackageCheck[] SymbolChecks { get; protected set; }
     public IEnumerable<PackageTest> PackageTests { get; set; }
     public ExtensionSpecifier[] PreLoadedExtensions { get; set; }
-    public bool HasTests => PackageTests != null;
-    public bool HasChecks => PackageChecks != null;
-    public bool HasSymbols => SymbolChecks != null;
+    public PackageContent PackageContent { get; }
     public virtual string SymbolPackageName => throw new System.NotImplementedException($"Symbols are not available for this type of package.");
 
     // The file name of this package, including extension
@@ -91,19 +106,19 @@ public abstract class PackageDefinition
         Banner.Display($"Installing {PackageFileName}");
         InstallPackage();
 
-        if (HasChecks)
+        if (PackageChecks != null || PackageContent != null)
         {
             Banner.Display($"Verifying {PackageFileName}");
             VerifyPackage();
         }
 
-        if (HasSymbols)
+        if (SymbolChecks != null)
         {
             // TODO: Override this in NuGetPackage
             VerifySymbolPackage();
         }
 
-        if (HasTests)
+        if (PackageTests != null)
         {
             Banner.Display($"Testing {PackageFileName}");
             RunPackageTests();
@@ -117,8 +132,12 @@ public abstract class PackageDefinition
     public void VerifyPackage()
     {
         bool allOK = true;
-        foreach (var check in PackageChecks)
-            allOK &= check.ApplyTo(PackageInstallDirectory + PackageId);
+
+        if (PackageChecks != null)
+            foreach (var check in PackageChecks)
+                allOK &= check.ApplyTo(PackageInstallDirectory + PackageId);
+        else // Use PackageContent
+            allOK = PackageContent.VerifyInstallation(PackageInstallDirectory + PackageId);
 
         if (allOK)
             Console.WriteLine("All checks passed!");

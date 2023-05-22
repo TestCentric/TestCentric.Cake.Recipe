@@ -41,28 +41,20 @@ public class NuGetPackage : PackageDefinition
     : base (
         PackageType.NuGet, 
         id, 
+        title: title,
+        description: description,
+        summary: summary,
+        releaseNotes: releaseNotes,
         source: source,
-        basePath: basePath ?? BuildSettings.OutputDirectory,
+        basePath: basePath,
         testRunner: testRunner,
         checks: checks,
         symbols: symbols,
         tests: tests,
-        preloadedExtensions: preloadedExtensions)
+        preloadedExtensions: preloadedExtensions,
+        packageContent: packageContent)
     {
-        PackageTitle = title ?? id;
-        PackageDescription = description ?? summary;
-        PackageSummary = summary ?? description;
-        ReleaseNotes = releaseNotes;
-        Tags = tags ?? new [] { "testcentric" };
-        PackageContent = packageContent ?? new PackageContent();
     }
-
-    public string PackageTitle { get; }
-    public string PackageSummary { get; }
-    public string PackageDescription { get; }
-    public string[] ReleaseNotes { get; }
-    public string[] Tags { get; }
-    public PackageContent PackageContent { get; }
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -99,15 +91,17 @@ public class NuGetPackage : PackageDefinition
 		        Icon = TESTCENTRIC_ICON,
 		        Language = "en-US",
                 BasePath = BasePath,
-                Symbols = HasSymbols,
 		        Verbosity = BuildSettings.NuGetVerbosity,
                 OutputDirectory = BuildSettings.PackageDirectory,
                 NoPackageAnalysis = true,
                 Files = PackageContent.GetNuSpecContent()
 	        };
 
-            if (HasSymbols)
+            if (SymbolChecks != null)
+            {
+                settings.Symbols = true;
                 settings.SymbolPackageFormat = "snupkg";
+            }
 
             return settings;
         }

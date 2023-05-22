@@ -1,6 +1,6 @@
 public class PackageContent
 {
-	protected ICakeContext _context;
+	private ICakeContext _context;
 
 	public PackageContent(FilePath[] rootFiles = null, params DirectoryContent[] directories)
 	{
@@ -40,15 +40,43 @@ public class PackageContent
 
 		return result;
 	}
+
+	public bool VerifyInstallation(DirectoryPath installDirectory)
+	{
+		bool isOK = true;
+
+		foreach(FilePath filePath in RootFiles)
+		{
+			var fileName = filePath.GetFilename();
+
+			if (!_context.FileExists(installDirectory.CombineWithFilePath(fileName)))
+			{
+				RecordError($"File {fileName} was not found.");
+				isOK = false;
+			}
+		}
+
+		foreach (DirectoryContent directory in Directories)
+			isOK &= directory.VerifyInstallation(installDirectory);
+			
+		return isOK;
+	}
+
+    public static void RecordError(string msg)
+    {
+        Console.WriteLine("  ERROR: " + msg);
+    }
 }
 
 public class DirectoryContent
 {
+	private ICakeContext _context;
 	private DirectoryPath _relDirPath;
 	private List<FilePath> _files = new List<FilePath>();
 
 	public DirectoryContent(DirectoryPath relDirPath)
 	{
+		_context = BuildSettings.Context;
 		_relDirPath = relDirPath;
 	}
 
@@ -84,5 +112,31 @@ public class DirectoryContent
 	{
 		foreach (FilePath file in _files)
 			yield return new ChocolateyNuSpecContent { Source = basePath + file.ToString(), Target = _relDirPath.ToString() };
+	}
+
+	public bool VerifyInstallation(DirectoryPath installDirectory)
+	{
+		DirectoryPath absDirPath = installDirectory.Combine(_relDirPath);
+
+		if (!_context.DirectoryExists(absDirPath))
+		{
+			PackageContent.RecordError($"Directory {_relDirPath} was not found.");
+			return false;
+		}
+
+		bool isOK = true;
+
+		foreach (var relFilePath in _files)
+		{
+			var fileName = relFilePath.GetFilename();
+
+			if (!_context.FileExists(absDirPath.CombineWithFilePath(fileName)))
+			{
+				PackageContent.RecordError($"File {fileName} was not found in directory {_relDirPath}.");
+				isOK = false;
+			}
+		}
+
+		return isOK;
 	}
 }

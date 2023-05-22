@@ -33,28 +33,21 @@ public class ChocolateyPackage : PackageDefinition
     : base (
         PackageType.Chocolatey,
         id, 
+        title: title,
+        summary: summary,
+        description: description,
+        releaseNotes: releaseNotes,
+        tags: tags,
         source: source,
-        basePath: basePath ?? BuildSettings.OutputDirectory,
+        basePath: basePath,
         testRunner: testRunner,
         checks: checks,
         symbols: symbols,
         tests: tests,
-        preloadedExtensions: preloadedExtensions)
+        preloadedExtensions: preloadedExtensions,
+        packageContent: packageContent)
     {
-        PackageTitle = title ?? id;
-        PackageDescription = description ?? summary;
-        PackageSummary = summary ?? description;
-        ReleaseNotes = releaseNotes;
-        Tags = tags ?? new [] { "testcentric" };
-        PackageContent = packageContent ?? new PackageContent();
     }
-
-    public string PackageTitle { get; }
-    public string PackageSummary { get; }
-    public string PackageDescription { get; }
-    public string[] ReleaseNotes { get; }
-    public string[] Tags { get; }
-    public PackageContent PackageContent { get; }
 
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
