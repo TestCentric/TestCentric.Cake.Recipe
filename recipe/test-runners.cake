@@ -4,6 +4,8 @@
 /// </summary>
 public abstract class TestRunner
 {
+	public virtual bool RequiresInstallation => false;
+
 	protected string ExecutablePath { get; set; }
 
 	public virtual int Run(string arguments)
@@ -19,6 +21,9 @@ public abstract class TestRunner
 
 		return rc;
 	}
+
+	// Base install does nothing
+	public virtual void Install() { } 
 }
 
 /// <summary>
@@ -27,7 +32,7 @@ public abstract class TestRunner
 /// </summary>
 public abstract class InstallableTestRunner : TestRunner
 {
-	protected bool _installationRequired = true;
+	public override bool RequiresInstallation => true;
 
 	public InstallableTestRunner(string packageId, string version)
 	{
@@ -44,16 +49,6 @@ public abstract class InstallableTestRunner : TestRunner
 	public string Version { get; }
 
 	public abstract string InstallPath { get; }
-
-	public override int Run(string arguments)
-	{
-		if (_installationRequired)
-			PerformInstallation();
-
-		return base.Run(arguments);
-	}
-
-	protected abstract void PerformInstallation();
 }
 
 /// <summary>
@@ -76,6 +71,8 @@ public class GuiRunner : InstallableTestRunner
 		ExecutablePath = $"{InstallPath}{PackageId}.{Version}/tools/{RUNNER_EXE}";
 	}
 
+	public string BuiltInAgentUnderTest { get; set; }
+
 	public override string InstallPath => PackageId == ChocoId
 		? BuildSettings.ChocolateyTestRunnerDirectory
 		: BuildSettings.NuGetTestRunnerDirectory;
@@ -93,7 +90,7 @@ public class GuiRunner : InstallableTestRunner
 		return base.Run(arguments);
 	}
 
-	protected override void PerformInstallation()
+	public override void Install()
 	{
 		var packageSources = new []
 		{
@@ -113,5 +110,13 @@ public class GuiRunner : InstallableTestRunner
 				OutputDirectory = InstallPath,
 				Source = packageSources
 			});
+
+		// If we are testing one of the built-in agents, remove the copy of the agent
+		// which was installed alongside the GUI so our new build is used.
+		if (BuiltInAgentUnderTest != null)
+			foreach (DirectoryPath directoryPath in BuildSettings.Context.GetDirectories($"{InstallPath}{BuiltInAgentUnderTest}*"))
+				BuildSettings.Context.DeleteDirectory(
+					directoryPath,
+					new DeleteDirectorySettings() { Recursive = true });
 	}
 }
