@@ -1,6 +1,7 @@
 public class BuildTasks
 {
 	// General
+	public CakeTaskBuilder CompileScriptTask { get; set; }
 	public CakeTaskBuilder DumpSettingsTask { get; set; }
 
 	// Building
@@ -61,8 +62,12 @@ public class BuildTasks
 // which is why we need FixupDependencies.
 
 //////////////////////////////////////////////////////////////////////
-// DUMPSETTINGS TASK
+// GENERAL TASKTasks
 //////////////////////////////////////////////////////////////////////
+
+BuildSettings.Tasks.CompileScriptTask = Task("CompileScript")
+	.Description("Just make sure the script compiled")
+	.Does(() => Information("Script was successfully compiled!"));
 
 BuildSettings.Tasks.DumpSettingsTask = Task("DumpSettings")
 	.Does(() => BuildSettings.DumpSettings());

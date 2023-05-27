@@ -171,6 +171,9 @@ public abstract class PackageDefinition
         foreach(ExtensionSpecifier extensionSpecifier in PreLoadedExtensions)
             extensionSpecifier.InstallExtension(this);
 
+        if (TestRunner.RequiresInstallation)
+            TestRunner.Install();
+
         foreach (var packageTest in PackageTests)
         {
             if (packageTest.Level > BuildSettings.PackageTestLevel)
