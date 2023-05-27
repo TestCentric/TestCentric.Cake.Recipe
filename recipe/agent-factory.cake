@@ -243,8 +243,8 @@ public class PluggableAgentFactory
 					1, $"AspNetCore{TargetVersionWithoutDots}Test", $"Run test using AspNetCore targeting .NET {TargetVersion}",
 					$"tests/net{TargetVersion}/aspnetcore-test.dll", AspNetCoreResult(TargetVersion)));
 
-			// Run Windows test for target framework >= 5.0
-			if (TargetVersion >= new Version(5,0))
+			// Run Windows test for target framework >= 5.0 (6.0 on AppVeyor)
+			if (TargetVersion >= new Version(6,0) || TargetVersion >= new Version(5,0) && !BuildSettings.IsRunningOnAppVeyor)
 				PackageTests.Add(new PackageTest(
 					1, $"Net{TargetVersionWithoutDots}WindowsFormsTest", $"Run test using windows forms under .NET {TargetVersion}",
 					$"tests/net{TargetVersion}-windows/windows-forms-test.dll", WindowsFormsResult(TargetVersion)));
