@@ -44,6 +44,8 @@ public class PluggableAgentFactory
 	private string Title { get; }
 	private string Description { get; }
 	private string[] Tags { get; }
+	private FilePath[] LauncherFiles { get; }
+	private FilePath[] AgentFiles { get; }
 
 	private string TargetIdentifier =>TargetFramework.Identifier;
 	private Version TargetVersion => TargetFramework.Version;
@@ -53,17 +55,6 @@ public class PluggableAgentFactory
 	private bool TargetIsNetCore => TargetIdentifier == ".NetCoreApp";
 	private bool TargetIsBuiltInAgent { get; }
 	
-	private FilePath[] LauncherFiles => new FilePath[] {
-		TargetLauncherFileName, TargetLauncherFileNameWithoutExtension + ".pdb", "nunit.engine.api.dll", "testcentric.engine.api.dll" };
-	private FilePath[] AgentFiles => TargetIsNetCore
-		? new FilePath[] {
-			$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
-			$"agent/{TargetAgentFileNameWithoutExtension}.deps.json", $"agent/{TargetAgentFileNameWithoutExtension}.runtimeconfig.json",
-			"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll",
-			"agent/testcentric.extensibility.dll", "agent/Microsoft.Extensions.DependencyModel.dll" }
-		: new FilePath[] {
-			$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
-			"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll", "agent/testcentric.extensibility.dll" };
 
 	private List<PackageTest> PackageTests = new List<PackageTest>();
 
@@ -86,6 +77,10 @@ public class PluggableAgentFactory
 			TargetAgentFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-pluggable-agent";
 			TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".exe";
 			Tags = new [] { "testcentric", "pluggable", "agent", $"net{TargetVersionWithoutDots}" };
+			AgentFiles = new FilePath[] {
+				$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
+				"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll", "agent/testcentric.extensibility.dll" };
+
 		}
 		else
 		{
@@ -98,6 +93,12 @@ public class PluggableAgentFactory
 				TargetLauncherName = $"NetCore{TargetVersionWithoutDots}AgentLauncher";
 				TargetLauncherFileNameWithoutExtension = $"netcore{TargetVersionWithoutDots}-agent-launcher";
 				TargetAgentFileNameWithoutExtension = $"netcore{TargetVersionWithoutDots}-pluggable-agent";
+				TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".dll";
+				AgentFiles = new FilePath[] {
+					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
+					$"agent/{TargetAgentFileNameWithoutExtension}.deps.json", $"agent/{TargetAgentFileNameWithoutExtension}.runtimeconfig.json",
+					"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll",
+					"agent/testcentric.extensibility.dll" };
 				Tags = new [] { "testcentric", "pluggable", "agent", $"netcoreapp{TargetVersion}" };
 			}
 			else
@@ -109,13 +110,19 @@ public class PluggableAgentFactory
 				TargetLauncherName = $"Net{TargetVersionWithoutDots}AgentLauncher";
 				TargetLauncherFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-agent-launcher";
 				TargetAgentFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-pluggable-agent";
+				TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".dll";
+				AgentFiles = new FilePath[] {
+					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
+					$"agent/{TargetAgentFileNameWithoutExtension}.deps.json", $"agent/{TargetAgentFileNameWithoutExtension}.runtimeconfig.json",
+					"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll",
+					"agent/testcentric.extensibility.dll", "agent/Microsoft.Extensions.DependencyModel.dll" };
 				Tags = new [] { "testcentric", "pluggable", "agent", $"net{TargetVersion}" };
 			}
-
-			TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".dll";
 		}
 
 		TargetLauncherFileName = TargetLauncherFileNameWithoutExtension + ".dll";
+		LauncherFiles = new FilePath[] {
+			TargetLauncherFileName, TargetLauncherFileNameWithoutExtension + ".pdb", "nunit.engine.api.dll", "testcentric.engine.api.dll" };
 
 		// Add all agents of the correct type (.NET Framework or .NET Core) to AvailableAgents
 		foreach (var agent in BuiltInAgents)
