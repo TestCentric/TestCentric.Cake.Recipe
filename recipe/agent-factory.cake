@@ -10,9 +10,9 @@ public class PluggableAgentFactory
 
 	// Agents which are included in the Gui 2.0.0-beta1 distribution
 	private static readonly AgentInfo[] BuiltInAgents = new AgentInfo[] {
-		new AgentInfo("Net462AgentLauncher", new FrameworkName(".NetFramework, Version=4.6.2")),
-		new AgentInfo("Net60AgentLauncher", new FrameworkName(".NetCoreApp, Version=6.0.0")),
-		new AgentInfo("Net70AgentLauncher", new FrameworkName(".NetCoreApp, Version=7.0.0"))
+		new AgentInfo("Net462AgentLauncher", new FrameworkName(".NetFramework", V_4_6_2)),
+		new AgentInfo("Net60AgentLauncher", new FrameworkName(".NetCoreApp", V_6_0)),
+		new AgentInfo("Net70AgentLauncher", new FrameworkName(".NetCoreApp", V_7_0))
 	};
 
 	private struct AgentInfo
@@ -178,80 +178,75 @@ public class PluggableAgentFactory
 
 	private void DefinePackageTests()
 	{
-		// NOTE: Because we are comparing versions using > and <, it's important that all
-		// versions be specified using the same number of components. Except for 4.6.2,
-		// we use two components. Version 4.6.2 will be a problem to solve if we want to 
-		// create a 4.8.0 version in the future
-
 		if (TargetIsNetFramework)
 		{
-			if (TargetVersion >= new Version(2,0))
+			if (TargetVersion >= V_2_0)
 			{
 				PackageTests.Add(new PackageTest(
 					1, "Net20PackageTest", "Run mock-assembly.dll targeting .NET 2.0",
-					"tests/net20/mock-assembly.dll", MockAssemblyResult(new Version(2,0))));
+					"tests/net20/mock-assembly.dll", MockAssemblyResult(V_2_0)));
 			
 				PackageTests.Add(new PackageTest(
 					1, "Net35PackageTest", "Run mock-assembly.dll targeting .NET 3.5",
-					"tests/net35/mock-assembly.dll", MockAssemblyResult(new Version(3,5))));
+					"tests/net35/mock-assembly.dll", MockAssemblyResult(V_3_5)));
 			}
 
-			if (TargetVersion >= new Version(4,6,2))
+			if (TargetVersion >= V_4_6_2)
 				PackageTests.Add(new PackageTest(
 					1, "Net462PackageTest", "Run mock-assembly.dll targeting .NET 4.6.2",
-					"tests/net462/mock-assembly.dll", MockAssemblyResult(new Version(4,6,2))));
+					"tests/net462/mock-assembly.dll", MockAssemblyResult(V_4_6_2)));
 		}
 		else if (TargetIsNetCore)
 		{
-			if (TargetVersion >= new Version(1,1))
+			if (TargetVersion >= V_1_1)
 				PackageTests.Add(new PackageTest(
 					1, "NetCore11PackageTest", "Run mock-assembly.dll targeting .NET Core 1.1",
-					"tests/netcoreapp1.1/mock-assembly.dll", MockAssemblyResult(new Version(1,1))));
+					"tests/netcoreapp1.1/mock-assembly.dll", MockAssemblyResult(V_1_1)));
 
-			if (TargetVersion >= new Version(2,1))
+			if (TargetVersion >= V_2_1)
 				PackageTests.Add(new PackageTest(
 					1, "NetCore21PackageTest", "Run mock-assembly.dll targeting .NET Core 2.1",
-					"tests/netcoreapp2.1/mock-assembly.dll", MockAssemblyResult(new Version(2,1))));
+					"tests/netcoreapp2.1/mock-assembly.dll", MockAssemblyResult(V_2_1)));
 
-			if (TargetVersion >= new Version(3,1))
+			if (TargetVersion >= V_3_1)
 				PackageTests.Add(new PackageTest(
 					1, "NetCore31PackageTest", "Run mock-assembly.dll targeting .NET Core 3.1",
-					"tests/netcoreapp3.1/mock-assembly.dll", MockAssemblyResult(new Version(3,1))));
+					"tests/netcoreapp3.1/mock-assembly.dll", MockAssemblyResult(V_3_1)));
 
-			if (TargetVersion >= new Version(5,0))
+			if (TargetVersion >= V_5_0)
 				PackageTests.Add(new PackageTest(
 					1, "Net50PackageTest", "Run mock-assembly.dll targeting .NET 5.0",
-					"tests/net5.0/mock-assembly.dll", MockAssemblyResult(new Version(5,0))));
+					"tests/net5.0/mock-assembly.dll", MockAssemblyResult(V_5_0)));
 
-			if (TargetVersion >= new Version(6,0))
+			if (TargetVersion >= V_6_0)
 				PackageTests.Add(new PackageTest(
 					1, "Net60PackageTest", "Run mock-assembly.dll targeting .NET 6.0",
-					"tests/net6.0/mock-assembly.dll", MockAssemblyResult(new Version(6,0))));
+					"tests/net6.0/mock-assembly.dll", MockAssemblyResult(V_6_0)));
 
-			if (TargetVersion >= new Version(7,0))
+			if (TargetVersion >= V_7_0)
 				PackageTests.Add(new PackageTest(
 					1, "Net70PackageTest", "Run mock-assembly.dll targeting .NET 7.0",
-					"tests/net7.0/mock-assembly.dll", MockAssemblyResult(new Version(7,0))));
+					"tests/net7.0/mock-assembly.dll", MockAssemblyResult(V_7_0)));
 
 			// Special handling for target version > highest built-in version
-			if (TargetVersion > new Version(7,0))
+			if (TargetVersion > V_7_0)
 				PackageTests.Add(new PackageTest(
 					1, $"Net{TargetVersionWithoutDots}PackageTest", $"Run mock-assembly.dll targeting .NET {TargetVersion}",
 					$"tests/net{TargetVersion}/mock-assembly.dll", MockAssemblyResult(TargetVersion)));
 
 			// Run AspNetCore test for target framework >= 3.1
-			if (TargetVersion == new Version(3,1))
+			if (TargetVersion == V_3_1)
 				PackageTests.Add(new PackageTest(
 					1, $"AspNetCore{TargetVersionWithoutDots}Test", $"Run test using AspNetCore targeting .NET {TargetVersion}",
 					$"tests/netcoreapp{TargetVersion}/aspnetcore-test.dll", AspNetCoreResult(TargetVersion)));
 
-			if (TargetVersion > new Version(3,1))
+			if (TargetVersion > V_3_1)
 				PackageTests.Add(new PackageTest(
 					1, $"AspNetCore{TargetVersionWithoutDots}Test", $"Run test using AspNetCore targeting .NET {TargetVersion}",
 					$"tests/net{TargetVersion}/aspnetcore-test.dll", AspNetCoreResult(TargetVersion)));
 
 			// Run Windows test for target framework >= 5.0 (6.0 on AppVeyor)
-			if (TargetVersion >= new Version(6,0) || TargetVersion >= new Version(5,0) && !BuildSettings.IsRunningOnAppVeyor)
+			if (TargetVersion >= V_6_0 || TargetVersion >= V_5_0 && !BuildSettings.IsRunningOnAppVeyor)
 				PackageTests.Add(new PackageTest(
 					1, $"Net{TargetVersionWithoutDots}WindowsFormsTest", $"Run test using windows forms under .NET {TargetVersion}",
 					$"tests/net{TargetVersion}-windows/windows-forms-test.dll", WindowsFormsResult(TargetVersion)));
@@ -280,7 +275,7 @@ public class PluggableAgentFactory
 	private string ExpectedLauncher(Version testVersion)
 	{
 		// Special handling for net20 agent
-		if (TargetIsNetFramework && TargetVersion == new Version(2,0) && testVersion <= new Version(3,5))
+		if (TargetIsNetFramework && TargetVersion == V_2_0 && testVersion <= V_3_5)
 			return "Net20AgentLauncher";
 		
 		foreach (var entry in AvailableAgents)

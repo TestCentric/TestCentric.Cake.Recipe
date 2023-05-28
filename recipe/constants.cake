@@ -1,6 +1,22 @@
 // This file contains both real constants and static readonly variables used
 // as constants. All values are initialized before any instance variables.
 
+// WARNING: When comparing versions, it's important to keep in mind some anomalies.
+// For example, new Version(6,0) is NOT equal to new Version(6,0,0). Instead the
+// former is less than the latter. Bugs can creep in easily. To avoid this, use
+// the following manifest static variables rather than using new each time.
+// Additional values should be defined as needed.
+static readonly Version V_1_1 = new Version(1,1);
+static readonly Version V_2_0 = new Version(2,0);
+static readonly Version V_2_1 = new Version(2,1);
+static readonly Version V_3_1 = new Version(3,1);
+static readonly Version V_3_5 = new Version(3,5);
+static readonly Version V_4_6_2 = new Version(4,6,2);
+static readonly Version V_5_0 = new Version(5,0);
+static readonly Version V_6_0 = new Version(6,0);
+static readonly Version V_7_0 = new Version(7,0);
+static readonly Version V_8_0 = new Version(8,0);
+
 // URLs for uploading packages
 private const string MYGET_PUSH_URL = "https://www.myget.org/F/testcentric/api/v2";
 private const string NUGET_PUSH_URL = "https://api.nuget.org/v3/index.json";
