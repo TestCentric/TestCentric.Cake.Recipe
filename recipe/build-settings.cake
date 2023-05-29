@@ -87,6 +87,7 @@ public static class BuildSettings
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
 		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
+		TraceLevel = context.Argument("trace", "OFF");
 
 		ValidateSettings();
 
@@ -173,6 +174,7 @@ public static class BuildSettings
 	// Arguments
 	public static string Configuration { get; private set; }
 	public static bool NoPush => Context.HasArgument("nopush");
+	public static string TraceLevel { get; private set; }
 
 	// Build Environment
 	public static bool IsLocalBuild => _buildSystem.IsLocalBuild;

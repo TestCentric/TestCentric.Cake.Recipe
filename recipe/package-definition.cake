@@ -196,6 +196,8 @@ public abstract class PackageDefinition
 
 			_context.CreateDirectory(testResultDir);
             string arguments = packageTest.Arguments + $" --work={testResultDir}";
+            if (BuildSettings.TraceLevel != "Off")
+                arguments += $" --trace:{BuildSettings.TraceLevel}";
 
             int rc = TestRunner.Run(arguments);
 
