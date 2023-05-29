@@ -87,7 +87,7 @@ public static class BuildSettings
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
 		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
-		TraceLevel = context.Argument("trace", "OFF");
+		TraceLevel = context.Argument("trace", "Off");
 
 		ValidateSettings();
 
