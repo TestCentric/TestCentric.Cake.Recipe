@@ -109,10 +109,22 @@ public class NuGetPackage : PackageDefinition
 
     public override void BuildPackage()
     {
-        if (!string.IsNullOrEmpty(PackageSource))
-            _context.NuGetPack(PackageSource, NuGetPackSettings);
-        else
+        if (string.IsNullOrEmpty(PackageSource))
             _context.NuGetPack(NuGetPackSettings);
+        else if (PackageSource.EndsWith(".nuspec"))
+            _context.NuGetPack(PackageSource, NuGetPackSettings);
+        else if (PackageSource.EndsWith(".csproj"))
+		    _context.MSBuild(PackageSource,
+                new MSBuildSettings {
+                    Target = "pack",
+		            Verbosity = BuildSettings.MSBuildVerbosity,
+		            Configuration = BuildSettings.Configuration,
+		            PlatformTarget = PlatformTarget.MSIL,
+		            AllowPreviewVersion = BuildSettings.MSBuildAllowPreviewVersion
+            	}.WithProperty("Version", BuildSettings.PackageVersion));
+        else
+            throw new ArgumentException(
+                $"Invalid package source specified: {PackageSource}", "source");
     }
 
     public override void InstallPackage()

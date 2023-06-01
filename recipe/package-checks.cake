@@ -23,6 +23,8 @@ public static FileCheck HasFiles(params FilePath[] files) => new FileCheck(files
 
 public static DirectoryCheck HasDirectory(DirectoryPath dir) => new DirectoryCheck(dir);
 
+public static DependencyCheck HasDependency(string packageId) => new DependencyCheck(packageId);
+
 //////////////////////////////////////////////////////////////////////
 // PACKAGECHECK CLASS
 //////////////////////////////////////////////////////////////////////
@@ -37,6 +39,38 @@ public abstract class PackageCheck
 	}
 	
 	public abstract bool ApplyTo(DirectoryPath testDirPath);
+
+	protected bool CheckDirectoryExists(DirectoryPath dirPath)
+	{
+		if (!_context.DirectoryExists(dirPath))
+		{
+			RecordError($"Directory {dirPath} was not found.");
+			return false;
+		}
+
+		return true;
+	}
+
+	protected bool CheckFileExists(FilePath filePath)
+	{
+		if (!_context.FileExists(filePath))
+		{
+			RecordError($"File {filePath} was not found.");
+			return false;
+		}
+
+		return true;
+	}
+
+	protected bool CheckFilesExist(IEnumerable<FilePath> filePaths)
+	{
+		bool isOK = true;
+
+		foreach (var filePath in filePaths)
+			isOK &= CheckFileExists(filePath);
+
+		return isOK;
+	}
 
     protected static void RecordError(string msg)
     {
@@ -59,18 +93,7 @@ public class FileCheck : PackageCheck
 
 	public override bool ApplyTo(DirectoryPath testDirPath)
 	{
-		bool isOK = true;
-
-		foreach (FilePath relFilePath in _files)
-		{
-			if (!_context.FileExists(testDirPath.CombineWithFilePath(relFilePath)))
-			{
-				RecordError($"File {relFilePath} was not found.");
-				isOK = false;
-			}
-		}
-
-		return isOK;
+		return CheckFilesExist(_files.Select(file => testDirPath.CombineWithFilePath(file)));
 	}
 }
 
@@ -114,25 +137,64 @@ public class DirectoryCheck : PackageCheck
 	{
 		DirectoryPath absDirPath = testDirPath.Combine(_relDirPath);
 
-		if (!_context.DirectoryExists(absDirPath))
+		if (!CheckDirectoryExists(absDirPath))
+			return false;
+
+		return CheckFilesExist(_files.Select(file => absDirPath.CombineWithFilePath(file)));
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// DEPENDENCYCHECK CLASS
+//////////////////////////////////////////////////////////////////////
+
+public class DependencyCheck : PackageCheck
+{
+	private string _packageId;
+
+	private List<DirectoryCheck> _directoryChecks = new List<DirectoryCheck>();
+	private List<FilePath> _files = new List<FilePath>();
+
+	public DependencyCheck(string packageId)
+	{
+		_packageId = packageId;
+	}
+
+	public DependencyCheck WithFiles(params FilePath[] files)
+	{
+		_files.AddRange(files);
+		return this;
+	}
+
+	public DependencyCheck WithFile(FilePath file)
+	{
+		_files.Add(file);
+		return this;
+	}
+
+	public DependencyCheck WithDirectory(DirectoryPath relDirPath)
+	{
+		_directoryChecks.Add(new DirectoryCheck(relDirPath));
+		return this;
+	}
+
+	public override bool ApplyTo(DirectoryPath testDirPath)
+	{
+		DirectoryPath packagePath = testDirPath.Combine($"../{_packageId}");
+
+		if (!_context.DirectoryExists(packagePath))
 		{
-			RecordError($"Directory {_relDirPath} was not found.");
+			RecordError($"Dependent package {_packageId} was not found.");
 			return false;
 		}
 
-		bool isOK = true;
+		bool isOK = CheckFilesExist(_files.Select(file => packagePath.CombineWithFilePath(file)));
 
-		if (_files != null)
-		{
-			foreach (var relFilePath in _files)
-			{
-				if (!BuildSettings.Context.FileExists(absDirPath.CombineWithFilePath(relFilePath)))
-				{
-					RecordError($"File {relFilePath} was not found in directory {_relDirPath}.");
-					isOK = false;
-				}
-			}
-		}
+		//foreach (var relFilePath in _files)
+		//	isOK &= CheckFileExists(packagePath.CombineWithFilePath(relFilePath));
+
+		foreach (var directoryCheck in _directoryChecks)
+			isOK &= directoryCheck.ApplyTo(packagePath);
 
 		return isOK;
 	}
