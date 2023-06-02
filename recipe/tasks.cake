@@ -9,7 +9,7 @@ public class BuildTasks
 	public CakeTaskBuilder CheckHeadersTask { get; set; }
 	public CakeTaskBuilder CleanTask { get; set; }
 	public CakeTaskBuilder CleanAllTask { get; set; }
-	public CakeTaskBuilder CleanOutputDirectoryTask { get; set; }
+	public CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
 	public CakeTaskBuilder CleanAllOutputDirectoriesTask { get; set; }
 	public CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
 	public CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
@@ -82,16 +82,24 @@ BuildSettings.Tasks.CheckHeadersTask = Task("CheckHeaders")
 
 BuildSettings.Tasks.CleanTask = Task("Clean")
 	.Description("Clean output and package directories")
-	.IsDependentOn("CleanOutputDirectory")
+	.IsDependentOn("CleanOutputDirectories")
 	.IsDependentOn("CleanPackageDirectory");
 
-BuildSettings.Tasks.CleanOutputDirectoryTask = Task("CleanOutputDirectory")
-	.Description("Clean output directory for current config")
-	.Does(() => CleanDirectory(BuildSettings.OutputDirectory));
+BuildSettings.Tasks.CleanOutputDirectoriesTask = Task("CleanOutputDirectories")
+	.Description("Clean output directories for current config")
+	.Does(() => 
+	{
+		foreach (var binDir in GetDirectories($"**/bin/{BuildSettings.Configuration}/"))
+			CleanDirectory(binDir);
+	});
 
 BuildSettings.Tasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirectories")
 	.Description("Clean output directories for all configs")
-	.Does(() => CleanDirectory(BuildSettings.ProjectDirectory + "bin/"));
+	.Does(() =>
+	{
+		foreach (var binDir in GetDirectories("**/bin/"))
+			CleanDirectory(binDir);
+	});
 
 BuildSettings.Tasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
 	.Description("Clean the package directory")

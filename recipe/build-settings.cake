@@ -86,7 +86,7 @@ public static class BuildSettings
 		ChocolateyVerbosity = chocolateyVerbosity;
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
-		Configuration = context.Argument("configuration", DEFAULT_CONFIGURATION);
+		Configuration = context.Argument("configuration", context.Argument("c", DEFAULT_CONFIGURATION));
 		TraceLevel = context.Argument("trace", "Off");
 
 		ValidateSettings();
@@ -326,6 +326,11 @@ public static class BuildSettings
 		DisplaySetting("IsRunningOnUnix:              ", IsRunningOnUnix);
 		DisplaySetting("IsRunningOnAppVeyor:          ", IsRunningOnAppVeyor);
 
+		DisplayHeading("ARGUMENTS");
+		DisplaySetting("Configuration:    ", Configuration);
+		DisplaySetting("TraceLevel:       ", TraceLevel);
+		DisplaySetting("PackageTestLevel: ", PackageTestLevel);
+
 		DisplayHeading("VERSIONING");
 		DisplaySetting("PackageVersion:               ", PackageVersion);
 		DisplaySetting("AssemblyVersion:              ", AssemblyVersion);
@@ -351,12 +356,10 @@ public static class BuildSettings
 		DisplayHeading("BUILD");
 		DisplaySetting("Title:            ", Title);
 		DisplaySetting("SolutionFile:     ", SolutionFile);
-		DisplaySetting("Configuration:    ", Configuration);
 
 		DisplayHeading("TESTING");
 		DisplaySetting("UnitTests:        ", UnitTests, "DEFAULT");
 		DisplaySetting("UnitTestRunner:   ", UnitTestRunner, "NUNITLITE");
-		DisplaySetting("PackageTestLevel: ", PackageTestLevel);
 
 		DisplayHeading("PACKAGES");
 		if (Packages == null)
