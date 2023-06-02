@@ -75,23 +75,22 @@ public static class NUnitLite
     private static List<FilePath> GetUnitTestFiles(string patternSet)
     {
         var result = new List<FilePath>();
+        var globberSettings = new GlobberSettings();
 
-        if (!string.IsNullOrEmpty(patternSet))
-        { 
-            // User supplied a set of patterns for the unit tests
-            foreach (string filePattern in patternSet.Split('|'))
-                foreach (var testPath in _context.GetFiles(BuildSettings.OutputDirectory + filePattern))
-                    result.Add(testPath);
-        }
-        else
+        if (string.IsNullOrEmpty(patternSet))
         {
-            // Use default patterns to find unit tests - case insensitive because
-            // we don't know how the user may have named test assemblies.
-            var defaultPatterns = new [] { "**/*.tests.dll", "**/*.tests.exe" };
-            var globberSettings = new GlobberSettings { IsCaseSensitive = false };
-            foreach (string filePattern in defaultPatterns)
-                foreach (var testPath in _context.GetFiles(BuildSettings.OutputDirectory + filePattern, globberSettings))
+            globberSettings.IsCaseSensitive = false;
+            patternSet = "**/*.tests.dll|**/*.tests.exe";
+        }
+
+        // User supplied a set of patterns for the unit tests
+        foreach (var dirPath in _context.GetDirectories($"**/bin/{BuildSettings.Configuration}/"))
+        {
+            foreach (string filePattern in patternSet.Split('|'))
+            {
+                foreach (var testPath in _context.GetFiles($"{dirPath}/{filePattern}"))
                     result.Add(testPath);
+            }
         }
 
         result.Sort(ComparePathsByFileName);
