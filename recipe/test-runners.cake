@@ -13,11 +13,12 @@ public abstract class TestRunner
 		if (ExecutablePath == null)
 			throw new InvalidOperationException("Unable to run tests. Executable path has not been set.");
 
-		int rc = BuildSettings.Context.StartProcess(ExecutablePath, new ProcessSettings()
-		{
-			Arguments = arguments,
-			WorkingDirectory = BuildSettings.OutputDirectory
-		});
+		int rc = ExecutablePath.EndsWith(".dll")
+			? BuildSettings.Context.StartProcess("dotnet", new ProcessSettings() {
+				Arguments = $"{ExecutablePath} {arguments}", WorkingDirectory = BuildSettings.OutputDirectory	})
+			: BuildSettings.Context.StartProcess(ExecutablePath, new ProcessSettings() {
+				Arguments = arguments, WorkingDirectory = BuildSettings.OutputDirectory
+			});
 
 		return rc;
 	}
@@ -49,6 +50,17 @@ public abstract class InstallableTestRunner : TestRunner
 	public string Version { get; }
 
 	public abstract string InstallPath { get; }
+}
+
+/// <summary>
+/// Class that knows how to run an agent directly.
+/// </summary>
+public class AgentRunner : TestRunner
+{
+	public AgentRunner(string agentExecutable)
+	{
+		ExecutablePath = agentExecutable;
+	}
 }
 
 /// <summary>

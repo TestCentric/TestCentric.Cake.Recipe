@@ -2,18 +2,10 @@ using System.Runtime.Versioning;
 
 public class PluggableAgentFactory
 {
-	private const string GUI_VERSION = "2.0.0-beta1";
 	private const string README = "../../README.md";
 	private const string LICENSE = "../../LICENSE.txt";
 	private const string ICON = "../../testcentric.png";
 	private const string CHOCO_VERIFICATION = "../../VERIFICATION.txt";
-
-	// Agents which are included in the Gui 2.0.0-beta1 distribution
-	private static readonly AgentInfo[] BuiltInAgents = new AgentInfo[] {
-		new AgentInfo("Net462AgentLauncher", new FrameworkName(".NetFramework", V_4_6_2)),
-		new AgentInfo("Net60AgentLauncher", new FrameworkName(".NetCoreApp", V_6_0)),
-		new AgentInfo("Net70AgentLauncher", new FrameworkName(".NetCoreApp", V_7_0))
-	};
 
 	private struct AgentInfo
 	{
@@ -47,14 +39,12 @@ public class PluggableAgentFactory
 	private FilePath[] LauncherFiles { get; }
 	private FilePath[] AgentFiles { get; }
 
-	private string TargetIdentifier =>TargetFramework.Identifier;
+	private string TargetIdentifier => TargetFramework.Identifier;
 	private Version TargetVersion => TargetFramework.Version;
 	private string TargetVersionWithoutDots => TargetVersion.ToString().Replace(".", "");
 	
 	private bool TargetIsNetFramework => TargetIdentifier == ".NetFramework";
 	private bool TargetIsNetCore => TargetIdentifier == ".NetCoreApp";
-	private bool TargetIsBuiltInAgent { get; }
-	
 
 	private List<PackageTest> PackageTests = new List<PackageTest>();
 
@@ -124,18 +114,6 @@ public class PluggableAgentFactory
 		LauncherFiles = new FilePath[] {
 			TargetLauncherFileName, TargetLauncherFileNameWithoutExtension + ".pdb", "nunit.engine.api.dll", "testcentric.engine.api.dll" };
 
-		// Add all agents of the correct type (.NET Framework or .NET Core) to AvailableAgents
-		foreach (var agent in BuiltInAgents)
-			if (agent.IsNetFramework == TargetIsNetFramework)
-			{
-				AvailableAgents.Add(agent.TargetFramework.Version, agent);
-				if (agent.TargetFramework == TargetFramework)
-					TargetIsBuiltInAgent = true;
-			}
-
-		if (!TargetIsBuiltInAgent)
-			AvailableAgents.Add(TargetVersion, new AgentInfo(TargetLauncherName, TargetFramework));
-
 		DefinePackageTests();
 	}
 
@@ -149,9 +127,7 @@ public class PluggableAgentFactory
 				new FilePath[] { LICENSE, README, ICON },
 				new DirectoryContent("tools").WithFiles( LauncherFiles ),
 				new DirectoryContent("tools/agent").WithFiles( AgentFiles )),
-			testRunner: TargetIsBuiltInAgent
-				? new GuiRunner("TestCentric.GuiRunner", GUI_VERSION) { BuiltInAgentUnderTest = NuGetId }
-				: new GuiRunner("TestCentric.GuiRunner", GUI_VERSION),
+			testRunner: new AgentRunner(BuildSettings.NuGetTestDirectory + NuGetId + "/tools/agent/net60-pluggable-agent.dll"),
 			tests: PackageTests);
 	
 	public ChocolateyPackage ChocolateyPackage =>
@@ -164,9 +140,7 @@ public class PluggableAgentFactory
 				new FilePath[] { ICON },
 				new DirectoryContent("tools").WithFiles( LICENSE, README, CHOCO_VERIFICATION ).AndFiles( LauncherFiles ),
 				new DirectoryContent("tools/agent").WithFiles( AgentFiles )),
-			testRunner: TargetIsBuiltInAgent
-				? new GuiRunner("testcentric-gui", GUI_VERSION) { BuiltInAgentUnderTest = ChocoId }
-				: new GuiRunner("testcentric-gui", GUI_VERSION),
+			testRunner: new AgentRunner(BuildSettings.ChocolateyTestDirectory + ChocoId + "/tools/agent/net60-pluggable-agent.dll"),
 			tests: PackageTests);
 
 	public PackageDefinition[] Packages => new PackageDefinition[] { NuGetPackage, ChocolateyPackage };
@@ -257,38 +231,18 @@ public class PluggableAgentFactory
 	private ExpectedResult MockAssemblyResult(Version testVersion) => new ExpectedResult("Failed")
 	{
 		Total = 36, Passed = 23, Failed = 5, Warnings = 1, Inconclusive = 1, Skipped = 7,
-		Assemblies = new ExpectedAssemblyResult[] { new ExpectedAssemblyResult("mock-assembly.dll", ExpectedLauncher(testVersion)) }
+		Assemblies = new ExpectedAssemblyResult[] { new ExpectedAssemblyResult("mock-assembly.dll") }
 	};
 
 	private ExpectedResult AspNetCoreResult(Version testVersion) => new ExpectedResult("Passed")
 	{
 		Total = 2, Passed = 2, Failed = 0, Warnings = 0, Inconclusive = 0, Skipped = 0,
-		Assemblies = new ExpectedAssemblyResult[] { new ExpectedAssemblyResult("aspnetcore-test.dll", ExpectedLauncher(testVersion)) }
+		Assemblies = new ExpectedAssemblyResult[] { new ExpectedAssemblyResult("aspnetcore-test.dll") }
 	};
 
 	private ExpectedResult WindowsFormsResult(Version testVersion) => new ExpectedResult("Passed")
 	{
 		Total = 2, Passed = 2, Failed = 0, Warnings = 0, Inconclusive = 0, Skipped = 0,
-		Assemblies = new ExpectedAssemblyResult[] {	new ExpectedAssemblyResult("windows-forms-test.dll", ExpectedLauncher(testVersion)) }
+		Assemblies = new ExpectedAssemblyResult[] {	new ExpectedAssemblyResult("windows-forms-test.dll") }
 	};
-
-	private string ExpectedLauncher(Version testVersion)
-	{
-		// Special handling for net20 agent
-		if (TargetIsNetFramework && TargetVersion == V_2_0 && testVersion <= V_3_5)
-			return "Net20AgentLauncher";
-		
-		foreach (var entry in AvailableAgents)
-		{
-			AgentInfo agent = entry.Value;
-
-			if (TargetVersion <= agent.TargetFramework.Version && TargetVersion >= testVersion)
-				return TargetLauncherName;
-			if (testVersion <= agent.TargetFramework.Version)
-				return agent.LauncherName;
-		}
-
-		// TargetVersion is greater than any builtin, so we must be testing a new, higher-version agent
-		return TargetLauncherName;
-	}
 }

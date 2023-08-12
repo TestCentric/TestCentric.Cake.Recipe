@@ -23,7 +23,7 @@ public class PackageTestReport
 		ReportMissingFiles();
 
 		if (actualResult.OverallResult == null)
-			Errors.Add("   The test-run element has no result attribute.");
+			Errors.Add("   No top-level result attribute was found.");
 		else if (expectedResult.OverallResult != actualResult.OverallResult)
 			Errors.Add($"   Expected: Overall Result = {expectedResult.OverallResult}\r\n   But was: {actualResult.OverallResult}");
 		CheckCounter("Test Count", expectedResult.Total, actualResult.Total);
