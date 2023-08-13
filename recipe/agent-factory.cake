@@ -64,7 +64,7 @@ public class PluggableAgentFactory
 			Description = $"TestCentric engine extension for running tests under .NET {TargetVersion}";
 			TargetLauncherName = $"Net{TargetVersionWithoutDots}AgentLauncher";
 			TargetLauncherFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-agent-launcher";
-			TargetAgentFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-pluggable-agent";
+			TargetAgentFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-agent";
 			TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".exe";
 			Tags = new [] { "testcentric", "pluggable", "agent", $"net{TargetVersionWithoutDots}" };
 			AgentFiles = new FilePath[] {
@@ -82,7 +82,7 @@ public class PluggableAgentFactory
 				Description = $"TestCentric engine extension for running tests under .NET Core {TargetVersion}";
 				TargetLauncherName = $"NetCore{TargetVersionWithoutDots}AgentLauncher";
 				TargetLauncherFileNameWithoutExtension = $"netcore{TargetVersionWithoutDots}-agent-launcher";
-				TargetAgentFileNameWithoutExtension = $"netcore{TargetVersionWithoutDots}-pluggable-agent";
+				TargetAgentFileNameWithoutExtension = $"netcore{TargetVersionWithoutDots}-agent";
 				TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".dll";
 				AgentFiles = new FilePath[] {
 					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
@@ -99,7 +99,7 @@ public class PluggableAgentFactory
 				Description = $"TestCentric engine extension for running tests under .NET {TargetVersion}";
 				TargetLauncherName = $"Net{TargetVersionWithoutDots}AgentLauncher";
 				TargetLauncherFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-agent-launcher";
-				TargetAgentFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-pluggable-agent";
+				TargetAgentFileNameWithoutExtension = $"net{TargetVersionWithoutDots}-agent";
 				TargetAgentFileName = TargetAgentFileNameWithoutExtension + ".dll";
 				AgentFiles = new FilePath[] {
 					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
@@ -127,7 +127,7 @@ public class PluggableAgentFactory
 				new FilePath[] { LICENSE, README, ICON },
 				new DirectoryContent("tools").WithFiles( LauncherFiles ),
 				new DirectoryContent("tools/agent").WithFiles( AgentFiles )),
-			testRunner: new AgentRunner(BuildSettings.NuGetTestDirectory + NuGetId + "/tools/agent/net60-pluggable-agent.dll"),
+			testRunner: new AgentRunner(BuildSettings.NuGetTestDirectory + NuGetId + "/tools/agent/" + TargetAgentFileName),
 			tests: PackageTests);
 	
 	public ChocolateyPackage ChocolateyPackage =>
@@ -140,7 +140,7 @@ public class PluggableAgentFactory
 				new FilePath[] { ICON },
 				new DirectoryContent("tools").WithFiles( LICENSE, README, CHOCO_VERIFICATION ).AndFiles( LauncherFiles ),
 				new DirectoryContent("tools/agent").WithFiles( AgentFiles )),
-			testRunner: new AgentRunner(BuildSettings.ChocolateyTestDirectory + ChocoId + "/tools/agent/net60-pluggable-agent.dll"),
+			testRunner: new AgentRunner(BuildSettings.ChocolateyTestDirectory + ChocoId + "/tools/agent/" + TargetAgentFileName),
 			tests: PackageTests);
 
 	public PackageDefinition[] Packages => new PackageDefinition[] { NuGetPackage, ChocolateyPackage };
