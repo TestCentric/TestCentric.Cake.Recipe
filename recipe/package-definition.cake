@@ -187,13 +187,6 @@ public abstract class PackageDefinition
 
             Banner.Display(packageTest.Description);
 
-            // Display Test Environment
-		    Console.WriteLine("Test Environment");
-		    Console.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
-		    Console.WriteLine($"  CLR Version: {Environment.Version}");
-		    Console.WriteLine($"    Arguments: {packageTest.Arguments}");
-		    Console.WriteLine();
-
 			_context.CreateDirectory(testResultDir);
             string arguments = packageTest.Arguments + $" --work={testResultDir}";
             if (BuildSettings.TraceLevel != "Off")
