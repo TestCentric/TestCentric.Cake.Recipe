@@ -72,12 +72,17 @@ public class ExtensionSpecifier
 		
 		extensionPackage.Install(targetPackage.ExtensionInstallDirectory);
 
-		// Temporary fix to copy testcentric.engine.core we just built into
-		// the pluggable agents we are using.
+		// Temporary fix when building engine to copy testcentric.engine.core
+		// we just built into the pluggable agents we are using.	
+		if (targetPackage.PackageId != "TestCentric.Engine")
+			return;
+
 		// TODO: Figure out how to break the circularity created by the fact that
-		// the pluggable agents depend on the engine core while this engine project
-		// tests require working copies of three pluggable agents.
-		
+		// the pluggable agents depend on the engine core while the engine project
+		// tests require working copies of three pluggable agents. Ideally, this
+		// code should be in the engine project itself but that's not possible so
+		// long as all packaging steps are within the same task.
+
 		var engineCoreBinDir = BuildSettings.SourceDirectory + "TestEngine/testcentric.engine.core/bin/Release/";
 		var targetDir = targetPackage.ExtensionInstallDirectory + extensionPackage.Id + "." + extensionPackage.Version + "/tools/agent/";
 
@@ -111,7 +116,7 @@ public static ExtensionSpecifier NUnitProjectLoader = new ExtensionSpecifier(
 public static ExtensionSpecifier Net20PluggableAgent = new ExtensionSpecifier(
 	"NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.0.0");
 public static ExtensionSpecifier Net462PluggableAgent = new ExtensionSpecifier(
-	"NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.1.0-dev00008");
+	"NUnit.Extension.Net462PluggableAgent", "nunit-extension-net462-pluggable-agent", "2.0.1");
 public static ExtensionSpecifier NetCore21PluggableAgent = new ExtensionSpecifier(
 	"NUnit.Extension.NetCore21PluggableAgent", "nunit-extension-netcore21-pluggable-agent", "2.1.0");
 public static ExtensionSpecifier NetCore31PluggableAgent = new ExtensionSpecifier(
@@ -119,9 +124,9 @@ public static ExtensionSpecifier NetCore31PluggableAgent = new ExtensionSpecifie
 public static ExtensionSpecifier Net50PluggableAgent = new ExtensionSpecifier(
 	"NUnit.Extension.Net50PluggableAgent", "nunit-extension-net50-pluggable-agent", "2.0.0");
 public static ExtensionSpecifier Net60PluggableAgent = new ExtensionSpecifier(
-	"NUnit.Extension.Net60PluggableAgent", "nunit-extension-net60-pluggable-agent", "2.1.0-dev00017");
+	"NUnit.Extension.Net60PluggableAgent", "nunit-extension-net60-pluggable-agent", "2.0.0");
 public static ExtensionSpecifier Net70PluggableAgent = new ExtensionSpecifier(
-	"NUnit.Extension.Net70PluggableAgent", "nunit-extension-net70-pluggable-agent", "2.1.0-dev00007");
+	"NUnit.Extension.Net70PluggableAgent", "nunit-extension-net70-pluggable-agent", "2.0.0");
 public static ExtensionSpecifier Net80PluggableAgent = new ExtensionSpecifier(
 	"NUnit.Extension.Net80PluggableAgent", "nunit-extension-net80-pluggable-agent", "2.1.0");
 
