@@ -86,6 +86,9 @@ public static class Headers
         if (NoHeader.Count > 0 || NonStandard.Count > 0)
             throw new Exception("Missing or invalid file headers found");
 
+        if (examined == 0)
+            _context.Warning("\nWARNING: There were no '*.cs' files in the source directory. Use of the 'CheckHeaders' task may not make sense for this project.");
+
         List<string> GetHeader(FilePath file)
         {
             var header = new List<string>();
