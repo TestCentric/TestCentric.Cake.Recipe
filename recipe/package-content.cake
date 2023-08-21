@@ -3,6 +3,8 @@ public class PackageContent
 	private ICakeContext _context;
 	private List<FileSpec> _fileSpecs = new List<FileSpec>();
 
+	public PackageContent(params DirectoryContent[] directories) : this(null, directories) { }
+
 	public PackageContent(FilePath[] rootFiles = null, params DirectoryContent[] directories)
 	{
 		_context = BuildSettings.Context;
