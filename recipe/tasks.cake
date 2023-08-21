@@ -37,32 +37,15 @@ public class BuildTasks
 	public CakeTaskBuilder CreateDraftReleaseTask { get; set; }
 	public CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
 	public CakeTaskBuilder CreateProductionReleaseTask { get; set; }
-
-	// While most dependencies are fixed, some of them vary according
-	// to the build settings. This method is called after the settings
-	// have been initialized.
-	public void FixupDependencies()
-	{
-		// Dependencies that change when there is no solution file.
-		if (BuildSettings.SolutionFile != null)
-		{
-			BuildTask.IsDependentOn("Clean").IsDependentOn("Restore").IsDependentOn("CheckHeaders");
-			PackageTask.IsDependentOn("Build");
-		}
-		else
-		{
-			PackageTask.IsDependentOn("CleanPackageDirectory");
-		}
-	}
 }
 
 // The following inline statements do most of the task initialization.
-// They run before any tasks but after static initialization. The
-// build settings have not yet been fully initialized at this point,
-// which is why we need FixupDependencies.
+// They run before any tasks but after static initialization. A few
+// tasks need a bit more initialization in the BuildSettings constructor
+// as indicated in comments below.
 
 //////////////////////////////////////////////////////////////////////
-// GENERAL TASKTasks
+// GENERAL TASKS
 //////////////////////////////////////////////////////////////////////
 
 BuildSettings.Tasks.CompileScriptTask = Task("CompileScript")
@@ -123,19 +106,23 @@ BuildSettings.Tasks.RestoreTask = Task("Restore")
 	.Description("Restore referenced packages")
 	.Does(() =>
 	{
+		// NOTE: May be called directly or as dependency of 'Build'
 		if (BuildSettings.SolutionFile == null)
-			throw new Exception("Nothing to restore because there is no solution file");
+			throw new Exception($"Can't use '{BuildSettings.Target}' for a project without a solution file.");
 
 		NuGetRestore(BuildSettings.SolutionFile, BuildSettings.RestoreSettings);
 	});
 
 
 BuildSettings.Tasks.BuildTask = Task("Build")
+	.IsDependentOn("Clean")
+	.IsDependentOn("Restore")
+	.IsDependentOn("CheckHeaders")
 	.Description("Build The solution")
 	.Does(() =>
 	{
 		if (BuildSettings.SolutionFile == null)
-			throw new Exception("Nothing to build because there is no solution file");
+			throw new Exception("Can't use 'Build' for a project without a solution file.");
 
 		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings.WithProperty("Version", BuildSettings.PackageVersion));
 	});
@@ -153,17 +140,15 @@ BuildSettings.Tasks.UnitTestTask = Task("Test")
 // PACKAGING TASKS
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.PackageTask = Task("Package")
-	.Does(() => {
-		foreach(var package in BuildSettings.Packages)
-			package.BuildVerifyAndTest();
-	});
+// NOTE: Dependencies are added in BuildSettings constructor
+BuildSettings.Tasks.PackageTask = Task("Package");
 
 BuildSettings.Tasks.PackageExistingBuildTask = Task("PackageExistingBuild")
-	.Does(() => {
-		foreach(var package in BuildSettings.Packages)
-			package.BuildVerifyAndTest();
-	});
+	.IsDependentOn("CleanPackageDirectory")
+	.IsDependentOn("BuildPackages")
+	.IsDependentOn("InstallPackages")
+	.IsDependentOn("VerifyPackages")
+	.IsDependentOn("TestPackages");
 
 BuildSettings.Tasks.BuildTestAndPackageTask = Task("BuildTestAndPackage")
 	.IsDependentOn("Build")
@@ -205,8 +190,11 @@ BuildSettings.Tasks.TestPackagesTask = Task("TestPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
-	        Banner.Display($"Testing {package.PackageFileName}");
-			package.RunPackageTests();
+			if (package.PackageTests != null)
+			{
+				Banner.Display($"Testing {package.PackageFileName}");
+				package.RunPackageTests();
+			}
 		}
 	});
 
