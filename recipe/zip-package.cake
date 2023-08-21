@@ -16,11 +16,22 @@ public class ZipPackage : PackageDefinition
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
 	public ZipPackage(
-        string id, string source, string basePath, TestRunner testRunner = null,
-        PackageCheck[] checks = null, IEnumerable<PackageTest> tests = null,
+        string id, 
+        string source = null, 
+        string basePath = null, 
+        TestRunner testRunner = null,
+        PackageCheck[] checks = null, 
+        IEnumerable<PackageTest> tests = null,
         ExtensionSpecifier[] preloadedExtensions = null)
-      : base (PackageType.Zip, id, source, basePath, testRunner: testRunner, 
-        checks: checks, tests: tests, preloadedExtensions: preloadedExtensions)
+    : base (
+        PackageType.Zip, 
+        id, 
+        source: source, 
+        basePath: basePath, 
+        testRunner: testRunner, 
+        checks: checks,
+        tests: tests,
+        preloadedExtensions: preloadedExtensions)
     {
     }
 
