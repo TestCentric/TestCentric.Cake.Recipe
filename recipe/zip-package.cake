@@ -22,17 +22,19 @@ public class ZipPackage : PackageDefinition
         TestRunner testRunner = null,
         PackageCheck[] checks = null, 
         IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null)
+        ExtensionSpecifier[] preloadedExtensions = null,
+        ExtensionSpecifier[] bundledExtensions = null)
     : base (
         PackageType.Zip, 
         id, 
-        source: source, 
+        source: source,
         basePath: basePath, 
         testRunner: testRunner, 
         checks: checks,
         tests: tests,
         preloadedExtensions: preloadedExtensions)
     {
+        BundledExtensions = bundledExtensions;
     }
 
     public override string PackageFileName => $"{PackageId}-{PackageVersion}.zip";
@@ -40,8 +42,20 @@ public class ZipPackage : PackageDefinition
     public override string PackageResultDirectory => $"{BuildSettings.ZipResultDirectory}{PackageId}/";
     public override string ExtensionInstallDirectory => $"{BuildSettings.ZipTestDirectory}{PackageId}/bin/addins/";
   
+    public ExtensionSpecifier[] BundledExtensions { get; }
+
     public override void BuildPackage()
     {
+        if (string.IsNullOrEmpty(PackageSource))
+            throw new ArgumentException(
+                $"Package source must be specified fir a Zip package.", "source");
+        else if (!PackageSource.EndsWith(".zspec"))
+            throw new ArgumentException(
+                $"Invalid package source specified: {PackageSource}. Must be of type '.zspec'.", "source");
+        else if (!System.IO.File.Exists(PackageSource))
+            throw new FileNotFoundException(
+                $"Package source not found: {PackageSource}");
+
         // Get zip specification, which tells what to put in the zip
 		var spec = new ZipSpecification(PackageSource);
 
@@ -66,6 +80,11 @@ public class ZipPackage : PackageDefinition
 				_context.CopyFileToDirectory(source, target);
 		}
 
+        if (BundledExtensions != null)
+            foreach(ExtensionSpecifier extensionSpecifier in BundledExtensions)
+                extensionSpecifier.NuGetPackage.Install(zipImageDir + "bin/addins/");
+                
+
         // Zip the directory to create package
         _context.Zip(BuildSettings.ZipImageDirectory, BuildSettings.PackageDirectory + PackageFileName);
 
@@ -75,6 +94,20 @@ public class ZipPackage : PackageDefinition
     public override void InstallPackage()
     {
         _context.Unzip(BuildSettings.PackageDirectory + PackageFileName, PackageInstallDirectory + PackageId);
+    }
+
+    protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath)
+    {
+        var dirName = dirPath.GetDirectoryName();
+
+        if (!dirName.StartsWith("NUnit.Extension."))
+            return false;
+
+        foreach (var extension in BundledExtensions)
+            if (dirName.StartsWith(extension.NuGetId + "."))
+                return false;
+
+        return true;
     }
 
     class ZipSpecification

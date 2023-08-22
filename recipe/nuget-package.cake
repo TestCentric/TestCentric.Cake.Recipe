@@ -103,6 +103,15 @@ public class NuGetPackage : PackageDefinition
                 settings.SymbolPackageFormat = "snupkg";
             }
 
+            if (PackageContent != null)
+            {
+                foreach (var item in PackageContent.GetNuSpecContent())
+                    settings.Files.Add(item);
+
+                foreach (var dependency in PackageContent.Dependencies)
+                    settings.Dependencies.Add(new NuSpecDependency { Id = dependency.NuGetId, Version = dependency.Version } );
+            }
+
             return settings;
         }
     }
@@ -149,4 +158,7 @@ public class NuGetPackage : PackageDefinition
             ExcludeVersion = true
         });
     }
+
+    protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
+        dirPath.GetDirectoryName().StartsWith("NUnit.Extension.");
 }

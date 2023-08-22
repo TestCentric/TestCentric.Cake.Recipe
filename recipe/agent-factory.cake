@@ -123,10 +123,11 @@ public class PluggableAgentFactory
 			title: Title,
 			description: Description,
 			tags: Tags,
-			packageContent: new PackageContent(
-				new FilePath[] { LICENSE, README, ICON },
-				new DirectoryContent("tools").WithFiles( LauncherFiles ),
-				new DirectoryContent("tools/agent").WithFiles( AgentFiles )),
+			packageContent: new PackageContent()
+				.WithRootFiles(LICENSE, README, ICON)
+				.WithDirectories(
+					new DirectoryContent("tools").WithFiles( LauncherFiles ),
+					new DirectoryContent("tools/agent").WithFiles( AgentFiles ) ),
 			testRunner: new AgentRunner(BuildSettings.NuGetTestDirectory + NuGetId + "/tools/agent/" + TargetAgentFileName),
 			tests: PackageTests);
 	
@@ -136,10 +137,11 @@ public class PluggableAgentFactory
 			title: Title,
 			description: Description,
 			tags: Tags,
-			packageContent: new PackageContent(
-				new FilePath[] { ICON },
-				new DirectoryContent("tools").WithFiles( LICENSE, README, CHOCO_VERIFICATION ).AndFiles( LauncherFiles ),
-				new DirectoryContent("tools/agent").WithFiles( AgentFiles )),
+			packageContent: new PackageContent()
+				.WithRootFiles(ICON)
+				.WithDirectories(
+					new DirectoryContent("tools").WithFiles( LICENSE, README, CHOCO_VERIFICATION ).AndFiles( LauncherFiles ),
+					new DirectoryContent("tools/agent").WithFiles( AgentFiles ) ),
 			testRunner: new AgentRunner(BuildSettings.ChocolateyTestDirectory + ChocoId + "/tools/agent/" + TargetAgentFileName),
 			tests: PackageTests);
 

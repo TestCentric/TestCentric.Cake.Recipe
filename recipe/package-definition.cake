@@ -155,16 +155,13 @@ public abstract class PackageDefinition
 
 		// Ensure we start out each package with no extensions installed.
 		// If any package test installs an extension, it remains available
-		// for subsequent tests of the same package only.
-		foreach (var dirPath in _context.GetDirectories(ExtensionInstallDirectory + "*"))
-		{
-			string dirName = dirPath.GetDirectoryName();
-			if (dirName.StartsWith("NUnit.Extension.") || dirName.StartsWith("nunit-extension-"))
-			{
-				_context.DeleteDirectory(dirPath, new DeleteDirectorySettings() { Recursive = true });
-				Console.WriteLine("Deleted directory " + dirName);
-			}
-		}
+		// for subsequent tests of the same package only. 
+		foreach (DirectoryPath dirPath in _context.GetDirectories(ExtensionInstallDirectory + "*"))
+			if (IsRemovableExtensionDirectory(dirPath))
+            {
+		        _context.DeleteDirectory(dirPath, new DeleteDirectorySettings() { Recursive = true });
+		        Console.WriteLine("Deleted directory " + dirPath.GetDirectoryName());
+            }
 
         // Pre-install any required extensions specified in BuildSettings.
         // Individual tests may still call for additional extensions.
@@ -220,4 +217,6 @@ public abstract class PackageDefinition
     }
 
     public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
+
+    protected abstract bool IsRemovableExtensionDirectory(DirectoryPath dirPath);
 }

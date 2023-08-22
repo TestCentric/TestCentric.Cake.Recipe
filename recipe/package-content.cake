@@ -1,7 +1,13 @@
+
 public class PackageContent
 {
 	private ICakeContext _context;
 	private List<FileSpec> _fileSpecs = new List<FileSpec>();
+
+	public PackageContent()
+	{
+		_context = BuildSettings.Context;
+	}
 
 	public PackageContent(params DirectoryContent[] directories) : this(null, directories) { }
 
@@ -20,8 +26,36 @@ public class PackageContent
 				_fileSpecs.Add(new FileSpec(source, content.TargetDirectory));
 	}
 
-	public FilePath[] RootFiles { get; set; }
-	public DirectoryContent[] Directories { get; set; }
+	public PackageContent WithRootFiles(params FilePath[] rootFiles)
+	{
+		RootFiles = rootFiles;
+
+		foreach (FilePath filePath in RootFiles)
+			_fileSpecs.Add(new FileSpec(filePath));
+
+		return this;
+	}
+
+	public PackageContent WithDirectories(params DirectoryContent[] directories)
+	{
+		Directories = directories;
+
+		foreach (DirectoryContent content in Directories)
+			foreach (FilePath source in content.Files)
+				_fileSpecs.Add(new FileSpec(source, content.TargetDirectory));
+
+		return this;
+	}
+
+	public PackageContent WithDependencies(params ExtensionSpecifier[] dependencies)
+	{
+		Dependencies = dependencies;
+		return this;
+	}
+
+	public FilePath[] RootFiles { get; set; } = new FilePath[0];
+	public DirectoryContent[] Directories { get; set; } = new DirectoryContent[0];
+	public ExtensionSpecifier[] Dependencies { get; set; } = new ExtensionSpecifier[0];
 
 	public List<NuSpecContent> GetNuSpecContent()
 	{

@@ -60,40 +60,57 @@ public class ChocolateyPackage : PackageDefinition
     // The directory into which extensions to the test runner are installed
     public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
 
+    protected virtual ChocolateyPackSettings ChocolateyPackSettings
+    {
+        get
+        {
+            var settings = new ChocolateyPackSettings
+            {
+		        Id = PackageId,
+                Version = PackageVersion,
+                Title = PackageTitle ?? PackageId,
+                Summary = PackageSummary,
+                Description = PackageDescription,
+                ReleaseNotes = ReleaseNotes,
+                Tags = Tags,
+                Authors = TESTCENTRIC_PACKAGE_AUTHORS,
+		        Owners = TESTCENTRIC_PACKAGE_OWNERS,
+		        Copyright = TESTCENTRIC_COPYRIGHT,
+		        ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
+		        LicenseUrl = new Uri(TESTCENTRIC_LICENSE_URL),
+		        RequireLicenseAcceptance = false,
+		        IconUrl = new Uri(TESTCENTRIC_ICON_URL),
+                ProjectSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
+                PackageSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
+                DocsUrl = new Uri(TESTCENTRIC_PROJECT_URL),
+                MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
+                BugTrackerUrl = new Uri(PROJECT_REPOSITORY_URL + "issues"),
+		        Verbose = BuildSettings.ChocolateyVerbosity,
+                OutputDirectory = BuildSettings.PackageDirectory,
+	        };
+
+            if (PackageContent != null)
+            {
+                foreach (var item in PackageContent.GetChocolateyNuSpecContent(BasePath))
+                    settings.Files.Add(item);
+
+                foreach (var dependency in PackageContent.Dependencies)
+                    settings.Dependencies.Add(new ChocolateyNuSpecDependency { Id = dependency.ChocoId, Version = dependency.Version } );
+            }
+
+            return settings;
+        }
+    }
+
     public override void BuildPackage()
     {
-        var settings = new ChocolateyPackSettings
-	    {
-		    Id = PackageId,
-            Version = PackageVersion,
-            Title = PackageTitle ?? PackageId,
-            Summary = PackageSummary,
-            Description = PackageDescription,
-            ReleaseNotes = ReleaseNotes,
-            Tags = Tags,
-            Authors = TESTCENTRIC_PACKAGE_AUTHORS,
-		    Owners = TESTCENTRIC_PACKAGE_OWNERS,
-		    Copyright = TESTCENTRIC_COPYRIGHT,
-		    ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
-		    LicenseUrl = new Uri(TESTCENTRIC_LICENSE_URL),
-		    RequireLicenseAcceptance = false,
-		    IconUrl = new Uri(TESTCENTRIC_ICON_URL),
-            ProjectSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
-            PackageSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
-            DocsUrl = new Uri(TESTCENTRIC_PROJECT_URL),
-            MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
-            BugTrackerUrl = new Uri(PROJECT_REPOSITORY_URL + "issues"),
-		    Verbose = BuildSettings.ChocolateyVerbosity,
-            OutputDirectory = BuildSettings.PackageDirectory,
-	    };
-
-        foreach (var item in PackageContent.GetChocolateyNuSpecContent(BasePath))
-            settings.Files.Add(item);
-        
-        if (!string.IsNullOrEmpty(PackageSource))
-            _context.ChocolateyPack(PackageSource, settings);
+        if (string.IsNullOrEmpty(PackageSource))
+            _context.ChocolateyPack(ChocolateyPackSettings);
+        else if (PackageSource.EndsWith(".nuspec"))
+            _context.ChocolateyPack(PackageSource, ChocolateyPackSettings);
         else
-            _context.ChocolateyPack(settings);
+            throw new ArgumentException(
+                $"Invalid package source specified: {PackageSource}", "source");
     }
 
     public override void InstallPackage()
@@ -118,4 +135,7 @@ public class ChocolateyPackage : PackageDefinition
             ExcludeVersion = true
         });
     }
+
+    protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
+        dirPath.GetDirectoryName().StartsWith("nunit-extension-");
 }
