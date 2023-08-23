@@ -94,7 +94,6 @@ public class NuGetPackage : PackageDefinition
 		        Verbosity = BuildSettings.NuGetVerbosity,
                 OutputDirectory = BuildSettings.PackageDirectory,
                 NoPackageAnalysis = true,
-                Files = PackageContent.GetNuSpecContent()
 	        };
 
             if (SymbolChecks != null)
@@ -103,6 +102,17 @@ public class NuGetPackage : PackageDefinition
                 settings.SymbolPackageFormat = "snupkg";
             }
 
+            return settings;
+        }
+    }
+
+    public override void BuildPackage()
+    {
+        var settings = NuGetPackSettings;
+
+        if (string.IsNullOrEmpty(PackageSource))
+        {
+            _context.Information("Using PackageSource");
             if (PackageContent != null)
             {
                 foreach (var item in PackageContent.GetNuSpecContent())
@@ -112,28 +122,29 @@ public class NuGetPackage : PackageDefinition
                     settings.Dependencies.Add(new NuSpecDependency { Id = dependency.NuGetId, Version = dependency.Version } );
             }
 
-            return settings;
+            _context.NuGetPack(settings);
         }
-    }
-
-    public override void BuildPackage()
-    {
-        if (string.IsNullOrEmpty(PackageSource))
-            _context.NuGetPack(NuGetPackSettings);
-        else if (PackageSource.EndsWith(".nuspec"))
-            _context.NuGetPack(PackageSource, NuGetPackSettings);
-        else if (PackageSource.EndsWith(".csproj"))
-		    _context.MSBuild(PackageSource,
-                new MSBuildSettings {
-                    Target = "pack",
-		            Verbosity = BuildSettings.MSBuildVerbosity,
-		            Configuration = BuildSettings.Configuration,
-		            PlatformTarget = PlatformTarget.MSIL,
-		            AllowPreviewVersion = BuildSettings.MSBuildAllowPreviewVersion
-            	}.WithProperty("Version", BuildSettings.PackageVersion));
-        else
-            throw new ArgumentException(
-                $"Invalid package source specified: {PackageSource}", "source");
+        else switch(System.IO.Path.GetExtension(PackageSource))
+        {
+            case ".nuspec":
+                _context.Information("Using Nuspec");
+                _context.NuGetPack(PackageSource, settings);
+                break;
+            case ".csproj":
+	            _context.Information("Using Csproj");
+	            _context.MSBuild(PackageSource,
+                    new MSBuildSettings {
+                        Target = "pack",
+		                Verbosity = BuildSettings.MSBuildVerbosity,
+		                Configuration = BuildSettings.Configuration,
+		                PlatformTarget = PlatformTarget.MSIL,
+		                AllowPreviewVersion = BuildSettings.MSBuildAllowPreviewVersion
+            	    }.WithProperty("Version", BuildSettings.PackageVersion));
+                break;
+            default:
+                throw new ArgumentException(
+                    $"Invalid package source specified: {PackageSource}", "source");
+        }
     }
 
     public override void InstallPackage()

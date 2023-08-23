@@ -160,7 +160,7 @@ public abstract class PackageDefinition
 			if (IsRemovableExtensionDirectory(dirPath))
             {
 		        _context.DeleteDirectory(dirPath, new DeleteDirectorySettings() { Recursive = true });
-		        Console.WriteLine("Deleted directory " + dirPath.GetDirectoryName());
+		        _context.Information("Deleted directory " + dirPath.GetDirectoryName());
             }
 
         // Pre-install any required extensions specified in BuildSettings.
