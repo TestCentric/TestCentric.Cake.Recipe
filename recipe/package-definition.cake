@@ -26,7 +26,7 @@ public abstract class PackageDefinition
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">An collection of PackageTests to be run against the package. Optional.</param>
-    /// <param name="preload">An array of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
+    /// <param name="preloadedExtensions">An array of PackgaeReferences indicating extensions to be preinstalled before running tests. Optional.</param>
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
@@ -41,7 +41,7 @@ public abstract class PackageDefinition
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
 		IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null,
+        PackageReference[] preloadedExtensions = null,
         PackageContent packageContent = null)
 	{
         if (testRunner == null && tests != null)
@@ -62,7 +62,7 @@ public abstract class PackageDefinition
 		TestRunner = testRunner;
 		PackageChecks = checks;
 		PackageTests = tests;
-        PreLoadedExtensions = preloadedExtensions ?? new ExtensionSpecifier[0];
+        PreLoadedExtensions = preloadedExtensions ?? new PackageReference[0];
 		SymbolChecks = symbols;
         PackageContent = packageContent ?? new PackageContent();
 	}
@@ -81,7 +81,7 @@ public abstract class PackageDefinition
 	public PackageCheck[] PackageChecks { get; protected set; }
     public PackageCheck[] SymbolChecks { get; protected set; }
     public IEnumerable<PackageTest> PackageTests { get; set; }
-    public ExtensionSpecifier[] PreLoadedExtensions { get; set; }
+    public PackageReference[] PreLoadedExtensions { get; set; }
     public PackageContent PackageContent { get; }
     public virtual string SymbolPackageName => throw new System.NotImplementedException($"Symbols are not available for this type of package.");
 
@@ -165,8 +165,8 @@ public abstract class PackageDefinition
 
         // Pre-install any required extensions specified in BuildSettings.
         // Individual tests may still call for additional extensions.
-        foreach(ExtensionSpecifier extensionSpecifier in PreLoadedExtensions)
-            extensionSpecifier.InstallExtension(this);
+        foreach(PackageReference package in PreLoadedExtensions)
+            package.Install(ExtensionInstallDirectory);
 
         if (TestRunner.RequiresInstallation)
             TestRunner.Install();
@@ -176,8 +176,8 @@ public abstract class PackageDefinition
             if (packageTest.Level > BuildSettings.PackageTestLevel)
                 continue;
 
-            foreach (ExtensionSpecifier extensionSpecifier in packageTest.ExtensionsNeeded)
-                extensionSpecifier.InstallExtension(this);
+            foreach (ExtensionSpecifier extension in packageTest.ExtensionsNeeded)
+                extension.InstallExtension(this);
 
             var testResultDir = $"{PackageResultDirectory}/{packageTest.Name}/";
             var resultFile = testResultDir + "TestResult.xml";

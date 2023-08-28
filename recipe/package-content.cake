@@ -47,7 +47,7 @@ public class PackageContent
 		return this;
 	}
 
-	public PackageContent WithDependencies(params ExtensionSpecifier[] dependencies)
+	public PackageContent WithDependencies(params PackageReference[] dependencies)
 	{
 		Dependencies = dependencies;
 		return this;
@@ -55,7 +55,7 @@ public class PackageContent
 
 	public FilePath[] RootFiles { get; set; } = new FilePath[0];
 	public DirectoryContent[] Directories { get; set; } = new DirectoryContent[0];
-	public ExtensionSpecifier[] Dependencies { get; set; } = new ExtensionSpecifier[0];
+	public PackageReference[] Dependencies { get; set; } = new PackageReference[0];
 
 	public List<NuSpecContent> GetNuSpecContent()
 	{

@@ -36,7 +36,7 @@ public class NuGetPackage : PackageDefinition
         PackageCheck[] checks = null,
         PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null, 
-        ExtensionSpecifier[] preloadedExtensions = null,
+        PackageReference[] preloadedExtensions = null,
         PackageContent packageContent = null)
     : base (
         PackageType.NuGet, 
@@ -118,8 +118,8 @@ public class NuGetPackage : PackageDefinition
                 foreach (var item in PackageContent.GetNuSpecContent())
                     settings.Files.Add(item);
 
-                foreach (var dependency in PackageContent.Dependencies)
-                    settings.Dependencies.Add(new NuSpecDependency { Id = dependency.NuGetId, Version = dependency.Version } );
+                foreach (PackageReference dependency in PackageContent.Dependencies)
+                    settings.Dependencies.Add(new NuSpecDependency { Id = dependency.Id, Version = dependency.Version } );
             }
 
             _context.NuGetPack(settings);

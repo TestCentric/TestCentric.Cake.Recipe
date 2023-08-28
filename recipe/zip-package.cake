@@ -22,7 +22,7 @@ public class ZipPackage : PackageDefinition
         TestRunner testRunner = null,
         PackageCheck[] checks = null, 
         IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null,
+        PackageReference[] preloadedExtensions = null,
         ExtensionSpecifier[] bundledExtensions = null)
     : base (
         PackageType.Zip, 

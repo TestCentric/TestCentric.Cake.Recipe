@@ -1,41 +1,3 @@
-// Representation of a package, containing everything needed to install it
-public class PackageSpecifier
-{
-	private ICakeContext _context;
-
-	public string Id { get; }
-	public string Version { get; }
-
-	public PackageSpecifier(string id, string version)
-	{
-		_context = BuildSettings.Context;
-
-		Id = id;
-		Version = version;
-	}
-
-	public bool IsInstalled(string installDirectory)
-	{
-		return _context.GetDirectories($"{installDirectory}{Id}.*").Count > 0;
-	}
-
-	public void Install(string installDirectory)
-	{
-		if (!IsInstalled(installDirectory))
-		{
-			Banner.Display($"Installing {Id} version {Version}");
-
-			_context.NuGetInstall(Id,
-				new NuGetInstallSettings()
-				{
-					OutputDirectory = installDirectory,
-					Version = Version
-				});
-		}
-	}
-
-}
-
 // Representation of an extension, for use by PackageTests. Because our
 // extensions usually exist as both nuget and chocolatey packages, each
 // extension may have a nuget id, a chocolatey id or both. A default version
@@ -53,8 +15,8 @@ public class ExtensionSpecifier
 	public string ChocoId { get; }
 	public string Version { get; }
 
-	public PackageSpecifier NuGetPackage => new PackageSpecifier(NuGetId, Version);
-	public PackageSpecifier ChocoPackage => new PackageSpecifier(ChocoId, Version);
+	public PackageReference NuGetPackage => new PackageReference(NuGetId, Version);
+	public PackageReference ChocoPackage => new PackageReference(ChocoId, Version);
 	
 	// Return an extension specifier using the same package ids as this
 	// one but specifying a particular version to be used.
@@ -66,7 +28,7 @@ public class ExtensionSpecifier
 	// Install this extension for a package
 	public void InstallExtension(PackageDefinition targetPackage)
 	{
-		PackageSpecifier extensionPackage = targetPackage.PackageType == PackageType.Chocolatey
+		PackageReference extensionPackage = targetPackage.PackageType == PackageType.Chocolatey
 			? ChocoPackage
 			: NuGetPackage;
 		

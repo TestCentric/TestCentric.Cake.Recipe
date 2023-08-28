@@ -28,7 +28,7 @@ public class ChocolateyPackage : PackageDefinition
         PackageCheck[] checks = null,
         PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null,
-        ExtensionSpecifier[] preloadedExtensions = null,
+        PackageReference[] preloadedExtensions = null,
         PackageContent packageContent = null)
     : base (
         PackageType.Chocolatey,
@@ -94,8 +94,8 @@ public class ChocolateyPackage : PackageDefinition
                 foreach (var item in PackageContent.GetChocolateyNuSpecContent(BasePath))
                     settings.Files.Add(item);
 
-                foreach (var dependency in PackageContent.Dependencies)
-                    settings.Dependencies.Add(new ChocolateyNuSpecDependency { Id = dependency.ChocoId, Version = dependency.Version } );
+                foreach (PackageReference dependency in PackageContent.Dependencies)
+                    settings.Dependencies.Add(new ChocolateyNuSpecDependency { Id = dependency.Id, Version = dependency.Version } );
             }
 
             return settings;
