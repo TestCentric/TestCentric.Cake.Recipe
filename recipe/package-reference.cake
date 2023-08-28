@@ -30,11 +30,19 @@ public class PackageReference
 		{
 			Banner.Display($"Installing {Id} version {Version}");
 
+			var packageSources = new []
+			{
+				"https://www.myget.org/F/testcentric/api/v3/index.json",
+				"https://api.nuget.org/v3/index.json",
+				"https://community.chocolatey.org/api/v2/"
+			};
+
 			_context.NuGetInstall(Id,
 				new NuGetInstallSettings()
 				{
 					OutputDirectory = installDirectory,
-					Version = Version
+					Version = Version,
+					Source = packageSources
 				});
 		}
 	}
