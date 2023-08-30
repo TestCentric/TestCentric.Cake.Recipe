@@ -33,40 +33,6 @@ public class ExtensionSpecifier
 			: NuGetPackage;
 		
 		extensionPackage.Install(targetPackage.ExtensionInstallDirectory);
-
-		// Temporary fix when building engine to copy testcentric.engine.core
-		// we just built into the pluggable agents we are using.	
-		if (targetPackage.PackageId != "TestCentric.Engine")
-			return;
-
-		// TODO: Figure out how to break the circularity created by the fact that
-		// the pluggable agents depend on the engine core while the engine project
-		// tests require working copies of three pluggable agents. Ideally, this
-		// code should be in the engine project itself but that's not possible so
-		// long as all packaging steps are within the same task.
-
-		var engineCoreBinDir = BuildSettings.SourceDirectory + "TestEngine/testcentric.engine.core/bin/Release/";
-		var targetDir = targetPackage.ExtensionInstallDirectory + extensionPackage.Id + "." + extensionPackage.Version + "/tools/agent/";
-
-		switch (extensionPackage.Id)
-		{
-			//case "NUnit.Extension.Net462PluggableAgent":
-			//case "nunit-extension-net462-pluggable-agent":
-			//	var sourceDir = engineCoreBinDir + "net462/";
-			//	Console.WriteLine($"Copying {sourceDir}");
-			//	Console.WriteLine($"     to {targetDir}");
-			//	BuildSettings.Context.CopyDirectory(sourceDir, targetDir);
-			//	break;
-			case "NUnit.Extension.Net60PluggableAgent":
-			case "nunit-extension-net60-pluggable-agent":
-			case "NUnit.Extension.Net70PluggableAgent":
-			case "nunit-extension-net70-pluggable-agent":
-				var sourceDir = engineCoreBinDir + "netcoreapp3.1/";
-				Console.WriteLine($"Copying {sourceDir}");
-				Console.WriteLine($"     to {targetDir}");
-				BuildSettings.Context.CopyDirectory(sourceDir, targetDir);
-				break;
-		}
 	}
 }
 
