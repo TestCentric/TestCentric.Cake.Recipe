@@ -61,7 +61,7 @@ const string TESTCENTRIC_ICON = "testcentric.png";
 const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2023 Charlie Poole";
 const string TESTCENTRIC_PROJECT_URL = "https://test-centric.org/";
 const string TESTCENTRIC_GITHUB_URL = "https://github.com/TestCentric/";
-const string TESTCENTRIC_ICON_URL = "https://github.com/TestCentric/assets/img/testcentric_128x128.png";
+const string TESTCENTRIC_ICON_URL = "https://test-centric.org/assets/img/testcentric_128x128.png";
 
 static readonly string PROJECT_REPOSITORY_URL = TESTCENTRIC_GITHUB_URL + BuildSettings.GitHubRepository + "/";
 
