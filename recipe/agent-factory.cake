@@ -88,7 +88,7 @@ public class PluggableAgentFactory
 					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
 					$"agent/{TargetAgentFileNameWithoutExtension}.deps.json", $"agent/{TargetAgentFileNameWithoutExtension}.runtimeconfig.json",
 					"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll",
-					"agent/testcentric.extensibility.dll" };
+					"agent/testcentric.extensibility.dll", "agent/Microsoft.Extensions.DependencyModel.dll" };
 				Tags = new [] { "testcentric", "pluggable", "agent", $"netcoreapp{TargetVersion}" };
 			}
 			else
