@@ -94,11 +94,11 @@ public abstract class PackageDefinition
     // The directory into which extensions to the test runner are installed
     public abstract string ExtensionInstallDirectory { get; }
 
-    public string PackageFilePath => BuildSettings.PackageDirectory + PackageFileName;
+    public string PackageFilePath => BuildSettings.PackagingDirectory + PackageFileName;
 
     public void BuildVerifyAndTest()
     {
-        _context.EnsureDirectoryExists(BuildSettings.PackageDirectory);
+        _context.EnsureDirectoryExists(BuildSettings.PackagingDirectory);
 
         Banner.Display($"Building {PackageFileName}");
         BuildPackage();

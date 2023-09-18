@@ -86,7 +86,7 @@ public class ChocolateyPackage : PackageDefinition
                 MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
                 BugTrackerUrl = new Uri(PROJECT_REPOSITORY_URL + "issues"),
 		        Verbose = BuildSettings.ChocolateyVerbosity,
-                OutputDirectory = BuildSettings.PackageDirectory,
+                OutputDirectory = BuildSettings.PackagingDirectory,
 	        };
 
             if (PackageContent != null)
@@ -118,7 +118,7 @@ public class ChocolateyPackage : PackageDefinition
         // Target Package is in package directory but may have dependencies
 		var packageSources = new []
 		{
-            BuildSettings.PackageDirectory,
+            BuildSettings.PackagingDirectory,
 			"https://www.myget.org/F/testcentric/api/v3/index.json",
 			"https://community.chocolatey.org/api/v2/"
 		};

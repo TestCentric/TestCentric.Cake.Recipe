@@ -13,12 +13,35 @@ public static class PackageReleaseManager
 	{
 		_hadErrors = false;
 
+		AddToLocalFeed();
+
 		PublishToMyGet();
 		PublishToNuGet();
 		PublishToChocolatey();
 
 		if (_hadErrors)
 			throw new Exception("One of the publishing steps failed.");
+	}
+
+	public static void AddToLocalFeed()
+	{
+		if (!BuildSettings.ShouldPublishToLocalFeed)
+			_context.Information("Nothing to add to local feed from this run.");
+		else
+			foreach (var package in BuildSettings.Packages)
+			{
+				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+				var packagePath = BuildSettings.PackagingDirectory + packageName;
+				try
+				{
+					AddNuGetPackage(packagePath, BuildSettings.LocalPackages);
+				}
+				catch (Exception ex)
+				{
+					_context.Error(ex.Message);
+					_hadErrors = true;
+				}
+			}
 	}
 
 	public static void PublishToMyGet()
@@ -31,7 +54,7 @@ public static class PackageReleaseManager
 			foreach (var package in BuildSettings.Packages)
 			{
 				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackageDirectory + packageName;
+				var packagePath = BuildSettings.PackagingDirectory + packageName;
 				try
 				{
 					if (package.PackageType == PackageType.NuGet)
@@ -57,7 +80,7 @@ public static class PackageReleaseManager
 			foreach (var package in BuildSettings.Packages)
 			{
 				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackageDirectory + packageName;
+				var packagePath = BuildSettings.PackagingDirectory + packageName;
 				try
 				{
 					if (package.PackageType == PackageType.NuGet)
@@ -81,7 +104,7 @@ public static class PackageReleaseManager
 			foreach (var package in BuildSettings.Packages)
 			{
 				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackageDirectory + packageName;
+				var packagePath = BuildSettings.PackagingDirectory + packageName;
 				try
 				{
 					if (package.PackageType == PackageType.Chocolatey)
@@ -93,6 +116,12 @@ public static class PackageReleaseManager
 					_hadErrors = true;
 				}
 			}
+	}
+
+	private static void AddNuGetPackage(string package, string localPackageDirectory)
+	{
+		CheckPackageExists(package);
+		_context.NuGetAdd(package, localPackageDirectory);
 	}
 
 	private static void PushNuGetPackage(FilePath package, string apiKey, string url)

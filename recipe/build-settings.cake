@@ -1,8 +1,4 @@
 //////////////////////////////////////////////////////////////////////
-// DUMP SETTINGS
-//////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////
 // BUILD SETTINGS
 //////////////////////////////////////////////////////////////////////
 
@@ -192,26 +188,27 @@ public static class BuildSettings
 	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
 	public static bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
 
+
 	// Standard Directory Structure - not changeable by user
 	public static string ProjectDirectory => Context.Environment.WorkingDirectory.FullPath + "/";
-	public static string SourceDirectory => ProjectDirectory + "src/";
-	public static string OutputDirectory => ProjectDirectory + "bin/" + Configuration + "/";
-	public static string ZipDirectory => ProjectDirectory + "zip/";
-	public static string NuGetDirectory => ProjectDirectory + "nuget/";
-	public static string ChocolateyDirectory => ProjectDirectory + "choco/";
-	public static string PackageDirectory => ProjectDirectory + "package/";
-	public static string ZipImageDirectory => PackageDirectory + "zipimage/";
-	public static string ToolsDirectory => ProjectDirectory + "tools/";
-	public static string PackageTestDirectory => PackageDirectory + "tests/";
-	public static string ZipTestDirectory => PackageTestDirectory + "zip/";
-	public static string NuGetTestDirectory => PackageTestDirectory + "nuget/";
-	public static string NuGetTestRunnerDirectory => NuGetTestDirectory + "runners/";
-	public static string ChocolateyTestDirectory => PackageTestDirectory + "choco/";
-	public static string ChocolateyTestRunnerDirectory => ChocolateyTestDirectory + "runners/";
-	public static string PackageResultDirectory => PackageDirectory + "results/";
-	public static string ZipResultDirectory => PackageResultDirectory + "zip/";
-	public static string NuGetResultDirectory => PackageResultDirectory + "nuget/";
-	public static string ChocolateyResultDirectory => PackageResultDirectory + "choco/";
+	public static string SourceDirectory				=> ProjectDirectory + SRC_DIR;
+	public static string OutputDirectory				=> ProjectDirectory + BIN_DIR + Configuration + "/";
+	public static string ZipDirectory					=> ProjectDirectory + ZIP_DIR;
+	public static string NuGetDirectory					=> ProjectDirectory + NUGET_DIR;
+	public static string ChocolateyDirectory			=> ProjectDirectory + CHOCO_DIR;
+	public static string PackagingDirectory				=> ProjectDirectory + PACKAGING_DIR;
+	public static string ZipImageDirectory				=> ProjectDirectory + ZIP_IMG_DIR;
+	public static string ToolsDirectory					=> ProjectDirectory + TOOLS_DIR;
+	public static string PackageTestDirectory			=> ProjectDirectory + PKG_TEST_DIR;
+	public static string ZipTestDirectory				=> ProjectDirectory + ZIP_TEST_DIR;
+	public static string NuGetTestDirectory				=> ProjectDirectory + NUGET_TEST_DIR;
+	public static string NuGetTestRunnerDirectory		=> ProjectDirectory + NUGET_RUNNER_DIR;
+	public static string ChocolateyTestDirectory		=> ProjectDirectory + CHOCO_TEST_DIR;
+	public static string ChocolateyTestRunnerDirectory	=> ProjectDirectory + CHOCO_RUNNER_DIR;
+	public static string PackageResultDirectory			=> ProjectDirectory + PKG_RSLT_DIR;
+	public static string ZipResultDirectory				=> ProjectDirectory + ZIP_RSLT_DIR;
+	public static string NuGetResultDirectory			=> ProjectDirectory + NUGET_RSLT_DIR;
+	public static string ChocolateyResultDirectory		=> ProjectDirectory + CHOCO_RSLT_DIR;
 
 	// Files
 	public static string SolutionFile { get; set; }
@@ -255,6 +252,9 @@ public static class BuildSettings
 	// Package Testing
 	public static int PackageTestLevel { get; set; }
 
+	// Publishing - Local Feed
+	public static string LocalPackages => LOCAL_PACKAGES;
+
 	// Publishing - MyGet
 	public static string MyGetPushUrl => MYGET_PUSH_URL;
 	public static string MyGetApiKey => GetApiKey(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY);
@@ -273,6 +273,8 @@ public static class BuildSettings
 	public static string GitHubAccessToken => GetApiKey(GITHUB_ACCESS_TOKEN);
 
 	public static bool IsPreRelease => BuildVersion.IsPreRelease;
+	public static bool ShouldPublishToLocalFeed =>
+		!IsPreRelease || LABELS_WE_PUBLISH_ON_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel);
 	public static bool ShouldPublishToMyGet =>
 		!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel);
 	public static bool ShouldPublishToNuGet =>
@@ -361,7 +363,7 @@ public static class BuildSettings
 		DisplaySetting("Source:           ", SourceDirectory);
 		DisplaySetting("NuGet:            ", NuGetDirectory);
 		DisplaySetting("Chocolatey:       ", ChocolateyDirectory);
-		DisplaySetting("Package:          ", PackageDirectory);
+		DisplaySetting("Package:          ", PackagingDirectory);
 		DisplaySetting("ZipImage:         ", ZipImageDirectory);
 		DisplaySetting("ZipTest:          ", ZipTestDirectory);
 		DisplaySetting("NuGetTest:        ", NuGetTestDirectory);

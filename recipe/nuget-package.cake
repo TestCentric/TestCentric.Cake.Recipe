@@ -92,7 +92,7 @@ public class NuGetPackage : PackageDefinition
 		        Language = "en-US",
                 BasePath = BasePath,
 		        Verbosity = BuildSettings.NuGetVerbosity,
-                OutputDirectory = BuildSettings.PackageDirectory,
+                OutputDirectory = BuildSettings.PackagingDirectory,
                 NoPackageAnalysis = true,
 	        };
 
@@ -152,7 +152,7 @@ public class NuGetPackage : PackageDefinition
         // Target Package is in package directory but may have dependencies
 		var packageSources = new []
 		{
-            BuildSettings.PackageDirectory,
+            BuildSettings.PackagingDirectory,
 			"https://www.myget.org/F/testcentric/api/v3/index.json",
 			"https://api.nuget.org/v3/index.json"
 		};

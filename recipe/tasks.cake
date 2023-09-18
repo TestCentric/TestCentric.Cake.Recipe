@@ -29,6 +29,7 @@ public class BuildTasks
 
 	// Publishing
 	public CakeTaskBuilder PublishTask { get; set; }
+	public CakeTaskBuilder AddToLocalFeedTask { get; set; }
 	public CakeTaskBuilder PublishToMyGetTask { get; set; }
 	public CakeTaskBuilder PublishToNuGetTask { get; set; }
 	public CakeTaskBuilder PublishToChocolateyTask { get; set; }
@@ -86,7 +87,7 @@ BuildSettings.Tasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirector
 
 BuildSettings.Tasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
 	.Description("Clean the package directory")
-	.Does(() => CleanDirectory(BuildSettings.PackageDirectory));
+	.Does(() => CleanDirectory(BuildSettings.PackagingDirectory));
 
 BuildSettings.Tasks.CleanAllTask = Task("CleanAll")
 	.Description("Clean all output directories, package directory and delete all obj directories")
@@ -206,6 +207,11 @@ BuildSettings.Tasks.PublishTask = Task("Publish")
 	.Description("Publish nuget and chocolatey packages according to the current settings")
 	.IsDependentOn("Package")
 	.Does(() => PackageReleaseManager.Publish());
+
+// This task may be run independently when recovering from errors.
+BuildSettings.Tasks.AddToLocalFeedTask = Task("AddToLocalFeed")
+	.Description("Publish packages to our local feed")
+	.Does(() =>	PackageReleaseManager.AddToLocalFeed());
 
 // This task may be run independently when recovering from errors.
 BuildSettings.Tasks.PublishToMyGetTask = Task("PublishToMyGet")

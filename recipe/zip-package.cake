@@ -86,14 +86,14 @@ public class ZipPackage : PackageDefinition
                 
 
         // Zip the directory to create package
-        _context.Zip(BuildSettings.ZipImageDirectory, BuildSettings.PackageDirectory + PackageFileName);
+        _context.Zip(BuildSettings.ZipImageDirectory, BuildSettings.PackagingDirectory + PackageFileName);
 
 		bool IsPattern(string s) => s.IndexOfAny(new [] {'*', '?' }) >0;
     }
 
     public override void InstallPackage()
     {
-        _context.Unzip(BuildSettings.PackageDirectory + PackageFileName, PackageInstallDirectory + PackageId);
+        _context.Unzip(BuildSettings.PackagingDirectory + PackageFileName, PackageInstallDirectory + PackageId);
     }
 
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath)
