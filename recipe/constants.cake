@@ -21,6 +21,9 @@ const string CHOCO_RSLT_DIR		= "packaging/results/choco/";
 const string ZIP_IMG_DIR		= "packaging/zipimage/";
 const string TOOLS_DIR			= "tools/";
 
+const string LOCAL_PACKAGES_DIR	= "../LocalPackages";
+private static readonly string[] LABELS_WE_ADD_TO_LOCAL_FEED = { "dev", "alpha", "beta", "rc" };
+
 // WARNING: When comparing versions, it's important to keep in mind some anomalies.
 // For example, new Version(6,0) is NOT equal to new Version(6,0,0). Instead the
 // former is less than the latter. Bugs can creep in easily. To avoid this, use
@@ -38,7 +41,6 @@ static readonly Version V_7_0	= new Version(7,0);
 static readonly Version V_8_0	= new Version(8,0);
 
 // URLs for uploading packages
-private const string LOCAL_PACKAGES = "../LocalPackages";
 private const string MYGET_PUSH_URL = "https://www.myget.org/F/testcentric/api/v2";
 private const string NUGET_PUSH_URL = "https://api.nuget.org/v3/index.json";
 private const string CHOCO_PUSH_URL = "https://push.chocolatey.org/";
@@ -54,7 +56,6 @@ private const string NUGET_API_KEY = "NUGET_API_KEY";
 private const string CHOCO_API_KEY = "CHOCO_API_KEY";
 
 // Pre-release labels that we publish
-private static readonly string[] LABELS_WE_PUBLISH_ON_LOCAL_FEED = { "dev" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };

@@ -127,7 +127,42 @@ public abstract class PackageDefinition
 
     public abstract void BuildPackage();
 
-    public abstract void InstallPackage();
+    // This may be called by NuGet or Chocolatey packages
+    public void AddPackageToLocalFeed()
+    {
+		try
+		{
+			_context.NuGetAdd(PackageFilePath, BuildSettings.LocalPackagesDirectory);
+		}
+		catch (Exception ex)
+		{
+			_context.Error(ex.Message);
+		}
+    }
+
+    // Base implementation is used for installing both NuGet and
+    // Chocolatey packages. Other package types should override.
+    public virtual void InstallPackage()
+    {
+	    var installSettings = new NuGetInstallSettings
+	    {
+		    Source = new [] {
+                // Package will be found here
+                BuildSettings.PackagingDirectory,
+                // Dependencies may be in any of these
+                BuildSettings.LocalPackagesDirectory,
+			    "https://www.myget.org/F/testcentric/api/v3/index.json",
+			    "https://api.nuget.org/v3/index.json" },
+            Version = PackageVersion,
+            OutputDirectory = PackageInstallDirectory,
+            ExcludeVersion = true,
+		    Prerelease = true,
+		    Verbosity = BuildSettings.NuGetVerbosity,
+		    NoCache = true
+	    };
+
+        _context.NuGetInstall(PackageId, installSettings);
+    }
 
     public void VerifyPackage()
     {

@@ -209,6 +209,7 @@ public static class BuildSettings
 	public static string ZipResultDirectory				=> ProjectDirectory + ZIP_RSLT_DIR;
 	public static string NuGetResultDirectory			=> ProjectDirectory + NUGET_RSLT_DIR;
 	public static string ChocolateyResultDirectory		=> ProjectDirectory + CHOCO_RSLT_DIR;
+	public static string LocalPackagesDirectory			=> ProjectDirectory + LOCAL_PACKAGES_DIR;
 
 	// Files
 	public static string SolutionFile { get; set; }
@@ -224,17 +225,19 @@ public static class BuildSettings
 		AllowPreviewVersion = MSBuildAllowPreviewVersion
 	};
 
+	public static bool ShouldAddToLocalFeed =>
+		IsLocalBuild
+			? !IsPreRelease || LABELS_WE_ADD_TO_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel)
+			: false;
+
 	public static NuGetVerbosity NuGetVerbosity{ get; set; }
 	public static NuGetRestoreSettings RestoreSettings => new NuGetRestoreSettings
 	{
 		Verbosity = NuGetVerbosity
 	};
-	public static NuGetInstallSettings NuGetInstallSettings => new NuGetInstallSettings
-	{
-		Verbosity = NuGetVerbosity
-	};
 
-	// The chocolatey Setting is actually bool Verbose, but we use verbosity so it lines up with the settings
+	// The chocolatey Setting is actually bool Verbose, but we use verbosity 
+	// so it lines up with the settings for NuGet
 	public static bool ChocolateyVerbosity { get; set; }
 
 	//Testing
@@ -251,9 +254,6 @@ public static class BuildSettings
 
 	// Package Testing
 	public static int PackageTestLevel { get; set; }
-
-	// Publishing - Local Feed
-	public static string LocalPackages => LOCAL_PACKAGES;
 
 	// Publishing - MyGet
 	public static string MyGetPushUrl => MYGET_PUSH_URL;
@@ -273,8 +273,6 @@ public static class BuildSettings
 	public static string GitHubAccessToken => GetApiKey(GITHUB_ACCESS_TOKEN);
 
 	public static bool IsPreRelease => BuildVersion.IsPreRelease;
-	public static bool ShouldPublishToLocalFeed =>
-		!IsPreRelease || LABELS_WE_PUBLISH_ON_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel);
 	public static bool ShouldPublishToMyGet =>
 		!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel);
 	public static bool ShouldPublishToNuGet =>
@@ -368,6 +366,7 @@ public static class BuildSettings
 		DisplaySetting("ZipTest:          ", ZipTestDirectory);
 		DisplaySetting("NuGetTest:        ", NuGetTestDirectory);
 		DisplaySetting("ChocolateyTest:   ", ChocolateyTestDirectory);
+		DisplaySetting("LocalPackages:    ", LocalPackagesDirectory);
 
 		DisplayHeading("BUILD");
 		DisplaySetting("Title:            ", Title);

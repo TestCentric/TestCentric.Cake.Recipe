@@ -32,10 +32,16 @@ public class PackageReference
 
 			var packageSources = new []
 			{
+				BuildSettings.LocalPackagesDirectory,
 				"https://www.myget.org/F/testcentric/api/v3/index.json",
 				"https://api.nuget.org/v3/index.json",
 				"https://community.chocolatey.org/api/v2/"
 			};
+
+			Console.WriteLine("Package Sources:");
+			foreach(var source in packageSources)
+				Console.WriteLine($"  {source}");
+			Console.WriteLine();
 
 			_context.NuGetInstall(Id,
 				new NuGetInstallSettings()

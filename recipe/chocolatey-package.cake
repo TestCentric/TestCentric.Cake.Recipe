@@ -113,29 +113,6 @@ public class ChocolateyPackage : PackageDefinition
                 $"Invalid package source specified: {PackageSource}", "source");
     }
 
-    public override void InstallPackage()
-    {
-        // Target Package is in package directory but may have dependencies
-		var packageSources = new []
-		{
-            BuildSettings.PackagingDirectory,
-			"https://www.myget.org/F/testcentric/api/v3/index.json",
-			"https://community.chocolatey.org/api/v2/"
-		};
-
-        // Install using nuget to avoid need for admin level
-        _context.NuGetInstall(PackageId, new NuGetInstallSettings
-        {
-            Source = packageSources,
-            Version = PackageVersion,
-            Prerelease = true,
-            Verbosity = BuildSettings.NuGetVerbosity,
-            NoCache = true,
-            OutputDirectory = PackageInstallDirectory,
-            ExcludeVersion = true
-        });
-    }
-
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
         dirPath.GetDirectoryName().StartsWith("nunit-extension-");
 }

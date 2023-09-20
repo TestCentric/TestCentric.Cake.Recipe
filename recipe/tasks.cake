@@ -26,10 +26,10 @@ public class BuildTasks
 	public CakeTaskBuilder InstallPackagesTask { get; set; }
 	public CakeTaskBuilder VerifyPackagesTask { get; set; }
 	public CakeTaskBuilder TestPackagesTask { get; set; }
+	public CakeTaskBuilder AddPackagesToLocalFeedTask { get; set; }
 
 	// Publishing
 	public CakeTaskBuilder PublishTask { get; set; }
-	public CakeTaskBuilder AddToLocalFeedTask { get; set; }
 	public CakeTaskBuilder PublishToMyGetTask { get; set; }
 	public CakeTaskBuilder PublishToNuGetTask { get; set; }
 	public CakeTaskBuilder PublishToChocolateyTask { get; set; }
@@ -163,7 +163,22 @@ BuildSettings.Tasks.BuildPackagesTask = Task("BuildPackages")
 		{
 	        Banner.Display($"Building {package.PackageFileName}");
 			package.BuildPackage();
+
+			if (BuildSettings.ShouldAddToLocalFeed)
+				if (package.PackageType == PackageType.NuGet || package.PackageType == PackageType.Chocolatey)
+					package.AddPackageToLocalFeed();
 		}
+	});
+
+BuildSettings.Tasks.AddPackagesToLocalFeedTask = Task("AddPackagesToLocalFeed")
+	.Description("Add packages to our local feed")
+	.Does(() =>	{
+		if (!BuildSettings.ShouldAddToLocalFeed)
+			Information("Nothing to add to local feed from this run.");
+		else
+			foreach(var package in BuildSettings.Packages)
+				if (package.PackageType == PackageType.NuGet || package.PackageType == PackageType.Chocolatey)
+					package.AddPackageToLocalFeed();
 	});
 
 BuildSettings.Tasks.InstallPackagesTask = Task("InstallPackages")
@@ -207,11 +222,6 @@ BuildSettings.Tasks.PublishTask = Task("Publish")
 	.Description("Publish nuget and chocolatey packages according to the current settings")
 	.IsDependentOn("Package")
 	.Does(() => PackageReleaseManager.Publish());
-
-// This task may be run independently when recovering from errors.
-BuildSettings.Tasks.AddToLocalFeedTask = Task("AddToLocalFeed")
-	.Description("Publish packages to our local feed")
-	.Does(() =>	PackageReleaseManager.AddToLocalFeed());
 
 // This task may be run independently when recovering from errors.
 BuildSettings.Tasks.PublishToMyGetTask = Task("PublishToMyGet")

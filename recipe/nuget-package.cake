@@ -147,29 +147,6 @@ public class NuGetPackage : PackageDefinition
         }
     }
 
-    public override void InstallPackage()
-    {
-        // Target Package is in package directory but may have dependencies
-		var packageSources = new []
-		{
-            BuildSettings.PackagingDirectory,
-			"https://www.myget.org/F/testcentric/api/v3/index.json",
-			"https://api.nuget.org/v3/index.json"
-		};
-
-        // Install using nuget to avoid need for admin level
-        _context.NuGetInstall(PackageId, new NuGetInstallSettings
-        {
-            Source = packageSources,
-            Version = PackageVersion,
-            Prerelease = true,
-            Verbosity = BuildSettings.NuGetVerbosity,
-            NoCache = true,
-            OutputDirectory = PackageInstallDirectory,
-            ExcludeVersion = true
-        });
-    }
-
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
         dirPath.GetDirectoryName().StartsWith("NUnit.Extension.");
 }
