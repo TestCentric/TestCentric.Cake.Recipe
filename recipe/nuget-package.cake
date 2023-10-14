@@ -112,9 +112,10 @@ public class NuGetPackage : PackageDefinition
 
         if (string.IsNullOrEmpty(PackageSource))
         {
-            _context.Information("Using PackageSource");
             if (PackageContent != null)
             {
+                _context.Information("Using PackageContent");
+
                 foreach (var item in PackageContent.GetNuSpecContent())
                     settings.Files.Add(item);
 
