@@ -85,10 +85,6 @@ public class BuildVersion
         if (label == branchName)
             label = "ci";
 
-        // Switch from 'dev' to 'adev' without requiring each project to change
-        if (label == "dev")
-            label = "adev";
-
         string suffix = "-" + label + _gitVersion.CommitsSinceVersionSourcePadded;
 
         switch (label)
@@ -101,7 +97,6 @@ public class BuildVersion
                     suffix = suffix.Substring(0, 21);
                 return _gitVersion.MajorMinorPatch + suffix;
 
-            case "adev":
             case "dev":
             case "pre":
                 return _gitVersion.MajorMinorPatch + suffix;
