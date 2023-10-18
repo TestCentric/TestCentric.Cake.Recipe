@@ -21,9 +21,7 @@ public class BuildVersion
         BranchName = _gitVersion.BranchName;
         IsReleaseBranch = BranchName.StartsWith("release-");
 
-        string packageVersion = context.HasArgument("packageVersion")
-            ? context.Argument<string>("packageVersion")
-            : CalculatePackageVersion();
+        string packageVersion = CommandLineOptions.PackageVersion ?? CalculatePackageVersion();
 
         int dash = packageVersion.IndexOf('-');
         IsPreRelease = dash > 0;

@@ -10,22 +10,22 @@ Setup((context) =>
 	// Ensure Api Keys and tokens are available if needed for tasks to be executed
 
 	// MyGet Api Key
-	bool needMyGetApiKey = tasksToExecute.Contains("PublishToMyGet") && BuildSettings.ShouldPublishToMyGet && !BuildSettings.NoPush;
+	bool needMyGetApiKey = tasksToExecute.Contains("PublishToMyGet") && BuildSettings.ShouldPublishToMyGet && !CommandLineOptions.NoPush;
 	if (needMyGetApiKey && string.IsNullOrEmpty(BuildSettings.MyGetApiKey))
 		DisplayErrorAndThrow("MyGet ApiKey is required but was not set.");
 
 	// NuGet Api Key
-	bool needNuGetApiKey = tasksToExecute.Contains("PublishToNuGet") && BuildSettings.ShouldPublishToNuGet && !BuildSettings.NoPush;
+	bool needNuGetApiKey = tasksToExecute.Contains("PublishToNuGet") && BuildSettings.ShouldPublishToNuGet && !CommandLineOptions.NoPush;
 	if (needNuGetApiKey && string.IsNullOrEmpty(BuildSettings.NuGetApiKey))
 		DisplayErrorAndThrow("NuGet ApiKey is required but was not set.");
 
 	// Chocolatey Api Key
-	bool needChocolateyApiKey = tasksToExecute.Contains("PublishToChocolatey") && BuildSettings.ShouldPublishToChocolatey && !BuildSettings.NoPush;
+	bool needChocolateyApiKey = tasksToExecute.Contains("PublishToChocolatey") && BuildSettings.ShouldPublishToChocolatey && !CommandLineOptions.NoPush;
 	if (needChocolateyApiKey && string.IsNullOrEmpty(BuildSettings.ChocolateyApiKey))
 		DisplayErrorAndThrow("Chocolatey ApiKey is required but was not set.");
 
 	// GitHub Access Token
-	if (!BuildSettings.NoPush &&
+	if (!CommandLineOptions.NoPush &&
 		(tasksToExecute.Contains("CreateDraftRelease") && BuildSettings.IsReleaseBranch ||
 		BuildSettings.IsProductionRelease))
 	{

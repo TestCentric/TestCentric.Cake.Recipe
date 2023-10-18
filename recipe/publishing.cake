@@ -25,7 +25,7 @@ public static class PackageReleaseManager
 	{
 		if (!BuildSettings.ShouldPublishToMyGet)
 			_context.Information("Nothing to publish to MyGet from this run.");
-		else if (BuildSettings.NoPush)
+		else if (CommandLineOptions.NoPush)
 			_context.Information("NoPush option suppressing publication to MyGet");
 		else
 			foreach (var package in BuildSettings.Packages)
@@ -51,7 +51,7 @@ public static class PackageReleaseManager
 	{
 		if (!BuildSettings.ShouldPublishToNuGet)
 			_context.Information("Nothing to publish to NuGet from this run.");
-		else if (BuildSettings.NoPush)
+		else if (CommandLineOptions.NoPush)
 			_context.Information("NoPush option suppressing publication to NuGet");
 		else
 			foreach (var package in BuildSettings.Packages)
@@ -75,7 +75,7 @@ public static class PackageReleaseManager
 	{
 		if (!BuildSettings.ShouldPublishToChocolatey)
 			_context.Information("Nothing to publish to Chocolatey from this run.");
-		else if (BuildSettings.NoPush)
+		else if (CommandLineOptions.NoPush)
 			_context.Information("NoPush option suppressing publication to Chocolatey");
 		else
 			foreach (var package in BuildSettings.Packages)
@@ -120,7 +120,7 @@ public static class PackageReleaseManager
 		{
 			_context.Information("Skipping Release creation because this is not a release branch");
 		}
-		else if (BuildSettings.NoPush)
+		else if (CommandLineOptions.NoPush)
 			_context.Information($"NoPush option skipping creation of draft release for version {BuildSettings.PackageVersion}");
 		else
 		{
@@ -169,7 +169,7 @@ public static class PackageReleaseManager
 		{
 			_context.Information("Skipping CreateProductionRelease because this is not a production release");
 		}
-		else if (BuildSettings.NoPush)
+		else if (CommandLineOptions.NoPush)
 			_context.Information($"NoPush option skipping creation of production release for version {BuildSettings.PackageVersion}");
 		else
 		{

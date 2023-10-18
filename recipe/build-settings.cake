@@ -37,9 +37,7 @@ public static class BuildSettings
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
 		bool chocolateyVerbosity = false,
 		// Defaults to Debug and Release
-		string[] validConfigurations = null,
-		// If 0, is calculated based on branch name and package version
-		int packageTestLevel = 0)
+		string[] validConfigurations = null)
 	{
 		if (context == null)
 			throw new ArgumentNullException(nameof(context));
@@ -51,6 +49,7 @@ public static class BuildSettings
 		Context = context;
 		_buildSystem = context.BuildSystem();
 
+		CommandLineOptions.Initialize(context);
 
 		Title = title;
 		SolutionFile = solutionFile ?? DeduceSolutionFile();
@@ -59,8 +58,6 @@ public static class BuildSettings
 		UnitTestRunner = unitTestRunner;
 
 		BuildVersion = new BuildVersion(context);
-
-		PackageTestLevel = CalcPackageTestLevel(packageTestLevel);
 
 		GitHubOwner = githubOwner;
 		GitHubRepository = githubRepository;
@@ -82,8 +79,6 @@ public static class BuildSettings
 		ChocolateyVerbosity = chocolateyVerbosity;
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
-		Configuration = context.Argument("configuration", context.Argument("c", DEFAULT_CONFIGURATION));
-		TraceLevel = context.Argument("trace", "Off");
 
 		ValidateSettings();
 
@@ -121,16 +116,8 @@ public static class BuildSettings
 		return solutionFile;
 	}
 
-	private static int CalcPackageTestLevel(int initializeArgument)
+	private static int CalcPackageTestLevel()
 	{
-		// Command-line argument takes precedence
-		int commandLineArgument = Context.Argument("testLevel", Context.Argument("level", 0));
-		if (commandLineArgument > 0)
-			return commandLineArgument;
-
-		if (initializeArgument > 0)
-			return initializeArgument;
-
 		if (!BuildVersion.IsPreRelease)
 			return 3;
 
@@ -168,9 +155,19 @@ public static class BuildSettings
 	public static BuildTasks Tasks { get; }
 	
 	// Arguments
-	public static string Configuration { get; private set; }
-	public static bool NoPush => Context.HasArgument("nopush");
-	public static string TraceLevel { get; private set; }
+	public static string Configuration
+	{
+		get
+		{
+			// Correct casing on user-provided config if necessary
+			foreach (string config in ValidConfigurations)
+				if (string.Equals(config, CommandLineOptions.Configuration, StringComparison.OrdinalIgnoreCase))
+					return config;
+
+			// Return the (invalid) user-provided config
+			return CommandLineOptions.Configuration;
+		}
+	}
 
 	// Build Environment
 	public static bool IsLocalBuild => _buildSystem.IsLocalBuild;
@@ -253,7 +250,10 @@ public static class BuildSettings
     public static List<PackageDefinition> Packages { get; } = new List<PackageDefinition>();
 
 	// Package Testing
-	public static int PackageTestLevel { get; set; }
+	public static int PackageTestLevel =>
+		CommandLineOptions.TestLevel > 0
+			? CommandLineOptions.TestLevel
+			: CalcPackageTestLevel();
 
 	// Publishing - MyGet
 	public static string MyGetPushUrl => MYGET_PUSH_URL;
@@ -286,18 +286,7 @@ public static class BuildSettings
 	{
 		var validationErrors = new List<string>();
 		
-		bool validConfig = false;
-		foreach (string config in ValidConfigurations)
-		{
-			if (string.Equals(config, Configuration, StringComparison.OrdinalIgnoreCase))
-			{
-				// Set again in case user specified wrong casing
-				Configuration = config;
-				validConfig = true;
-			}
-		}
-
-		if (!validConfig)
+		if (!ValidConfigurations.Contains(Configuration))
 			validationErrors.Add($"Invalid configuration: {Configuration}");
 
 		if (validationErrors.Count > 0)
@@ -340,10 +329,14 @@ public static class BuildSettings
 		DisplaySetting("IsRunningOnUnix:              ", IsRunningOnUnix);
 		DisplaySetting("IsRunningOnAppVeyor:          ", IsRunningOnAppVeyor);
 
-		DisplayHeading("ARGUMENTS");
-		DisplaySetting("Configuration:    ", Configuration);
-		DisplaySetting("TraceLevel:       ", TraceLevel);
-		DisplaySetting("PackageTestLevel: ", PackageTestLevel);
+		DisplayHeading("COMMAND-LINE OPTIONS");
+		DisplaySetting("Target:           ", CommandLineOptions.Target);
+		DisplaySetting("Target:           ", CommandLineOptions.Target);
+		DisplaySetting("Configuration:    ", CommandLineOptions.Configuration);
+		DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion);
+		DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel);
+		DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel);
+		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush);
 
 		DisplayHeading("VERSIONING");
 		DisplaySetting("PackageVersion:               ", PackageVersion);
@@ -400,7 +393,6 @@ public static class BuildSettings
 		DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToNuGet);
 		DisplaySetting("  ChocolateyPushUrl:       ", NuGetPushUrl);
 		DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY));
-		DisplaySetting("NoPush:                    ", NoPush);
 
 		DisplayHeading("\nRELEASING");
 		DisplaySetting("BranchName:             ", BranchName);

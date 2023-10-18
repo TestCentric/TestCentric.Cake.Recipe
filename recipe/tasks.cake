@@ -141,7 +141,8 @@ BuildSettings.Tasks.UnitTestTask = Task("Test")
 // PACKAGING TASKS
 //////////////////////////////////////////////////////////////////////
 
-// NOTE: Dependencies are added in BuildSettings constructor
+// NOTE: Dependencies are added in BuildSettings.FixupTaskDependencies(),
+// which is called by the BuildSettings.Initialize() method.
 BuildSettings.Tasks.PackageTask = Task("Package");
 
 BuildSettings.Tasks.PackageExistingBuildTask = Task("PackageExistingBuild")
