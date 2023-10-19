@@ -49,8 +49,6 @@ public static class BuildSettings
 		Context = context;
 		_buildSystem = context.BuildSystem();
 
-		CommandLineOptions.Initialize(context);
-
 		Title = title;
 		SolutionFile = solutionFile ?? DeduceSolutionFile();
 
@@ -318,7 +316,7 @@ public static class BuildSettings
 		DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion);
 		DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel);
 		DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel);
-		DisplaySetting("NoBuild:          ", CommandLineOptions.NoPush ? "True" : "NOT SET");
+		DisplaySetting("NoBuild:          ", CommandLineOptions.NoBuild ? "True" : "NOT SET");
 		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush ? "True" : "NOT SET");
 
 		DisplayHeading("VERSIONING");

@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE.txt in root directory.
 // ***********************************************************************
 
+CommandLineOptions.Initialize(Context);
+
 public static class CommandLineOptions
 {
 	static public string Target;
