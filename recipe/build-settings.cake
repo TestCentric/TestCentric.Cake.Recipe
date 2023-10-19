@@ -82,9 +82,6 @@ public static class BuildSettings
 
 		ValidateSettings();
 
-		// Fix up task dependencies that depend on the settings
-		FixupTaskDependencies();
-
 		context.Information($"{Title} {Configuration} version {PackageVersion}");
 
 		// Output like this should go after the run title display
@@ -301,20 +298,6 @@ public static class BuildSettings
 		}
 	}
 
-	// While most dependencies are fixed, some of them vary according
-	// to the build settings. This method is called after the settings
-	// have been initialized.
-	public static void FixupTaskDependencies()
-	{
-		// Package task dependencies change when there is no solution file.
-		Tasks.PackageTask
-			.IsDependentOn(SolutionFile != null ? "Build" : "CleanPackageDirectory")
-			.IsDependentOn("BuildPackages")
-			.IsDependentOn("InstallPackages")
-			.IsDependentOn("VerifyPackages")
-			.IsDependentOn("TestPackages");
-	}
-
 	public static void DumpSettings()
     {
 		DisplayHeading("TASKS");
@@ -331,12 +314,12 @@ public static class BuildSettings
 
 		DisplayHeading("COMMAND-LINE OPTIONS");
 		DisplaySetting("Target:           ", CommandLineOptions.Target);
-		DisplaySetting("Target:           ", CommandLineOptions.Target);
 		DisplaySetting("Configuration:    ", CommandLineOptions.Configuration);
 		DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion);
 		DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel);
 		DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel);
-		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush);
+		DisplaySetting("NoBuild:          ", CommandLineOptions.NoPush ? "True" : "NOT SET");
+		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush ? "True" : "NOT SET");
 
 		DisplayHeading("VERSIONING");
 		DisplaySetting("PackageVersion:               ", PackageVersion);

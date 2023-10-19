@@ -20,7 +20,6 @@ public class BuildTasks
 
 	// Packaging
 	public CakeTaskBuilder PackageTask { get; set; }
-	public CakeTaskBuilder PackageExistingBuildTask { get; set; }
 	public CakeTaskBuilder BuildTestAndPackageTask { get; set; }
 	public CakeTaskBuilder BuildPackagesTask { get; set; }
 	public CakeTaskBuilder InstallPackagesTask { get; set; }
@@ -71,6 +70,7 @@ BuildSettings.Tasks.CleanTask = Task("Clean")
 
 BuildSettings.Tasks.CleanOutputDirectoriesTask = Task("CleanOutputDirectories")
 	.Description("Clean output directories for current config")
+	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.Does(() => 
 	{
 		foreach (var binDir in GetDirectories($"**/bin/{BuildSettings.Configuration}/"))
@@ -105,26 +105,23 @@ BuildSettings.Tasks.DeleteObjectDirectoriesTask = Task("DeleteObjectDirectories"
 
 BuildSettings.Tasks.RestoreTask = Task("Restore")
 	.Description("Restore referenced packages")
+	.WithCriteria(() => BuildSettings.SolutionFile != null)
+	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.Does(() =>
 	{
-		// NOTE: May be called directly or as dependency of 'Build'
-		if (BuildSettings.SolutionFile == null)
-			throw new Exception($"Can't use '{BuildSettings.Target}' for a project without a solution file.");
-
 		NuGetRestore(BuildSettings.SolutionFile, BuildSettings.RestoreSettings);
 	});
 
 
 BuildSettings.Tasks.BuildTask = Task("Build")
+	.WithCriteria(() => BuildSettings.SolutionFile != null)
+	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.IsDependentOn("Clean")
 	.IsDependentOn("Restore")
 	.IsDependentOn("CheckHeaders")
 	.Description("Build The solution")
 	.Does(() =>
 	{
-		if (BuildSettings.SolutionFile == null)
-			throw new Exception("Can't use 'Build' for a project without a solution file.");
-
 		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings.WithProperty("Version", BuildSettings.PackageVersion));
 	});
 
@@ -141,16 +138,12 @@ BuildSettings.Tasks.UnitTestTask = Task("Test")
 // PACKAGING TASKS
 //////////////////////////////////////////////////////////////////////
 
-// NOTE: Dependencies are added in BuildSettings.FixupTaskDependencies(),
-// which is called by the BuildSettings.Initialize() method.
-BuildSettings.Tasks.PackageTask = Task("Package");
-
-BuildSettings.Tasks.PackageExistingBuildTask = Task("PackageExistingBuild")
-	.IsDependentOn("CleanPackageDirectory")
-	.IsDependentOn("BuildPackages")
-	.IsDependentOn("InstallPackages")
-	.IsDependentOn("VerifyPackages")
-	.IsDependentOn("TestPackages");
+BuildSettings.Tasks.PackageTask = Task("Package")
+	.IsDependentOn("Build")
+	.Does(() => {
+		foreach(var package in BuildSettings.Packages)
+			package.BuildVerifyAndTest();
+	});
 
 BuildSettings.Tasks.BuildTestAndPackageTask = Task("BuildTestAndPackage")
 	.IsDependentOn("Build")

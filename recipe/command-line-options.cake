@@ -10,46 +10,56 @@ public static class CommandLineOptions
 	static public string PackageVersion;
 	static public int TestLevel;
 	static public string TraceLevel;
+	static public bool NoBuild;
 	static public bool NoPush;
 
 	public static void Initialize(ICakeContext context)
 	{
 		// The name of the TARGET task to be run, e.g. Test.
-		Target = GetArgument("target|t", "Default");
+		Target = GetArgument("target", 1, "Default");
 
 		// The name of the configuration to build, test and/or package, e.g. Debug.
-		Configuration = GetArgument("configuration|c", DEFAULT_CONFIGURATION);
+		Configuration = GetArgument("configuration", 1, DEFAULT_CONFIGURATION);
 		
-		// Specifies the full package version, including any pre-release
-		// suffix. This version is used directly instead of the default
-		// version from the script or that calculated by GitVersion.
-		// Note that all other versions (AssemblyVersion, etc.) are
-		// derived from the package version.
-		PackageVersion = GetArgument<string>("packageVersion|package", null);
+		// If used, specifies the full package version, including any pre-release
+		// suffix. Otherwise we use GitVersion to calculate the package version.
+		PackageVersion = GetArgument<string>("packageVersion", 4, null);
 		
 		// Specifies the level of package testing, which is normally set
 		// automatically for different types of builds like CI, PR, etc.
-		// Used by developers to test packages locally without creating
-		// a PR or publishing the package. Defined levels are
-		//	1. Normal CI tests run every time you build a package
-		//  2. Adds more tests for PRs and Dev builds uploaded to MyGet
-		//  3. Adds even more tests prior to publishing a release
-		TestLevel = GetArgument("testLevel|level", 0);
+		// If not used, level is are calculated in BuildSettings.
+		TestLevel = GetArgument("testLevel", 4, GetArgument("level", 1, 0));
 
 		// Default TraceLevel for package tests
-		TraceLevel = GetArgument("trace", "Off");
-		
+		TraceLevel = GetArgument("trace", 2, "Off");
+
+		// If true, no builds are done. If any build target is used,
+		// a message is displayed.
+		NoBuild = HasArgument("nobuild", 3);
+
 		// If true, no publishing or releasing will be done. If any
 		// publish or release targets are used, a message is displayed.
-		NoPush = context.HasArgument("nopush");
+		NoPush = HasArgument("nopush", 3);
 
-		T GetArgument<T>(string pattern, T defaultValue)
+		T GetArgument<T>(string name, int minLength, T defaultValue)
 		{
-			foreach (var name in pattern.Split('|'))
-				if (context.HasArgument(name))
-					return context.Argument<T>(name);
+			for (int len = name.Length; len >= minLength; len--)
+			{
+				string abbrev = name.Substring(0,len);
+				if (context.HasArgument(abbrev))
+					return context.Argument<T>(abbrev);
+			}
 			
 			return defaultValue;
+		}
+
+		bool HasArgument(string name, int minLength)
+		{
+			for (int len = name.Length; len >= minLength; len--)
+				if (context.HasArgument(name.Substring(0,len)))
+					return true;
+
+			return false;
 		}
 	}
 }
