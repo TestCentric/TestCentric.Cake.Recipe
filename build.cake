@@ -1,5 +1,4 @@
 #tool NuGet.CommandLine&version=6.0.0
-#tool nuget:?package=GitVersion.CommandLine&version=5.6.3
 
 // We use some recipe files for testing. In addition, loading the
 // entire recipe gives us an error if any references are missing.
