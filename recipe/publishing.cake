@@ -116,12 +116,12 @@ public static class PackageReleaseManager
 
 	public static void CreateDraftRelease()
 	{
-		if (!BuildSettings.BuildVersion.IsReleaseBranch)
-		{
-			_context.Information("Skipping Release creation because this is not a release branch");
-		}
-		else if (CommandLineOptions.NoPush)
-			_context.Information($"NoPush option skipping creation of draft release for version {BuildSettings.PackageVersion}");
+		string releaseVersion = BuildSettings.BuildVersion.IsReleaseBranch
+			? BuildSettings.BranchName.Substring(8)
+			: BuildSettings.PackageVersion;
+
+		if (CommandLineOptions.NoPush)
+			_context.Information($"NoPush option skipping creation of draft release for version {releaseVersion}");
 		else
 		{
 			// NOTE: Since this is a release branch, the pre-release label
@@ -129,8 +129,7 @@ public static class PackageReleaseManager
 			// The branch name contains the full information to be used
 			// for both the name of the draft release and the milestone,
 			// i.e. release-2.0.0, release-2.0.0-beta2, etc.
-			string milestone = BuildSettings.BranchName.Substring(8);
-			string releaseName = $"{BuildSettings.Title} {milestone}";
+			string releaseName = $"{BuildSettings.Title} {releaseVersion}";
 
 			_context.Information($"Creating draft release for {releaseName}");
 
@@ -139,13 +138,13 @@ public static class PackageReleaseManager
 				_context.GitReleaseManagerCreate(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, new GitReleaseManagerCreateSettings()
 				{
 					Name = releaseName,
-					Milestone = milestone
+					Milestone = releaseVersion
 				});
 			}
 			catch
 			{
 				_context.Error($"Unable to create draft release for {releaseName}.");
-				_context.Error($"Check that there is a {milestone} milestone with at least one closed issue.");
+				_context.Error($"Check that there is a {releaseVersion} milestone with at least one closed issue.");
 				_context.Error("");
 				throw;
 			}
