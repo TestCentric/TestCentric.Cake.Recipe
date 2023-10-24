@@ -114,21 +114,12 @@ public static class PackageReleaseManager
 				$"Package not found: {package.GetFilename()}.\nCode may have changed since package was last built.");
 	}
 
-	public static void CreateDraftRelease()
+	public static void CreateDraftRelease(string releaseVersion)
 	{
-		string releaseVersion = BuildSettings.BuildVersion.IsReleaseBranch
-			? BuildSettings.BranchName.Substring(8)
-			: BuildSettings.PackageVersion;
-
 		if (CommandLineOptions.NoPush)
 			_context.Information($"NoPush option skipping creation of draft release for version {releaseVersion}");
 		else
 		{
-			// NOTE: Since this is a release branch, the pre-release label
-			// is "pre", which we don't want to use for the draft release.
-			// The branch name contains the full information to be used
-			// for both the name of the draft release and the milestone,
-			// i.e. release-2.0.0, release-2.0.0-beta2, etc.
 			string releaseName = $"{BuildSettings.Title} {releaseVersion}";
 
 			_context.Information($"Creating draft release for {releaseName}");

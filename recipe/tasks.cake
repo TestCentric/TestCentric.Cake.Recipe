@@ -233,7 +233,30 @@ BuildSettings.Tasks.PublishToChocolateyTask = Task("PublishToChocolatey")
 	.Does(() =>	PackageReleaseManager.PublishToChocolatey());
 
 BuildSettings.Tasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
-	.Does(() => PackageReleaseManager.CreateDraftRelease() );
+	.Does(() => {
+		bool calledDirectly = CommandLineOptions.Target == "CreateDraftRelease";
+
+		Information($"Target: {CommandLineOptions.Target}");
+		Information($"Called Directly: {calledDirectly}");
+		Information($"Branch Name: {BuildSettings.BuildVersion.BranchName}");
+		Information($"Release Branch: {BuildSettings.IsReleaseBranch}");
+
+		if (calledDirectly)
+		{
+			if (CommandLineOptions.PackageVersion == null)
+				throw new InvalidOperationException("CreateDraftRelease target requires --packageVersion");
+
+			PackageReleaseManager.CreateDraftRelease(CommandLineOptions.PackageVersion);
+		}
+		else if (!BuildSettings.IsReleaseBranch)
+		{
+			Information("Skipping creation of draft release because this is not a release branch");
+		}
+		else
+		{
+			PackageReleaseManager.CreateDraftRelease(BuildSettings.BuildVersion.BranchName.Substring(8));
+		}
+	});
 
 BuildSettings.Tasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
 	.Description("Download draft release for local use")
