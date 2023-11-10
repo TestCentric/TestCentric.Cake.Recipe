@@ -23,7 +23,8 @@ public static FileCheck HasFiles(params FilePath[] files) => new FileCheck(files
 
 public static DirectoryCheck HasDirectory(DirectoryPath dir) => new DirectoryCheck(dir);
 
-public static DependencyCheck HasDependency(string packageId) => new DependencyCheck(packageId);
+public static DependencyCheck HasDependency(string packageId, string packageVersion = null) => new DependencyCheck(packageId, packageVersion);
+public static DependencyCheck HasDependency(PackageReference packageReference) => new DependencyCheck(packageReference);
 
 //////////////////////////////////////////////////////////////////////
 // PACKAGECHECK CLASS
@@ -44,7 +45,7 @@ public abstract class PackageCheck
 	{
 		if (!_context.DirectoryExists(dirPath))
 		{
-			RecordError($"Directory {dirPath} was not found.");
+			DisplayError($"Directory {dirPath} was not found.");
 			return false;
 		}
 
@@ -55,7 +56,7 @@ public abstract class PackageCheck
 	{
 		if (!_context.FileExists(filePath))
 		{
-			RecordError($"File {filePath} was not found.");
+			DisplayError($"File {filePath} was not found.");
 			return false;
 		}
 
@@ -72,10 +73,15 @@ public abstract class PackageCheck
 		return isOK;
 	}
 
-    protected static void RecordError(string msg)
-    {
-        Console.WriteLine("  ERROR: " + msg);
-    }
+	protected bool DisplayError(string msg)
+	{
+		_context.Error("  ERROR: " + msg);
+
+		// The return value may be ignored or used as a shortcut
+		// for an immediate return from ApplyTo as in
+		//    return DisplayError(...)
+		return false;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -151,13 +157,22 @@ public class DirectoryCheck : PackageCheck
 public class DependencyCheck : PackageCheck
 {
 	private string _packageId;
+	private string _packageVersion;
+
 
 	private List<DirectoryCheck> _directoryChecks = new List<DirectoryCheck>();
 	private List<FilePath> _files = new List<FilePath>();
 
-	public DependencyCheck(string packageId)
+	public DependencyCheck(string packageId, string packageVersion)
 	{
 		_packageId = packageId;
+		_packageVersion = packageVersion;
+	}
+
+	public DependencyCheck(PackageReference packageReference)
+	{
+		_packageId = packageReference.Id;
+		_packageVersion = packageReference.Version;
 	}
 
 	public DependencyCheck WithFiles(params FilePath[] files)
@@ -180,22 +195,60 @@ public class DependencyCheck : PackageCheck
 
 	public override bool ApplyTo(DirectoryPath testDirPath)
 	{
-		DirectoryPath packagePath = testDirPath.Combine($"../{_packageId}");
+		var packageInstallPath = testDirPath.GetParent();
+		string pattern = packageInstallPath.Combine(_packageId) + ".*";
+		var installedPackages = new List<string>(_context.GetDirectories(pattern).Select(p => p.FullPath));
 
-		if (!_context.DirectoryExists(packagePath))
-		{
-			RecordError($"Dependent package {_packageId} was not found.");
+		DirectoryPath packagePath = GetDependentPackagePath(packageInstallPath);
+		if (packagePath == null)
 			return false;
-		}
 
 		bool isOK = CheckFilesExist(_files.Select(file => packagePath.CombineWithFilePath(file)));
-
-		//foreach (var relFilePath in _files)
-		//	isOK &= CheckFileExists(packagePath.CombineWithFilePath(relFilePath));
 
 		foreach (var directoryCheck in _directoryChecks)
 			isOK &= directoryCheck.ApplyTo(packagePath);
 
 		return isOK;
+
+		DirectoryPath GetDependentPackagePath(DirectoryPath packageInstallPath)
+		{
+			if (_packageVersion != null)
+			{
+				var packagePath = packageInstallPath.Combine(_packageId + "." + _packageVersion);
+				if (_context.DirectoryExists(packagePath))
+				{
+					_context.Information($"  Using version {_packageVersion} of package {_packageId}");
+					return packagePath;
+				}
+			}
+
+			// At this point, either no package version was specified or, if it was, it was not found.
+
+			switch (installedPackages.Count)
+			{
+				case 0:
+					DisplayError($"Package {_packageId} is not installed.");
+					return null;
+
+				case 1:
+					if (_packageVersion == null)
+					{
+						var packagePath = installedPackages[0];
+						var packageVersion = System.IO.Path.GetFileName(packagePath).Substring(_packageId.Length + 1);
+						_context.Information($"  Using version {packageVersion} of package {_packageId}");
+
+						return packagePath;
+					}
+					
+					DisplayError($"Version {_packageVersion} of {_packageId} is not installed.");
+					return null;
+
+				default:
+					DisplayError(_packageVersion == null
+						? $"Version was not specified and multiple versions of package {_packageId} were found."
+						: $"Version {_packageVersion} of {_packageId} is not installed.");
+					return null;
+			}
+		}
 	}
 }
