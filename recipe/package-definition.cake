@@ -155,7 +155,7 @@ public abstract class PackageDefinition
 			    "https://api.nuget.org/v3/index.json" },
             Version = PackageVersion,
             OutputDirectory = PackageInstallDirectory,
-            ExcludeVersion = true,
+            //ExcludeVersion = true,
 		    Prerelease = true,
 		    Verbosity = BuildSettings.NuGetVerbosity,
 		    NoCache = true
@@ -167,12 +167,13 @@ public abstract class PackageDefinition
     public void VerifyPackage()
     {
         bool allOK = true;
+        string packageDirectory = $"{PackageInstallDirectory}{PackageId}.{PackageVersion}";
 
         if (PackageChecks != null)
             foreach (var check in PackageChecks)
-                allOK &= check.ApplyTo(PackageInstallDirectory + PackageId);
+                allOK &= check.ApplyTo(packageDirectory);
         else // Use PackageContent
-            allOK = PackageContent.VerifyInstallation(PackageInstallDirectory + PackageId);
+            allOK = PackageContent.VerifyInstallation(packageDirectory);
 
         if (allOK)
             Console.WriteLine("All checks passed!");
