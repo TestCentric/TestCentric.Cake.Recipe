@@ -95,6 +95,7 @@ public abstract class PackageDefinition
     public abstract string ExtensionInstallDirectory { get; }
 
     public string PackageFilePath => BuildSettings.PackagingDirectory + PackageFileName;
+    public string PackageTestDirectory => $"{PackageInstallDirectory}{PackageId}.{PackageVersion}";
 
     public void BuildVerifyAndTest()
     {
@@ -167,13 +168,12 @@ public abstract class PackageDefinition
     public void VerifyPackage()
     {
         bool allOK = true;
-        string packageDirectory = $"{PackageInstallDirectory}{PackageId}.{PackageVersion}";
 
         if (PackageChecks != null)
             foreach (var check in PackageChecks)
-                allOK &= check.ApplyTo(packageDirectory);
+                allOK &= check.ApplyTo(PackageTestDirectory);
         else // Use PackageContent
-            allOK = PackageContent.VerifyInstallation(packageDirectory);
+            allOK = PackageContent.VerifyInstallation(PackageTestDirectory);
 
         if (allOK)
             Console.WriteLine("All checks passed!");
