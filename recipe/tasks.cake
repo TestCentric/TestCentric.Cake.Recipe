@@ -61,6 +61,7 @@ BuildSettings.Tasks.DumpSettingsTask = Task("DumpSettings")
 
 BuildSettings.Tasks.CheckHeadersTask = Task("CheckHeaders")
 	.Description("Check source files for valid copyright headers")
+	.WithCriteria(() => !BuildSettings.SuppressHeaderCheck)
 	.Does(() => Headers.Check());
 
 BuildSettings.Tasks.CleanTask = Task("Clean")

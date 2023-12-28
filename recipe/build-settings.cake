@@ -31,7 +31,8 @@ public static class BuildSettings
 		string[] standardHeader = null,
 		// Ignored if non-standard header is specified otherwise replaces line 2 of standard header
 		string copyright = null,
-		string[] exemptFiles = null, 
+		string[] exemptFiles = null,
+		bool suppressHeaderCheck = false,
 		bool msbuildAllowPreviewVersion = false,
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
@@ -60,6 +61,7 @@ public static class BuildSettings
 		GitHubOwner = githubOwner;
 		GitHubRepository = githubRepository;
 
+		SuppressHeaderCheck = suppressHeaderCheck;
 		StandardHeader = standardHeader;
 		if (standardHeader == null)
 		{
@@ -234,9 +236,10 @@ public static class BuildSettings
 
 	//Testing
 	public static string UnitTests { get; set; }
-	public static TestRunner UnitTestRunner {get; private set; }
+	public static TestRunner UnitTestRunner { get; private set; }
 
 	// Checking 
+	public static bool SuppressHeaderCheck { get; private set; }
 	public static string[] StandardHeader { get; private set; }
 	public static string[] ExemptFiles { get; private set; }
 
