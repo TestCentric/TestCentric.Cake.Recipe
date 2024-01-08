@@ -8,19 +8,26 @@ public abstract class TestRunner
 
 	protected string ExecutablePath { get; set; }
 
-	public virtual int Run(string arguments)
+	protected ProcessSettings ProcessSettings { get; } = new ProcessSettings()
+	{
+		WorkingDirectory = BuildSettings.OutputDirectory
+	};
+
+	public virtual int Run(string arguments=null)
 	{
 		if (ExecutablePath == null)
 			throw new InvalidOperationException("Unable to run tests. Executable path has not been set.");
 
-		int rc = ExecutablePath.EndsWith(".dll")
-			? BuildSettings.Context.StartProcess("dotnet", new ProcessSettings() {
-				Arguments = $"{ExecutablePath} {arguments}", WorkingDirectory = BuildSettings.OutputDirectory	})
-			: BuildSettings.Context.StartProcess(ExecutablePath, new ProcessSettings() {
-				Arguments = arguments, WorkingDirectory = BuildSettings.OutputDirectory
-			});
-
-		return rc;
+		if (ExecutablePath.EndsWith(".dll"))
+		{
+			ProcessSettings.Arguments = $"{ExecutablePath} {arguments}";
+			return BuildSettings.Context.StartProcess("dotnet", ProcessSettings);
+		}
+		else
+		{
+			ProcessSettings.Arguments = arguments;
+			return BuildSettings.Context.StartProcess(ExecutablePath, ProcessSettings);
+		}
 	}
 
 	// Base install does nothing

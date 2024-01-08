@@ -13,13 +13,6 @@ public static class UnitTestRunner
 
     public static void RunUnitTests()
     {
-        // TODO: Make a TestRunner for NUnitLite
-        if (BuildSettings.UnitTestRunner == null)
-        {
-            NUnitLite.RunUnitTests();
-            return;
-        }
-
 		var unitTests = FindUnitTestFiles(BuildSettings.UnitTests);
 
         foreach (var testPath in unitTests)
@@ -32,8 +25,12 @@ public static class UnitTestRunner
 
             Banner.Display(msg);
 
-		    BuildSettings.UnitTestRunner.Run(testPath.ToString());
-		    var result = new ActualResult(BuildSettings.OutputDirectory + "TestResult.xml");
+            if (BuildSettings.UnitTestRunner != null)
+		        BuildSettings.UnitTestRunner.Run(testPath.ToString());
+            else
+                new NUnitLiteRunner(testPath.ToString()).Run();
+		    
+            var result = new ActualResult(BuildSettings.OutputDirectory + "TestResult.xml");
 
 		    new ConsoleReporter(result).Display();
 
