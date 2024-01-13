@@ -59,6 +59,25 @@ public abstract class InstallableTestRunner : TestRunner
 	public abstract string InstallPath { get; }
 }
 
+public class NUnitLiteRunner : TestRunner
+{
+    public NUnitLiteRunner(string testPath)
+    {
+        ExecutablePath = testPath;
+    }
+
+    public override int Run(string arguments=null)
+    {
+        var traceLevel = CommandLineOptions.TraceLevel ?? "Off";
+
+        ProcessSettings.EnvironmentVariables = new Dictionary<string,string> {
+            { "TESTCENTRIC_INTERNAL_TRACE_LEVEL", traceLevel }
+        };
+        
+        return base.Run(arguments);
+    }
+}
+
 /// <summary>
 /// Class that knows how to run an agent directly.
 /// </summary>
