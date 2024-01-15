@@ -26,9 +26,9 @@ public static class UnitTestRunner
             Banner.Display(msg);
 
             if (BuildSettings.UnitTestRunner != null)
-		        BuildSettings.UnitTestRunner.Run(testPath.ToString());
+		        BuildSettings.UnitTestRunner.Run($"{testPath} {BuildSettings.UnitTestArguments}");
             else
-                new NUnitLiteRunner(testPath.ToString()).Run();
+                new NUnitLiteRunner(testPath.ToString()).Run(BuildSettings.UnitTestArguments);
 		    
             var result = new ActualResult(BuildSettings.OutputDirectory + "TestResult.xml");
 

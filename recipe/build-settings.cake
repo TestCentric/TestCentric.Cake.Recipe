@@ -12,33 +12,30 @@ public static class BuildSettings
 	}
 
 	public static void Initialize(
-	    // Required parameters
+	 // Required parameters
 		ICakeContext context,
 		string title,
 		string githubRepository,
-
-		// Optional parameters
-
-		// If not specified, uses TITLE.sln if it exists or uses solution
-		// found in the root directory provided there is only one. 
-		string solutionFile = null,
-        // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
-		string unitTests = null,
-		// Defaults to NUnitLite runner
-		TestRunner unitTestRunner = null,
-		string githubOwner = "TestCentric",
-		// Defaults to our standard header
+     
+	 // Optional parameters
+		bool suppressHeaderCheck = false,
 		string[] standardHeader = null,
-		// Ignored if non-standard header is specified otherwise replaces line 2 of standard header
 		string copyright = null,
 		string[] exemptFiles = null,
-		bool suppressHeaderCheck = false,
+
+		string solutionFile = null,
+		string[] validConfigurations = null,
 		bool msbuildAllowPreviewVersion = false,
+		string githubOwner = "TestCentric",
+		
+		string unitTests = null, // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
+		TestRunner unitTestRunner = null, // If not set, NUnitLite is used
+		string unitTestArguments = null,
+		
+		// Verbosity
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
-		bool chocolateyVerbosity = false,
-		// Defaults to Debug and Release
-		string[] validConfigurations = null)
+		bool chocolateyVerbosity = false )
 	{
 		if (context == null)
 			throw new ArgumentNullException(nameof(context));
@@ -51,16 +48,20 @@ public static class BuildSettings
 		_buildSystem = context.BuildSystem();
 
 		Title = title;
+		// If not specified, uses TITLE.sln if it exists or uses solution
+		// found in the root directory provided there is only one. 
 		SolutionFile = solutionFile ?? DeduceSolutionFile();
 
 		UnitTests = unitTests;
 		UnitTestRunner = unitTestRunner;
+		UnitTestArguments = unitTestArguments;
 
 		BuildVersion = new BuildVersion(context);
 
 		GitHubOwner = githubOwner;
 		GitHubRepository = githubRepository;
 
+		// File Header Checks
 		SuppressHeaderCheck = suppressHeaderCheck;
 		StandardHeader = standardHeader;
 		if (standardHeader == null)
@@ -237,6 +238,7 @@ public static class BuildSettings
 	//Testing
 	public static string UnitTests { get; set; }
 	public static TestRunner UnitTestRunner { get; private set; }
+	public static string UnitTestArguments { get; private set; }
 
 	// Checking 
 	public static bool SuppressHeaderCheck { get; private set; }
