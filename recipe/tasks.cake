@@ -234,13 +234,9 @@ BuildSettings.Tasks.PublishToChocolateyTask = Task("PublishToChocolatey")
 	.Does(() =>	PackageReleaseManager.PublishToChocolatey());
 
 BuildSettings.Tasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
-	.Does(() => {
+	.Does(() =>
+	{
 		bool calledDirectly = CommandLineOptions.Target == "CreateDraftRelease";
-
-		Information($"Target: {CommandLineOptions.Target}");
-		Information($"Called Directly: {calledDirectly}");
-		Information($"Branch Name: {BuildSettings.BuildVersion.BranchName}");
-		Information($"Release Branch: {BuildSettings.IsReleaseBranch}");
 
 		if (calledDirectly)
 		{
