@@ -44,6 +44,13 @@ public static class BuildSettings
 		if (githubRepository == null)
 			throw new ArgumentNullException(nameof(githubRepository));
 
+		// NOTE: Order of initialization can be sensitive. Obviously,
+		// we have to set any properties in this method before we
+		// make use of them. Less obviously, some of the classes we
+		// construct here have dependencies on certain properties
+		// being set before the constructor is called. I have
+		// tried to annotate such dependenciess below.
+
 		Context = context;
 		_buildSystem = context.BuildSystem();
 
@@ -52,8 +59,11 @@ public static class BuildSettings
 		// found in the root directory provided there is only one. 
 		SolutionFile = solutionFile ?? DeduceSolutionFile();
 
+		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
+
 		UnitTests = unitTests;
-		UnitTestRunner = unitTestRunner;
+		// NUnitLiteRunner depends indirectly on ValidConfigurations
+		UnitTestRunner = unitTestRunner ?? new NUnitLiteRunner();
 		UnitTestArguments = unitTestArguments;
 
 		BuildVersion = new BuildVersion(context);
@@ -62,7 +72,7 @@ public static class BuildSettings
 		GitHubRepository = githubRepository;
 
 		// File Header Checks
-		SuppressHeaderCheck = suppressHeaderCheck;
+		SuppressHeaderCheck = suppressHeaderCheck && !CommandLineOptions.NoBuild;
 		StandardHeader = standardHeader;
 		if (standardHeader == null)
 		{
@@ -79,8 +89,6 @@ public static class BuildSettings
 		NuGetVerbosity = nugetVerbosity;
 		ChocolateyVerbosity = chocolateyVerbosity;
 
-		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
-
 		ValidateSettings();
 
 		context.Information($"{Title} {Configuration} version {PackageVersion}");
@@ -90,6 +98,7 @@ public static class BuildSettings
 			Context.Warning($"  SolutionFile: '{SolutionFile}'");
 		Context.Information($"  PackageTestLevel: {PackageTestLevel}");
 
+		// Keep this last
 		if (IsRunningOnAppVeyor)
 		{
 			var buildNumber = _buildSystem.AppVeyor.Environment.Build.Number;

@@ -1,7 +1,7 @@
 public class BuildTasks
 {
 	// General
-	public CakeTaskBuilder CompileScriptTask { get; set; }
+	public CakeTaskBuilder CheckScriptTask { get; set; }
 	public CakeTaskBuilder DumpSettingsTask { get; set; }
 
 	// Building
@@ -40,15 +40,18 @@ public class BuildTasks
 }
 
 // The following inline statements do most of the task initialization.
-// They run before any tasks but after static initialization. A few
-// tasks need a bit more initialization in the BuildSettings constructor
-// as indicated in comments below.
+// The tasks created act exactly as if they had been defined in the
+// build.cake file of the applcation using the recipe.
+//
+// The initialization code is inline, so it runs before any tasks but 
+// after static initialization. A few tasks need a bit more initialization
+// in the BuildSettings constructor as indicated in comments below.
 
 //////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.CompileScriptTask = Task("CompileScript")
+BuildSettings.Tasks.CheckScriptTask = Task("CheckScript")
 	.Description("Just make sure the script compiled")
 	.Does(() => Information("Script was successfully compiled!"));
 
@@ -61,11 +64,13 @@ BuildSettings.Tasks.DumpSettingsTask = Task("DumpSettings")
 
 BuildSettings.Tasks.CheckHeadersTask = Task("CheckHeaders")
 	.Description("Check source files for valid copyright headers")
+	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.WithCriteria(() => !BuildSettings.SuppressHeaderCheck)
 	.Does(() => Headers.Check());
 
 BuildSettings.Tasks.CleanTask = Task("Clean")
 	.Description("Clean output and package directories")
+	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.IsDependentOn("CleanOutputDirectories")
 	.IsDependentOn("CleanPackageDirectory");
 
@@ -88,6 +93,8 @@ BuildSettings.Tasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirector
 
 BuildSettings.Tasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
 	.Description("Clean the package directory")
+	// TODO: Test with Package task
+	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.Does(() => CleanDirectory(BuildSettings.PackagingDirectory));
 
 BuildSettings.Tasks.CleanAllTask = Task("CleanAll")
@@ -133,7 +140,7 @@ BuildSettings.Tasks.BuildTask = Task("Build")
 BuildSettings.Tasks.UnitTestTask = Task("Test")
 	.Description("Run unit tests")
 	.IsDependentOn("Build")
-	.Does(() => UnitTestRunner.RunUnitTests());
+	.Does(() => UnitTesting.RunAllTests());
 
 //////////////////////////////////////////////////////////////////////
 // PACKAGING TASKS
