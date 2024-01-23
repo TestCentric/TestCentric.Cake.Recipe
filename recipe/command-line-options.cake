@@ -7,61 +7,106 @@ CommandLineOptions.Initialize(Context);
 
 public static class CommandLineOptions
 {
-	static public string Target;
-	static public string Configuration;
-	static public string PackageVersion;
-	static public int TestLevel;
-	static public string TraceLevel;
-	static public bool NoBuild;
-	static public bool NoPush;
+	static private ICakeContext _context;
+
+	static public ValueOption<string> Target;
+	static public ValueOption<string> Configuration;
+	static public ValueOption<string> PackageVersion;
+	static public ValueOption<int> TestLevel;
+	static public ValueOption<string> TraceLevel;
+	static public SimpleOption NoBuild;
+	static public SimpleOption NoPush;
 
 	public static void Initialize(ICakeContext context)
 	{
+		_context = context;
+
 		// The name of the TARGET task to be run, e.g. Test.
-		Target = GetArgument("target", 1, "Default");
+		Target = new ValueOption<string>("target", "Default", 1);
 
-		// The name of the configuration to build, test and/or package, e.g. Debug.
-		Configuration = GetArgument("configuration", 1, DEFAULT_CONFIGURATION);
+		Configuration = new ValueOption<String>("configuration", DEFAULT_CONFIGURATION, 1);
 		
-		// If used, specifies the full package version, including any pre-release
-		// suffix. Otherwise we use GitVersion to calculate the package version.
-		PackageVersion = GetArgument<string>("packageVersion", 4, null);
+		PackageVersion = new ValueOption<string>("packageVersion", null, 4);
+
+		TestLevel = new ValueOption<int>("level", 0, 3);
+
+		TraceLevel = new ValueOption<string>("trace", "Off", 2);
+
+		NoBuild = new SimpleOption("nobuild", 3);
+
+		NoPush = new SimpleOption("nopush",  3);
+	}
+
+	// Nested classes to represent individual options
+
+	// AbstractOption has a name and can tell us if it exists.
+	public abstract class AbstractOption
+	{
+		public string Name { get; }
 		
-		// Specifies the level of package testing, which is normally set
-		// automatically for different types of builds like CI, PR, etc.
-		// If not used, level is are calculated in BuildSettings.
-		TestLevel = GetArgument("testLevel", 4, GetArgument("level", 1, 0));
-
-		// Default TraceLevel for package tests
-		TraceLevel = GetArgument("trace", 2, "Off");
-
-		// If true, no builds are done. If any build target is used,
-		// a message is displayed.
-		NoBuild = HasArgument("nobuild", 3);
-
-		// If true, no publishing or releasing will be done. If any
-		// publish or release targets are used, a message is displayed.
-		NoPush = HasArgument("nopush", 3);
-
-		T GetArgument<T>(string name, int minLength, T defaultValue)
+		public int MinimumAbbreviation { get; internal set; }
+		
+		public bool Exists 
 		{
-			for (int len = name.Length; len >= minLength; len--)
+			get
 			{
-				string abbrev = name.Substring(0,len);
-				if (context.HasArgument(abbrev))
-					return context.Argument<T>(abbrev);
+				for (int len = Name.Length; len >= MinimumAbbreviation; len--)
+					if (_context.HasArgument(Name.Substring(0,len)))
+						return true;
+				return false;
 			}
-			
-			return defaultValue;
 		}
 
-		bool HasArgument(string name, int minLength)
-		{
-			for (int len = name.Length; len >= minLength; len--)
-				if (context.HasArgument(name.Substring(0,len)))
-					return true;
+		public string Description { get; }
 
-			return false;
+		public AbstractOption(string name, int minimumAbbreviation = 0, string description = null)
+		{
+			Name = name;
+			MinimumAbbreviation = minimumAbbreviation > 0 && minimumAbbreviation <= name.Length
+				? minimumAbbreviation
+				: name.Length;
+			Description = description;
+		}
+	}
+
+	// Simple Option adds an implicit boolean conversion operator.
+	// It throws an exception if you gave it a value on the command-line.
+	public class SimpleOption : AbstractOption
+	{
+		static public implicit operator bool(SimpleOption o) => o.Exists;
+
+		public SimpleOption(string name, int minimumAbbreviation = 0, string description = null)
+			: base(name, minimumAbbreviation, description)
+		{
+			if (_context.Argument(name, (string)null) != null)
+				throw new Exception($"Option --{name} does not take a value.");
+		}
+	}
+
+	// Generic ValueOption adds Value as well as a default value
+	public class ValueOption<T> : AbstractOption
+	{
+		public T DefaultValue { get; }
+
+		public ValueOption(string name, T defaultValue, int minimumAbbreviation = 0, string description = null)
+			: base(name, minimumAbbreviation, description)
+		{
+			DefaultValue = defaultValue;
+		}
+
+		public T Value
+		{
+			get
+			{
+				for (int len = Name.Length; len >= MinimumAbbreviation; len--)
+				{
+					string abbrev = Name.Substring(0,len);
+					if (_context.HasArgument(abbrev))
+						return _context.Argument<T>(abbrev);
+				}
+			
+				return DefaultValue;
+			}
 		}
 	}
 }

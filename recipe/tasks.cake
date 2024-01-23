@@ -1,42 +1,119 @@
-public class BuildTasks
+public static class BuildTasks
 {
+	// Help
+	public static CakeTaskBuilder HelpTask { get; set; }
+    public static CakeTaskBuilder OptionsTask {get; set; }
+	public static CakeTaskBuilder TaskListTask { get; set; }
+
 	// General
-	public CakeTaskBuilder CheckScriptTask { get; set; }
-	public CakeTaskBuilder DumpSettingsTask { get; set; }
+	public static CakeTaskBuilder CheckScriptTask { get; set; }
+	public static CakeTaskBuilder DumpSettingsTask { get; set; }
 
 	// Building
-	public CakeTaskBuilder BuildTask { get; set; }
-	public CakeTaskBuilder CheckHeadersTask { get; set; }
-	public CakeTaskBuilder CleanTask { get; set; }
-	public CakeTaskBuilder CleanAllTask { get; set; }
-	public CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
-	public CakeTaskBuilder CleanAllOutputDirectoriesTask { get; set; }
-	public CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
-	public CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
-	public CakeTaskBuilder RestoreTask { get; set; }
+	public static CakeTaskBuilder BuildTask { get; set; }
+	public static  CakeTaskBuilder CheckHeadersTask { get; set; }
+	public static  CakeTaskBuilder CleanTask { get; set; }
+	public static  CakeTaskBuilder CleanAllTask { get; set; }
+	public static  CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
+	public static  CakeTaskBuilder CleanAllOutputDirectoriesTask { get; set; }
+	public static  CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
+	public static  CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
+	public static  CakeTaskBuilder RestoreTask { get; set; }
 
 	// Unit Testing
-	public CakeTaskBuilder UnitTestTask { get; set; }
+	public static  CakeTaskBuilder UnitTestTask { get; set; }
 
 	// Packaging
-	public CakeTaskBuilder PackageTask { get; set; }
-	public CakeTaskBuilder BuildTestAndPackageTask { get; set; }
-	public CakeTaskBuilder BuildPackagesTask { get; set; }
-	public CakeTaskBuilder InstallPackagesTask { get; set; }
-	public CakeTaskBuilder VerifyPackagesTask { get; set; }
-	public CakeTaskBuilder TestPackagesTask { get; set; }
-	public CakeTaskBuilder AddPackagesToLocalFeedTask { get; set; }
+	public static  CakeTaskBuilder PackageTask { get; set; }
+	public static  CakeTaskBuilder BuildTestAndPackageTask { get; set; }
+	public static  CakeTaskBuilder BuildPackagesTask { get; set; }
+	public static  CakeTaskBuilder InstallPackagesTask { get; set; }
+	public static  CakeTaskBuilder VerifyPackagesTask { get; set; }
+	public static  CakeTaskBuilder TestPackagesTask { get; set; }
+	public static  CakeTaskBuilder AddPackagesToLocalFeedTask { get; set; }
 
 	// Publishing
-	public CakeTaskBuilder PublishTask { get; set; }
-	public CakeTaskBuilder PublishToMyGetTask { get; set; }
-	public CakeTaskBuilder PublishToNuGetTask { get; set; }
-	public CakeTaskBuilder PublishToChocolateyTask { get; set; }
+	public static  CakeTaskBuilder PublishTask { get; set; }
+	public static  CakeTaskBuilder PublishToMyGetTask { get; set; }
+	public static  CakeTaskBuilder PublishToNuGetTask { get; set; }
+	public static  CakeTaskBuilder PublishToChocolateyTask { get; set; }
 
 	// Releasing
-	public CakeTaskBuilder CreateDraftReleaseTask { get; set; }
-	public CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
-	public CakeTaskBuilder CreateProductionReleaseTask { get; set; }
+	public static  CakeTaskBuilder CreateDraftReleaseTask { get; set; }
+	public static  CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
+	public static  CakeTaskBuilder CreateProductionReleaseTask { get; set; }
+
+    public static string TaskList => $"""
+        BUILDING
+          {Show(BuildTask)}
+          {Show(CleanTask)}
+          {Show(CleanAllTask)}
+          {Show(CleanOutputDirectoriesTask)}
+          {Show(CleanAllOutputDirectoriesTask)}
+          {Show(CleanPackageDirectoryTask)}
+          {Show(DeleteObjectDirectoriesTask)}
+          {Show(RestoreTask)}
+          {Show(CheckHeadersTask)}
+
+        UNIT TESTING
+          {Show(UnitTestTask)}
+
+        PACKAGING
+          {Show(PackageTask)}
+          {Show(BuildTestAndPackageTask)}
+          {Show(BuildPackagesTask)}
+          {Show(AddPackagesToLocalFeedTask)}
+          {Show(InstallPackagesTask)}
+          {Show(VerifyPackagesTask)}
+          {Show(TestPackagesTask)}
+
+        PUBLISHING
+          {Show(PublishTask)}
+          {Show(PublishToMyGetTask)}
+          {Show(PublishToNuGetTask)}
+          {Show(PublishToChocolateyTask)}
+
+        RELEASING
+          {Show(CreateDraftReleaseTask)}
+          {Show(DownloadDraftReleaseTask)}
+          {Show(CreateProductionReleaseTask)}
+
+        MISCELLANEOUS
+          {Show(CheckScriptTask)}
+
+        MORE INFORMATION
+          {Show(HelpTask)}
+          {Show(OptionsTask)}
+          {Show(TaskListTask)}
+
+        To see all task dependencies use build --tree.
+        """;
+
+    private const string THIRTY_SPACES = "                               ";
+    private const string DEPENDENCY_PREFIX_1 = "\r\n                                 Depends on: ";
+    private const string DEPENDENCY_PREFIX_2 = "\r\n                                             ";
+    
+    private static string Show(CakeTaskBuilder ctb)
+    {
+        var sb = new StringBuilder(ctb.Task.Name);
+        sb.Append(new string(' ', 29 - sb.Length));
+        sb.Append(ctb.Task.Description);
+
+        if (ctb.Task.Dependencies.Count > 0)
+        {
+            var prefix = DEPENDENCY_PREFIX_1;
+            foreach (var dependency in ctb.Task.Dependencies)
+            {
+                sb.Append(prefix);
+                sb.Append(dependency.Name);
+                prefix = DEPENDENCY_PREFIX_2;
+            }
+        }
+        
+        sb.Append("\r\n");
+
+        return sb.ToString();
+    }
 }
 
 // The following inline statements do most of the task initialization.
@@ -48,33 +125,59 @@ public class BuildTasks
 // in the BuildSettings constructor as indicated in comments below.
 
 //////////////////////////////////////////////////////////////////////
+// HELP TASKS
+//////////////////////////////////////////////////////////////////////
+BuildTasks.HelpTask = Task("Help")
+	.Description("Display help, including Usage, Options and Tasks")
+	.Does(() =>
+	{
+		Information(HelpMessages.Summary);
+	});
+
+BuildTasks.OptionsTask = Task("Options")
+    .Description("Display command-line options")
+    .Does(() =>
+    {
+        Information(HelpMessages.Options);
+    });
+
+
+BuildTasks.TaskListTask = Task("TaskList")
+    .Description("Display tasks provided by the recipe")
+    .Does(() =>
+    {
+        Information(BuildTasks.TaskList);
+    });
+
+//////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.CheckScriptTask = Task("CheckScript")
+BuildTasks.CheckScriptTask = Task("CheckScript")
 	.Description("Just make sure the script compiled")
 	.Does(() => Information("Script was successfully compiled!"));
 
-BuildSettings.Tasks.DumpSettingsTask = Task("DumpSettings")
+BuildTasks.DumpSettingsTask = Task("DumpSettings")
+	.Description("Display BuildSettings properties")
 	.Does(() => BuildSettings.DumpSettings());
 
 //////////////////////////////////////////////////////////////////////
 // BUILDING TASKS
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.CheckHeadersTask = Task("CheckHeaders")
+BuildTasks.CheckHeadersTask = Task("CheckHeaders")
 	.Description("Check source files for valid copyright headers")
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.WithCriteria(() => !BuildSettings.SuppressHeaderCheck)
 	.Does(() => Headers.Check());
 
-BuildSettings.Tasks.CleanTask = Task("Clean")
+BuildTasks.CleanTask = Task("Clean")
 	.Description("Clean output and package directories")
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.IsDependentOn("CleanOutputDirectories")
 	.IsDependentOn("CleanPackageDirectory");
 
-BuildSettings.Tasks.CleanOutputDirectoriesTask = Task("CleanOutputDirectories")
+BuildTasks.CleanOutputDirectoriesTask = Task("CleanOutputDirectories")
 	.Description("Clean output directories for current config")
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.Does(() => 
@@ -83,7 +186,7 @@ BuildSettings.Tasks.CleanOutputDirectoriesTask = Task("CleanOutputDirectories")
 			CleanDirectory(binDir);
 	});
 
-BuildSettings.Tasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirectories")
+BuildTasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirectories")
 	.Description("Clean output directories for all configs")
 	.Does(() =>
 	{
@@ -91,19 +194,19 @@ BuildSettings.Tasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirector
 			CleanDirectory(binDir);
 	});
 
-BuildSettings.Tasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
+BuildTasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
 	.Description("Clean the package directory")
 	// TODO: Test with Package task
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.Does(() => CleanDirectory(BuildSettings.PackagingDirectory));
 
-BuildSettings.Tasks.CleanAllTask = Task("CleanAll")
-	.Description("Clean all output directories, package directory and delete all obj directories")
+BuildTasks.CleanAllTask = Task("CleanAll")
+	.Description("Clean everything!")
 	.IsDependentOn("CleanAllOutputDirectories")
 	.IsDependentOn("CleanPackageDirectory")
 	.IsDependentOn("DeleteObjectDirectories");
 
-BuildSettings.Tasks.DeleteObjectDirectoriesTask = Task("DeleteObjectDirectories")
+BuildTasks.DeleteObjectDirectoriesTask = Task("DeleteObjectDirectories")
 	.Description("Delete all obj directories")
 	.Does(() =>
 	{
@@ -111,7 +214,7 @@ BuildSettings.Tasks.DeleteObjectDirectoriesTask = Task("DeleteObjectDirectories"
 			DeleteDirectory(dir, new DeleteDirectorySettings() { Recursive = true });
 	});
 
-BuildSettings.Tasks.RestoreTask = Task("Restore")
+BuildTasks.RestoreTask = Task("Restore")
 	.Description("Restore referenced packages")
 	.WithCriteria(() => BuildSettings.SolutionFile != null)
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
@@ -121,13 +224,13 @@ BuildSettings.Tasks.RestoreTask = Task("Restore")
 	});
 
 
-BuildSettings.Tasks.BuildTask = Task("Build")
+BuildTasks.BuildTask = Task("Build")
 	.WithCriteria(() => BuildSettings.SolutionFile != null)
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.IsDependentOn("Clean")
 	.IsDependentOn("Restore")
 	.IsDependentOn("CheckHeaders")
-	.Description("Build The solution")
+	.Description("Build the solution")
 	.Does(() =>
 	{
 		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings.WithProperty("Version", BuildSettings.PackageVersion));
@@ -137,7 +240,7 @@ BuildSettings.Tasks.BuildTask = Task("Build")
 // UNIT TEST TASK
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.UnitTestTask = Task("Test")
+BuildTasks.UnitTestTask = Task("Test")
 	.Description("Run unit tests")
 	.IsDependentOn("Build")
 	.Does(() => UnitTesting.RunAllTests());
@@ -146,19 +249,22 @@ BuildSettings.Tasks.UnitTestTask = Task("Test")
 // PACKAGING TASKS
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.PackageTask = Task("Package")
+BuildTasks.PackageTask = Task("Package")
 	.IsDependentOn("Build")
+	.Description("Build, Install, Verify and Test all packages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 			package.BuildVerifyAndTest();
 	});
 
-BuildSettings.Tasks.BuildTestAndPackageTask = Task("BuildTestAndPackage")
+BuildTasks.BuildTestAndPackageTask = Task("BuildTestAndPackage")
+	.Description("Do Build, Test and Package all in one run")
 	.IsDependentOn("Build")
 	.IsDependentOn("Test")
 	.IsDependentOn("Package");
 
-BuildSettings.Tasks.BuildPackagesTask = Task("BuildPackages")
+BuildTasks.BuildPackagesTask = Task("BuildPackages")
+	.Description("Build all packages")
 	.IsDependentOn("CleanPackageDirectory")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
@@ -172,7 +278,7 @@ BuildSettings.Tasks.BuildPackagesTask = Task("BuildPackages")
 		}
 	});
 
-BuildSettings.Tasks.AddPackagesToLocalFeedTask = Task("AddPackagesToLocalFeed")
+BuildTasks.AddPackagesToLocalFeedTask = Task("AddPackagesToLocalFeed")
 	.Description("Add packages to our local feed")
 	.Does(() =>	{
 		if (!BuildSettings.ShouldAddToLocalFeed)
@@ -183,7 +289,8 @@ BuildSettings.Tasks.AddPackagesToLocalFeedTask = Task("AddPackagesToLocalFeed")
 					package.AddPackageToLocalFeed();
 	});
 
-BuildSettings.Tasks.InstallPackagesTask = Task("InstallPackages")
+BuildTasks.InstallPackagesTask = Task("InstallPackages")
+	.Description("Build and Install all packages")
 	.IsDependentOn("BuildPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
@@ -193,7 +300,8 @@ BuildSettings.Tasks.InstallPackagesTask = Task("InstallPackages")
 		}
 	});
 
-BuildSettings.Tasks.VerifyPackagesTask = Task("VerifyPackages")
+BuildTasks.VerifyPackagesTask = Task("VerifyPackages")
+	.Description("Build, Install and verify all packages")
 	.IsDependentOn("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
@@ -203,7 +311,8 @@ BuildSettings.Tasks.VerifyPackagesTask = Task("VerifyPackages")
 		}
 	});
 
-BuildSettings.Tasks.TestPackagesTask = Task("TestPackages")
+BuildTasks.TestPackagesTask = Task("TestPackages")
+	.Description("Build, Install and Test all packages")
 	.IsDependentOn("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
@@ -220,37 +329,38 @@ BuildSettings.Tasks.TestPackagesTask = Task("TestPackages")
 // PUBLISHING TASKS
 //////////////////////////////////////////////////////////////////////
 
-BuildSettings.Tasks.PublishTask = Task("Publish")
-	.Description("Publish nuget and chocolatey packages according to the current settings")
+BuildTasks.PublishTask = Task("Publish")
+	.Description("Publish all packages for current branch")
 	.IsDependentOn("Package")
 	.Does(() => PackageReleaseManager.Publish());
 
 // This task may be run independently when recovering from errors.
-BuildSettings.Tasks.PublishToMyGetTask = Task("PublishToMyGet")
+BuildTasks.PublishToMyGetTask = Task("PublishToMyGet")
 	.Description("Publish packages to MyGet")
 	.Does(() =>	PackageReleaseManager.PublishToMyGet());
 
 // This task may be run independently when recovering from errors.
-BuildSettings.Tasks.PublishToNuGetTask = Task("PublishToNuGet")
+BuildTasks.PublishToNuGetTask = Task("PublishToNuGet")
 	.Description("Publish packages to NuGet")
 	.Does(() =>	PackageReleaseManager.PublishToNuGet());
 
 // This task may be run independently when recovering from errors.
-BuildSettings.Tasks.PublishToChocolateyTask = Task("PublishToChocolatey")
+BuildTasks.PublishToChocolateyTask = Task("PublishToChocolatey")
 	.Description("Publish packages to Chocolatey")
 	.Does(() =>	PackageReleaseManager.PublishToChocolatey());
 
-BuildSettings.Tasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
+BuildTasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
+	.Description("Create a draft release on GitHub")
 	.Does(() =>
 	{
-		bool calledDirectly = CommandLineOptions.Target == "CreateDraftRelease";
+		bool calledDirectly = CommandLineOptions.Target.Value == "CreateDraftRelease";
 
 		if (calledDirectly)
 		{
 			if (CommandLineOptions.PackageVersion == null)
 				throw new InvalidOperationException("CreateDraftRelease target requires --packageVersion");
 
-			PackageReleaseManager.CreateDraftRelease(CommandLineOptions.PackageVersion);
+			PackageReleaseManager.CreateDraftRelease(CommandLineOptions.PackageVersion.Value);
 		}
 		else if (!BuildSettings.IsReleaseBranch)
 		{
@@ -262,9 +372,10 @@ BuildSettings.Tasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
 		}
 	});
 
-BuildSettings.Tasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
+BuildTasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
 	.Description("Download draft release for local use")
 	.Does(() =>	PackageReleaseManager.DownloadDraftRelease() );
 
-BuildSettings.Tasks.CreateProductionReleaseTask = Task("CreateProductionRelease")
+BuildTasks.CreateProductionReleaseTask = Task("CreateProductionRelease")
+	.Description("Create a production GitHub Release")
 	.Does(() => PackageReleaseManager.CreateProductionRelease() );
