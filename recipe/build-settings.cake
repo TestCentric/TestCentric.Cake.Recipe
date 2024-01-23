@@ -6,11 +6,6 @@ public static class BuildSettings
 {
 	private static BuildSystem _buildSystem;
 
-	static BuildSettings()
-	{
-		Tasks = new BuildTasks();
-	}
-
 	public static void Initialize(
 	 // Required parameters
 		ICakeContext context,
@@ -158,9 +153,6 @@ public static class BuildSettings
 	public static string Target { get; set; }
 	public static IEnumerable<string> TasksToExecute { get; set; }
 
-	// Task Definitions
-	public static BuildTasks Tasks { get; }
-	
 	// Arguments
 	public static string Configuration
 	{
@@ -168,11 +160,11 @@ public static class BuildSettings
 		{
 			// Correct casing on user-provided config if necessary
 			foreach (string config in ValidConfigurations)
-				if (string.Equals(config, CommandLineOptions.Configuration, StringComparison.OrdinalIgnoreCase))
+				if (string.Equals(config, CommandLineOptions.Configuration.Value, StringComparison.OrdinalIgnoreCase))
 					return config;
 
 			// Return the (invalid) user-provided config
-			return CommandLineOptions.Configuration;
+			return CommandLineOptions.Configuration.Value;
 		}
 	}
 
@@ -260,8 +252,8 @@ public static class BuildSettings
 
 	// Package Testing
 	public static int PackageTestLevel =>
-		CommandLineOptions.TestLevel > 0
-			? CommandLineOptions.TestLevel
+		CommandLineOptions.TestLevel.Value > 0
+			? CommandLineOptions.TestLevel.Value
 			: CalcPackageTestLevel();
 
 	// Publishing - MyGet
@@ -325,11 +317,11 @@ public static class BuildSettings
 		DisplaySetting("IsRunningOnAppVeyor:          ", IsRunningOnAppVeyor);
 
 		DisplayHeading("COMMAND-LINE OPTIONS");
-		DisplaySetting("Target:           ", CommandLineOptions.Target);
-		DisplaySetting("Configuration:    ", CommandLineOptions.Configuration);
-		DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion);
-		DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel);
-		DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel);
+		DisplaySetting("Target:           ", CommandLineOptions.Target.Value);
+		DisplaySetting("Configuration:    ", CommandLineOptions.Configuration.Value);
+		DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion.Value);
+		DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel.Value);
+		DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel.Value);
 		DisplaySetting("NoBuild:          ", CommandLineOptions.NoBuild ? "True" : "NOT SET");
 		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush ? "True" : "NOT SET");
 

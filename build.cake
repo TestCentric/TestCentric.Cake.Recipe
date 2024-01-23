@@ -36,4 +36,4 @@ Task("Default")
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 
-RunTarget(CommandLineOptions.Target);
+RunTarget(CommandLineOptions.Target.Value);
