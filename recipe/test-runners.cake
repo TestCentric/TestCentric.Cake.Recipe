@@ -91,8 +91,21 @@ public class NUnitLiteRunner : TestRunner
 /// </summary>
 public class AgentRunner : TestRunner
 {
-	public AgentRunner(string agentExecutable)
+    private string _stdExecutable;
+    private string _x86Executable;
+
+	public AgentRunner(string stdExecutable, string x86Executable = null)
 	{
-		ExecutablePath = agentExecutable;
+        _stdExecutable = stdExecutable;
+        _x86Executable = x86Executable;
+    }
+
+    public override int Run(string arguments)
+    {
+		ExecutablePath = arguments.Contains("--x86")
+            ? _x86Executable
+            : _stdExecutable;
+
+        return base.Run(arguments.Replace("--x86", string.Empty));
 	}
 }
