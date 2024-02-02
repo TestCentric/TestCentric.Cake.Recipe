@@ -67,8 +67,19 @@ public class ChocolateyPackage : PackageDefinition
     {
         get
         {
+            var repositoryUrl = TESTCENTRIC_GITHUB_URL + BuildSettings.GitHubRepository + "/";
+            var rawGitHubUserContent = "https://raw.githubusercontent.com/" + BuildSettings.GitHubRepository + "/main/";
+
+            // NOTE: Because of how Cake build works, these settings will
+            // override any settings in a nuspec file. Therefore, no settings
+            // should be initialized unless they either
+            //  1) are taken from the PackageDefinition itself.
+            //  2) are taken from the BuildSettings, which apply to all packages being built.
+            //  3) are defined to be the same for all TestCentric packages.
+
             var settings = new ChocolateyPackSettings
             {
+                // From PackageDefinition
 		        Id = PackageId,
                 Version = PackageVersion,
                 Title = PackageTitle ?? PackageId,
@@ -76,20 +87,22 @@ public class ChocolateyPackage : PackageDefinition
                 Description = PackageDescription,
                 ReleaseNotes = ReleaseNotes,
                 Tags = Tags,
+                // From BuildSettings
+		        LicenseUrl = new Uri($"{TESTCENTRIC_RAW_URL}{BuildSettings.GitHubRepository}/main/LICENSE.txt"),
+		        Verbose = BuildSettings.ChocolateyVerbosity,
+                OutputDirectory = BuildSettings.PackagingDirectory,
+                ProjectSourceUrl = new Uri(repositoryUrl),
+                PackageSourceUrl = new Uri(repositoryUrl),
+                BugTrackerUrl = new Uri(repositoryUrl + "issues"),
+                // Common to all packages
                 Authors = TESTCENTRIC_PACKAGE_AUTHORS,
 		        Owners = TESTCENTRIC_PACKAGE_OWNERS,
 		        Copyright = TESTCENTRIC_COPYRIGHT,
 		        ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
-		        LicenseUrl = new Uri(TESTCENTRIC_LICENSE_URL),
 		        RequireLicenseAcceptance = false,
 		        IconUrl = new Uri(TESTCENTRIC_ICON_URL),
-                ProjectSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
-                PackageSourceUrl = new Uri(PROJECT_REPOSITORY_URL),
                 DocsUrl = new Uri(TESTCENTRIC_PROJECT_URL),
-                MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
-                BugTrackerUrl = new Uri(PROJECT_REPOSITORY_URL + "issues"),
-		        Verbose = BuildSettings.ChocolateyVerbosity,
-                OutputDirectory = BuildSettings.PackagingDirectory,
+                MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL)
 	        };
 
             if (PackageContent != null)
