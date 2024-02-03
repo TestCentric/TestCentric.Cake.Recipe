@@ -81,12 +81,10 @@ static readonly string[] TESTCENTRIC_PACKAGE_OWNERS = new[] { "Charlie Poole" };
 static readonly NuSpecLicense TESTCENTRIC_LICENSE = new NuSpecLicense() { Type = "expression", Value="MIT" };
 
 const string TESTCENTRIC_ICON = "testcentric.png";
-const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2023 Charlie Poole";
+// TODO: Automatic update of year
+const string TESTCENTRIC_COPYRIGHT = "Copyright (c) 2021-2024 Charlie Poole";
 const string TESTCENTRIC_PROJECT_URL = "https://test-centric.org/";
 const string TESTCENTRIC_GITHUB_URL = "https://github.com/TestCentric/";
+const string TESTCENTRIC_RAW_URL = "https://raw.githubusercontent.com/TestCentric/";
 const string TESTCENTRIC_ICON_URL = "https://test-centric.org/assets/img/testcentric_128x128.png";
-
-static readonly string PROJECT_REPOSITORY_URL = TESTCENTRIC_GITHUB_URL + BuildSettings.GitHubRepository + "/";
-
-static readonly string TESTCENTRIC_LICENSE_URL = "https://raw.githubusercontent.com/TestCentric/" + BuildSettings.GitHubRepository + "/main/LICENSE.txt";
 const string TESTCENTRIC_MAILING_LIST_URL = "https://groups.google.com/forum/#!forum/nunit-discuss";

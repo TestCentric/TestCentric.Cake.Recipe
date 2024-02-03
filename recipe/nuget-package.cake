@@ -74,28 +74,41 @@ public class NuGetPackage : PackageDefinition
     {
         get
         {
+            var repositoryUrl = TESTCENTRIC_GITHUB_URL + BuildSettings.GitHubRepository + "/";
+            var rawGitHubUserContent = "https://raw.githubusercontent.com/" + BuildSettings.GitHubRepository + "/main/";
+
+            // NOTE: Because of how Cake build works, these settings will
+            // override any settings in a nuspec file. Therefore, no settings
+            // should be initialized unless they either
+            //  1) are taken from the PackageDefinition itself.
+            //  2) are taken from the BuildSettings, which apply to all packages being built.
+            //  3) are defined to be the same for all TestCentric packages.
+
             var settings = new NuGetPackSettings
 	        {
+                // From PackageDefinition
 		        Id = PackageId,
                 Version = PackageVersion,
                 Title = PackageTitle ?? PackageId,
-                // Deprecated by nuget: Summary = PackageSummary,
+                //Summary = PackageSummary, // Deprecated
                 Description = PackageDescription,
                 ReleaseNotes = ReleaseNotes,
                 Tags = Tags,
+                BasePath = BasePath,
+                // From BuildSettings
+		        Verbosity = BuildSettings.NuGetVerbosity,
+                OutputDirectory = BuildSettings.PackagingDirectory,
+                Repository = new NuGetRepository() { Type="Git", Url=repositoryUrl },
+                // Common to all pacakges
                 Authors = TESTCENTRIC_PACKAGE_AUTHORS,
-		        // Deprecated by nuget: Owners = TESTCENTRIC_PACKAGE_OWNERS,
+		        //Owners = TESTCENTRIC_PACKAGE_OWNERS, // Deprecated
 		        Copyright = TESTCENTRIC_COPYRIGHT,
 		        ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
 		        License = TESTCENTRIC_LICENSE,
-                Repository = new NuGetRepository() { Type="Git", Url="https://github.com/TestCentric/TestCentric.Cake.Recipe" },
 		        RequireLicenseAcceptance = false,
-		        // Deprecated by nuget: IconUrl = new Uri(TESTCENTRIC_ICON_URL),
+		        //IconUrl = new Uri(TESTCENTRIC_ICON_URL), // Deprecated
 		        Icon = TESTCENTRIC_ICON,
 		        Language = "en-US",
-                BasePath = BasePath,
-		        Verbosity = BuildSettings.NuGetVerbosity,
-                OutputDirectory = BuildSettings.PackagingDirectory,
                 NoPackageAnalysis = true,
 	        };
 
@@ -105,20 +118,8 @@ public class NuGetPackage : PackageDefinition
                 settings.SymbolPackageFormat = "snupkg";
             }
 
-            return settings;
-        }
-    }
-
-    public override void BuildPackage()
-    {
-        var settings = NuGetPackSettings;
-
-        if (string.IsNullOrEmpty(PackageSource))
-        {
             if (PackageContent != null)
             {
-                _context.Information("Using PackageContent");
-
                 foreach (var item in PackageContent.GetNuSpecContent())
                     settings.Files.Add(item);
 
@@ -126,29 +127,28 @@ public class NuGetPackage : PackageDefinition
                     settings.Dependencies.Add(new NuSpecDependency { Id = dependency.Id, Version = dependency.Version } );
             }
 
-            _context.NuGetPack(settings);
+            return settings;
         }
-        else switch(System.IO.Path.GetExtension(PackageSource))
-        {
-            case ".nuspec":
-                _context.Information("Using Nuspec");
-                _context.NuGetPack(PackageSource, settings);
-                break;
-            case ".csproj":
-	            _context.Information("Using Csproj");
-	            _context.MSBuild(PackageSource,
-                    new MSBuildSettings {
-                        Target = "pack",
-		                Verbosity = BuildSettings.MSBuildVerbosity,
-		                Configuration = BuildSettings.Configuration,
-		                PlatformTarget = PlatformTarget.MSIL,
-		                AllowPreviewVersion = BuildSettings.MSBuildAllowPreviewVersion
-            	    }.WithProperty("Version", BuildSettings.PackageVersion));
-                break;
-            default:
-                throw new ArgumentException(
-                    $"Invalid package source specified: {PackageSource}", "source");
-        }
+    }
+
+    public override void BuildPackage()
+    {
+        if (string.IsNullOrEmpty(PackageSource))
+            _context.NuGetPack(NuGetPackSettings);
+        else if (PackageSource.EndsWith(".nuspec"))
+            _context.NuGetPack(PackageSource, NuGetPackSettings);
+        else if (PackageSource.EndsWith(".csproj"))
+            _context.MSBuild(PackageSource,
+                new MSBuildSettings {
+                    Target = "pack",
+                    Verbosity = BuildSettings.MSBuildVerbosity,
+                    Configuration = BuildSettings.Configuration,
+                    PlatformTarget = PlatformTarget.MSIL,
+                    AllowPreviewVersion = BuildSettings.MSBuildAllowPreviewVersion
+                }.WithProperty("Version", BuildSettings.PackageVersion));
+        else
+            throw new ArgumentException(
+                $"Invalid package source specified: {PackageSource}", "source");
     }
 
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
