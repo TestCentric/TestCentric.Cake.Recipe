@@ -78,11 +78,10 @@ public class NUnitLiteRunner : TestRunner
 
 	private void SetupProcessEnvironmentVariables()
 	{
-        var traceLevel = CommandLineOptions.TraceLevel.Value ?? "Off";
-
-        ProcessSettings.EnvironmentVariables = new Dictionary<string,string> {
-            { "TESTCENTRIC_INTERNAL_TRACE_LEVEL", traceLevel }
-        };
+		if (CommandLineOptions.TraceLevel.Exists)
+			ProcessSettings.EnvironmentVariables = new Dictionary<string,string> {
+				{ "TESTCENTRIC_INTERNAL_TRACE_LEVEL", CommandLineOptions.TraceLevel.Value }
+			};
 	}
 }
 

@@ -32,15 +32,17 @@ public static class UnitTesting
         Banner.Display(msg);
 
         var runner = BuildSettings.UnitTestRunner ?? new NUnitLiteRunner();
+        bool isNUnitLite = runner is NUnitLiteRunner;
 
-        if (runner is NUnitLiteRunner)
+        if (isNUnitLite)
             runner.Run(testPath, BuildSettings.UnitTestArguments);
         else
 		    runner.Run($"{testPath} {BuildSettings.UnitTestArguments}");
 		    
         var result = new ActualResult(BuildSettings.OutputDirectory + "TestResult.xml");
 
-		new ConsoleReporter(result).Display();
+        if (!isNUnitLite) // NUnitLite displays it's own results
+		    new ConsoleReporter(result).Display();
 
 		if (result.OverallResult == "Failed")
 			throw new System.Exception("There were test failures or errors. See listing.");

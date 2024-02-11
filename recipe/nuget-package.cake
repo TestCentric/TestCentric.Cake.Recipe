@@ -99,9 +99,9 @@ public class NuGetPackage : PackageDefinition
 		        Verbosity = BuildSettings.NuGetVerbosity,
                 OutputDirectory = BuildSettings.PackagingDirectory,
                 Repository = new NuGetRepository() { Type="Git", Url=repositoryUrl },
-                // Common to all pacakges
+                // Common to all packages
                 Authors = TESTCENTRIC_PACKAGE_AUTHORS,
-		        //Owners = TESTCENTRIC_PACKAGE_OWNERS, // Deprecated
+		        //Owners = TESTCENTRIC_PACKAGE_OWNERS, // Deprecated by NuGet
 		        Copyright = TESTCENTRIC_COPYRIGHT,
 		        ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
 		        License = TESTCENTRIC_LICENSE,
