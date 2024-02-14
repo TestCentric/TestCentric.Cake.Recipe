@@ -58,8 +58,8 @@ public class PluggableAgentFactory
 
 		if (TargetIsNetFramework)
 		{
-			NuGetId = $"NUnit.Extension.Net{TargetVersionWithoutDots}PluggableAgent";
-			ChocoId = $"nunit-extension-net{TargetVersionWithoutDots}-pluggable-agent";
+			NuGetId = $"TestCentric.Extension.Net{TargetVersionWithoutDots}PluggableAgent";
+			ChocoId = $"testcentric-extension-net{TargetVersionWithoutDots}-pluggable-agent";
 			Title = $".NET {TargetVersion} Pluggable Agent";
 			Description = $"TestCentric engine extension for running tests under .NET {TargetVersion}";
 			TargetLauncherName = $"Net{TargetVersionWithoutDots}AgentLauncher";
@@ -69,15 +69,15 @@ public class PluggableAgentFactory
 			Tags = new [] { "testcentric", "pluggable", "agent", $"net{TargetVersionWithoutDots}" };
 			AgentFiles = new FilePath[] {
 				$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
-				"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll", "agent/testcentric.extensibility.dll" };
+				"agent/TestCentric.Agent.Core.dll", "agent/TestCentric.Engine.Api.dll", "agent/TestCentric.Metadata.dll", "agent/TestCentric.Extensibility.dll", "agent/TestCentric.Extensibility.Api.dll", "agent/TestCentric.InternalTrace.dll" };
 
 		}
 		else
 		{
 			if (TargetVersion.Major <= 3)
 			{
-				NuGetId = $"NUnit.Extension.NetCore{TargetVersionWithoutDots}PluggableAgent";
-				ChocoId = $"nunit-extension-netcore{TargetVersionWithoutDots}-pluggable-agent";
+				NuGetId = $"TestCentric.Extension.NetCore{TargetVersionWithoutDots}PluggableAgent";
+				ChocoId = $"testcentric-extension-netcore{TargetVersionWithoutDots}-pluggable-agent";
 				Title = $".NET Core {TargetVersion} Pluggable Agent";
 				Description = $"TestCentric engine extension for running tests under .NET Core {TargetVersion}";
 				TargetLauncherName = $"NetCore{TargetVersionWithoutDots}AgentLauncher";
@@ -87,14 +87,14 @@ public class PluggableAgentFactory
 				AgentFiles = new FilePath[] {
 					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
 					$"agent/{TargetAgentFileNameWithoutExtension}.deps.json", $"agent/{TargetAgentFileNameWithoutExtension}.runtimeconfig.json",
-					"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll",
-					"agent/testcentric.extensibility.dll", "agent/Microsoft.Extensions.DependencyModel.dll" };
+					"agent/TestCentric.Agent.Core.dll", "agent/TestCentric.Engine.Api.dll", "agent/TestCentric.Metadata.dll",
+					"agent/TestCentric.Extensibility.dll", "agent/TestCentric.Extensibility.Api.dll", "agent/TestCentric.InternalTrace.dll", "agent/Microsoft.Extensions.DependencyModel.dll" };
 				Tags = new [] { "testcentric", "pluggable", "agent", $"netcoreapp{TargetVersion}" };
 			}
 			else
 			{
-				NuGetId = $"NUnit.Extension.Net{TargetVersionWithoutDots}PluggableAgent";
-				ChocoId = $"nunit-extension-net{TargetVersionWithoutDots}-pluggable-agent";
+				NuGetId = $"TestCentric.Extension.Net{TargetVersionWithoutDots}PluggableAgent";
+				ChocoId = $"testcentric-extension-net{TargetVersionWithoutDots}-pluggable-agent";
 				Title = $".NET {TargetVersion} Pluggable Agent";
 				Description = $"TestCentric engine extension for running tests under .NET {TargetVersion}";
 				TargetLauncherName = $"Net{TargetVersionWithoutDots}AgentLauncher";
@@ -104,8 +104,8 @@ public class PluggableAgentFactory
 				AgentFiles = new FilePath[] {
 					$"agent/{TargetAgentFileName}", $"agent/{TargetAgentFileNameWithoutExtension}.pdb", $"agent/{TargetAgentFileName}.config",
 					$"agent/{TargetAgentFileNameWithoutExtension}.deps.json", $"agent/{TargetAgentFileNameWithoutExtension}.runtimeconfig.json",
-					"agent/nunit.engine.api.dll", "agent/testcentric.engine.core.dll", "agent/testcentric.engine.metadata.dll",
-					"agent/testcentric.extensibility.dll", "agent/Microsoft.Extensions.DependencyModel.dll" };
+					"agent/TestCentric.Agent.Core.dll", "agent/TestCentric.Engine.Api.dll", "agent/TestCentric.Metadata.dll",
+					"agent/TestCentric.Extensibility.dll", "agent/TestCentric.Extensibility.Api.dll", "agent/TestCentric.InternalTrace.dll", "agent/Microsoft.Extensions.DependencyModel.dll" };
 				Tags = new [] { "testcentric", "pluggable", "agent", $"net{TargetVersion}" };
 			}
 		}
@@ -128,7 +128,7 @@ public class PluggableAgentFactory
 				.WithDirectories(
 					new DirectoryContent("tools").WithFiles( LauncherFiles ),
 					new DirectoryContent("tools/agent").WithFiles( AgentFiles ) ),
-			testRunner: new AgentRunner(BuildSettings.NuGetTestDirectory + NuGetId + "/tools/agent/" + TargetAgentFileName),
+			testRunner: new AgentRunner($"{BuildSettings.NuGetTestDirectory}{NuGetId}.{BuildSettings.PackageVersion}/tools/agent/{TargetAgentFileName}"),
 			tests: PackageTests);
 	
 	public ChocolateyPackage ChocolateyPackage =>
@@ -142,7 +142,7 @@ public class PluggableAgentFactory
 				.WithDirectories(
 					new DirectoryContent("tools").WithFiles( LICENSE, README, CHOCO_VERIFICATION ).AndFiles( LauncherFiles ),
 					new DirectoryContent("tools/agent").WithFiles( AgentFiles ) ),
-			testRunner: new AgentRunner(BuildSettings.ChocolateyTestDirectory + ChocoId + "/tools/agent/" + TargetAgentFileName),
+			testRunner: new AgentRunner($"{BuildSettings.ChocolateyTestDirectory}{ChocoId}.{BuildSettings.PackageVersion}/tools/agent/{TargetAgentFileName}"),
 			tests: PackageTests);
 
 	public PackageDefinition[] Packages => new PackageDefinition[] { NuGetPackage, ChocolateyPackage };
