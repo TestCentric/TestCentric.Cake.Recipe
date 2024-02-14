@@ -97,14 +97,15 @@ public class ActualAssemblyResult
     {
 		AssemblyName = xml.Attributes["name"]?.Value;
 
-		var env = xml.SelectSingleNode("environment");
+		//var env = xml.SelectSingleNode("environment");
 		var settings = xml.SelectSingleNode("settings");
 
-		// If TargetRuntimeFramework setting is not present, the GUI will have crashed anyway
+		// If TargetRuntimeFramework setting is not present, the GUI will probably crash
+		// However, it is optional when using tc-lite directly.
 		var runtimeSetting = settings?.SelectSingleNode("setting[@name='TargetRuntimeFramework']");
 		TargetRuntime = runtimeSetting?.Attributes["value"]?.Value;
 
-		var agentSetting = settings.SelectSingleNode("setting[@name='SelectedAgentName']");
+		var agentSetting = settings?.SelectSingleNode("setting[@name='SelectedAgentName']");
 		AgentName = agentSetting?.Attributes["value"]?.Value;
 	}
 
