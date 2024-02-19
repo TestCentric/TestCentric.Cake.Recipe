@@ -10,25 +10,20 @@ BuildSettings.Initialize(
 	context: Context,
 	title: "TestCentric Cake Recipe",
 	githubRepository: "TestCentric.Cake.Recipe",
-	defaultTarget: "Package");
-
-BuildSettings.Packages.Add(new RecipePackage
-(
-	id: "TestCentric.Cake.Recipe",
-    description: "Cake Recipe used for building TestCentric applications and extensions",
-	//releaseNotes: new [] {"line1", "line2", "line3"},
-    tags: new [] { "testcentric", "cake", "recipe" }
-));
+	defaultTarget: "Package" );
 
 //////////////////////////////////////////////////////////////////////
-// TASK TARGETS
+// DEFINE RECIPE PACKAGE
 //////////////////////////////////////////////////////////////////////
 
-Task("Appveyor")
-	.IsDependentOn("Package")
-	.IsDependentOn("Publish")
-	.IsDependentOn("CreateDraftRelease")
-	.IsDependentOn("CreateProductionRelease");
+BuildSettings.Packages.Add(
+	new RecipePackage
+	(
+		id: "TestCentric.Cake.Recipe",
+		description: "Cake Recipe used for building TestCentric applications and extensions",
+		//releaseNotes: new [] {"line1", "line2", "line3"},
+		tags: new [] { "testcentric", "cake", "recipe" }
+	) );
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
