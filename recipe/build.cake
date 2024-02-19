@@ -7,16 +7,6 @@
 // in the BuildSettings constructor as indicated in comments below.
 
 //////////////////////////////////////////////////////////////////////
-// HELP TASKS
-//////////////////////////////////////////////////////////////////////
-BuildTasks.HelpTask = Task("Help")
-	.Description("Display help, including Usage, Options and Tasks")
-	.Does(() =>
-	{
-		Information(HelpMessages.Summary);
-	});
-
-//////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
 //////////////////////////////////////////////////////////////////////
 
@@ -276,7 +266,9 @@ BuildTasks.DefaultTask = Task("Default")
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 
-public Builder Build => new Builder(() => RunTarget(CommandLineOptions.Target.Value));
+public Builder Build => CommandLineOptions.Usage
+    ? new Builder(() => Information(HelpMessages.Usage))
+    : new Builder(() => RunTarget(CommandLineOptions.Target.Value));
 
 public class Builder
 {

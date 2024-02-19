@@ -1,8 +1,5 @@
 public static class BuildTasks
 {
-	// Help
-	public static CakeTaskBuilder HelpTask { get; set; }
-
 	// General
 	public static CakeTaskBuilder CheckScriptTask { get; set; }
 	public static CakeTaskBuilder DumpSettingsTask { get; set; }
