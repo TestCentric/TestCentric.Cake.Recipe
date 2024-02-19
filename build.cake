@@ -9,7 +9,8 @@
 BuildSettings.Initialize(
 	context: Context,
 	title: "TestCentric Cake Recipe",
-	githubRepository: "TestCentric.Cake.Recipe");
+	githubRepository: "TestCentric.Cake.Recipe",
+	defaultTarget: "Package");
 
 BuildSettings.Packages.Add(new RecipePackage
 (
@@ -28,9 +29,6 @@ Task("Appveyor")
 	.IsDependentOn("Publish")
 	.IsDependentOn("CreateDraftRelease")
 	.IsDependentOn("CreateProductionRelease");
-
-Task("Default")
-    .IsDependentOn("Package");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION

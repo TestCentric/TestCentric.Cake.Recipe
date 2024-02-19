@@ -4,10 +4,45 @@ TestCentric.Cake.Recipe is a standard cake recipe used for TestCentric projects.
 It is inspired by Cake.Recipe but is somewhat simpler in implementation, since
 it isn't intended for general use. The recipe is still under development.
 
-## Usage
+## Structure of the `build.cake` File
 
-This section is under development. For now, take a look at the `net20-pluggable-agent`
-project for an example of how the recipe is used.
+The following is an example of a simple `build.cake` file for a project which creates a single package.
+
+```
+// Load the recipe
+#load nuget:?package=TestCentric.Cake.Recipe&version=1.1.0
+
+// Initialize Build Settings
+BuildSettings.Initialize(
+	context: Context,
+	title: "Sample Application",
+	githubRepository: "TestCentric.Sample.Application");
+
+// Define the package
+BuildSettings.Packages.Add(new NuGetPackage(
+	id: "TestCentric.Sample.Application",
+	source: "nuget/TestCentric.Sample.Application.nuspec",
+	checks: new PackageCheck[] {
+		HasFiles(
+			"LICENSE.txt", "README.md", "testcentric.png",
+			"lib/net8.0/testcentric.sample.application.dll") }));
+
+// Run the task selected by user or default task
+RunTarget(CommandLineOptions.Target.Value);
+```
+
+**NOTES:**
+
+1. The `#load` statement loads `TestCentric.Cake.Recipe`, specifying the version to use, 
+   in this case version 1.1.0. It is generally recommended that you specify the recipe 
+   version to avoid unpleasant surprises when the recipe is updated.
+
+2. `BuildSettings.Initialize` sets the parameters which drive the build process. The example
+   specifies only the three required paraameters. See below for a complete list of parameters.
+
+3. Define a single `nuget` package.
+
+4. Run the selected target. This must be the last command in the file.
 
 ## Supported Arguments
 
