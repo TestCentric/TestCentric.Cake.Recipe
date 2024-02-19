@@ -26,6 +26,8 @@ public static class BuildSettings
 		string unitTests = null, // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
 		TestRunner unitTestRunner = null, // If not set, NUnitLite is used
 		string unitTestArguments = null,
+
+		string defaultTarget = null, // Defaults to "Build"
 		
 		// Verbosity
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
@@ -77,6 +79,9 @@ public static class BuildSettings
 				StandardHeader[1] = "// " + copyright;
 		}
 		ExemptFiles = exemptFiles ?? new string[0];
+
+		if (defaultTarget != null)
+			BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
 
 		MSBuildVerbosity = msbuildVerbosity;
 		MSBuildAllowPreviewVersion = msbuildAllowPreviewVersion;

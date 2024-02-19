@@ -8,6 +8,7 @@ public static class BuildTasks
 	// General
 	public static CakeTaskBuilder CheckScriptTask { get; set; }
 	public static CakeTaskBuilder DumpSettingsTask { get; set; }
+	public static CakeTaskBuilder DefaultTask {get; set; }
 
 	// Building
 	public static CakeTaskBuilder BuildTask { get; set; }
@@ -160,6 +161,10 @@ BuildTasks.CheckScriptTask = Task("CheckScript")
 BuildTasks.DumpSettingsTask = Task("DumpSettings")
 	.Description("Display BuildSettings properties")
 	.Does(() => BuildSettings.DumpSettings());
+
+BuildTasks.DefaultTask = Task("Default")
+	.Description("Default target if not specified by user")
+	.IsDependentOn("Build");
 
 //////////////////////////////////////////////////////////////////////
 // BUILDING TASKS
