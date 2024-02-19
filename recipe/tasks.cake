@@ -44,6 +44,10 @@ public static class BuildTasks
 	public static  CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
 	public static  CakeTaskBuilder CreateProductionReleaseTask { get; set; }
 
+	// Continuous Integration
+	public static CakeTaskBuilder ContinuousIntegrationTask { get; set; }
+	public static CakeTaskBuilder AppVeyorTask { get; set; }
+
     public static string TaskList => $"""
         BUILDING
           {Show(BuildTask)}
@@ -384,3 +388,20 @@ BuildTasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
 BuildTasks.CreateProductionReleaseTask = Task("CreateProductionRelease")
 	.Description("Create a production GitHub Release")
 	.Does(() => PackageReleaseManager.CreateProductionRelease() );
+
+//////////////////////////////////////////////////////////////////////
+// CONTINUOUS INTEGRATION
+//////////////////////////////////////////////////////////////////////
+
+BuildTasks.ContinuousIntegrationTask = Task("ContinuousIntegration")
+	.Description("Perform continuous integration run")
+	.IsDependentOn("Build")
+	.IsDependentOn("Test")
+	.IsDependentOn("Package")
+	.IsDependentOn("Publish")
+	.IsDependentOn("CreateDraftRelease")
+	.IsDependentOn("CreateProductionRelease");
+
+BuildTasks.AppVeyorTask = Task("Appveyor")
+	.Description("Target for running on AppVeyor")
+	.IsDependentOn("ContinuousIntegration");
