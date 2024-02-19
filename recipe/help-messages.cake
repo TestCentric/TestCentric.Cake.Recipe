@@ -8,15 +8,13 @@
         Usage: build [options]
 
         {Options}
-
-        {BuildTasks.TaskList}
         """;
 
     public static string Options = $"""
         Options:
 
             --target, -t=TARGET
-                The TARGET task to be run, e.g. Test. Specify Default in `build.cake`.
+                The TARGET task to be run, e.g. Test. Default is Build"
 
             --configuration, -c=CONFIG
                 The name of the configuration to build. Default is Release.
@@ -25,8 +23,6 @@
                 Specifies the full package version, including any pre-release suffix.
                 This version is used directly instead of the default determined by
                 the script. All other versions (AssemblyVersion, etc.) derive from this.
-
-              NOTE: We can't use "--version" since that's an argument to Cake itself.
 
             --testLevel, --level=LEVEL
                 Specifies the level of package testing, 1, 2 or 3. Defaults are
@@ -46,5 +42,21 @@
             --nopush
                 Indicates that no publishing or releasing should be done. If
                 publish or release targets are run, a message is displayed.
+
+        Selected Cake Options:
+            
+            --version
+                Displays the cake version in use.
+
+            --description
+                Displays a list of the available tasks (targets).
+
+            --tree
+                Displays the task dependency tree
+
+            --help
+                Displays help information for cake itself.
+
+            NOTE: The above Cake options bypass execution of the script.
         """;
 }
