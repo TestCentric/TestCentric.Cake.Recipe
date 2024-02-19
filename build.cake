@@ -29,4 +29,4 @@ BuildSettings.Packages.Add(
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 
-RunTarget(CommandLineOptions.Target.Value);
+Build.Run();

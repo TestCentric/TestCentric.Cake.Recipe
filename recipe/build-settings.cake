@@ -34,12 +34,17 @@ public static class BuildSettings
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
 		bool chocolateyVerbosity = false )
 	{
+		// Required arguments
 		if (context == null)
 			throw new ArgumentNullException(nameof(context));
 		if (title == null)
 			throw new ArgumentNullException(nameof(title));
 		if (githubRepository == null)
 			throw new ArgumentNullException(nameof(githubRepository));
+
+		Context = context;
+		Title = title;
+		GitHubRepository = githubRepository;
 
 		// NOTE: Order of initialization can be sensitive. Obviously,
 		// we have to set any properties in this method before we
@@ -48,10 +53,8 @@ public static class BuildSettings
 		// being set before the constructor is called. I have
 		// tried to annotate such dependenciess below.
 
-		Context = context;
 		_buildSystem = context.BuildSystem();
 
-		Title = title;
 		// If not specified, uses TITLE.sln if it exists or uses solution
 		// found in the root directory provided there is only one. 
 		SolutionFile = solutionFile ?? DeduceSolutionFile();
@@ -66,7 +69,6 @@ public static class BuildSettings
 		BuildVersion = new BuildVersion(context);
 
 		GitHubOwner = githubOwner;
-		GitHubRepository = githubRepository;
 
 		// File Header Checks
 		SuppressHeaderCheck = suppressHeaderCheck && !CommandLineOptions.NoBuild;
@@ -89,6 +91,10 @@ public static class BuildSettings
 		NuGetVerbosity = nugetVerbosity;
 		ChocolateyVerbosity = chocolateyVerbosity;
 
+		// Skip remaining initialization if help was requested
+		if (CommandLineOptions.Usage)
+			return;
+			
 		ValidateSettings();
 
 		context.Information($"{Title} {Configuration} version {PackageVersion}");

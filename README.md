@@ -28,7 +28,7 @@ BuildSettings.Packages.Add(new NuGetPackage(
 			"lib/net8.0/testcentric.sample.application.dll") }));
 
 // Run the task selected by user or default task
-RunTarget(CommandLineOptions.Target.Value);
+Build.Run();
 ```
 
 **NOTES:**

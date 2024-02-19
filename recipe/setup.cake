@@ -24,18 +24,18 @@ Setup((context) =>
 	if (needChocolateyApiKey && string.IsNullOrEmpty(BuildSettings.ChocolateyApiKey))
 		DisplayErrorAndThrow("Chocolatey ApiKey is required but was not set.");
 
-	// GitHub Access Token
-	if (!CommandLineOptions.NoPush &&
-		(tasksToExecute.Contains("CreateDraftRelease") && BuildSettings.IsReleaseBranch ||
-		BuildSettings.IsProductionRelease))
-	{
-		if (string.IsNullOrEmpty(BuildSettings.GitHubAccessToken))
-			DisplayErrorAndThrow("GitHub Access Token is required but was not set.");
-		if (string.IsNullOrEmpty(BuildSettings.GitHubOwner))
-			DisplayErrorAndThrow("GitHub Owner is required but was not set.");
-		if (string.IsNullOrEmpty(BuildSettings.GitHubRepository))
-			DisplayErrorAndThrow("GitHub Repository is required but was not set.");
-	}
+	// GitHub Access Token, Owner and Repository
+	if (!CommandLineOptions.NoPush)
+		if (tasksToExecute.Contains("CreateDraftRelease") && BuildSettings.IsReleaseBranch ||
+			tasksToExecute.Contains("CreateProductionRelease") && BuildSettings.IsProductionRelease)
+		{
+			if (string.IsNullOrEmpty(BuildSettings.GitHubAccessToken))
+				DisplayErrorAndThrow("GitHub Access Token is required but was not set.");
+			if (string.IsNullOrEmpty(BuildSettings.GitHubOwner))
+				DisplayErrorAndThrow("GitHub Owner is required but was not set.");
+			if (string.IsNullOrEmpty(BuildSettings.GitHubRepository))
+				DisplayErrorAndThrow("GitHub Repository is required but was not set.");
+		}
 	
 	// Add settings to BuildSettings
 	BuildSettings.Target = target;
