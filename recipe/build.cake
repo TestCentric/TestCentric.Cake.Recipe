@@ -212,21 +212,14 @@ BuildTasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
 	{
 		bool calledDirectly = CommandLineOptions.Target.Value == "CreateDraftRelease";
 
-		if (calledDirectly)
-		{
-			if (CommandLineOptions.PackageVersion == null)
-				throw new InvalidOperationException("CreateDraftRelease target requires --packageVersion");
-
+		if (CommandLineOptions.PackageVersion.Exists)
 			PackageReleaseManager.CreateDraftRelease(CommandLineOptions.PackageVersion.Value);
-		}
-		else if (!BuildSettings.IsReleaseBranch)
-		{
-			Information("Skipping creation of draft release because this is not a release branch");
-		}
-		else
-		{
+		else if (BuildSettings.IsReleaseBranch)
 			PackageReleaseManager.CreateDraftRelease(BuildSettings.BuildVersion.BranchName.Substring(8));
-		}
+		else if (calledDirectly)
+			throw new InvalidOperationException("CreateDraftRelease target requires --packageVersion");
+		else
+			Information("Skipping creation of draft release because this is not a release branch");
 	});
 
 BuildTasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
