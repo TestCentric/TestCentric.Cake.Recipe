@@ -1,8 +1,6 @@
 # TestCentric.Cake.Recipe
 
-TestCentric.Cake.Recipe is a standard cake recipe used for TestCentric projects.
-It is inspired by Cake.Recipe but is somewhat simpler in implementation, since
-it isn't intended for general use. The recipe is still under development.
+TestCentric.Cake.Recipe is a standard cake recipe used for TestCentric projects. It is inspired by Cake.Recipe but is somewhat simpler in implementation, since it isn't intended for general use. The recipe is still under development.
 
 ## Structure of the `build.cake` File
 
@@ -54,7 +52,7 @@ Arguments taking a value may use  `=` or space to separate the name
 from the value.
 
 #### --target, -t=TARGET
-The name of the TARGET task to be run, e.g. Test. Default is specified in `build.cake`.
+The name of the TARGET task to be run, e.g. Test. Default is "Build."
 
 #### --configuration, -c=CONFIG
 The name of the configuration to build, test and/or package, e.g. Debug.
@@ -78,6 +76,19 @@ a PR or publishing the package. Defined levels are
   2. Adds more tests for PRs and Dev builds uploaded to MyGet
   3. Adds even more tests prior to publishing a release
 
+#### --trace=LEVEL
+Specifies the default trace level for this run. Values are Off,
+Error, Warning, Info or Debug. Default is value of environment
+variable TESTCENTRIC_INTERNAL_TRACE_LEVEL if set. If not,
+tracing is turned Off.
+
+#### --nobuild
+Indicates that the Build task should not be run even if other
+tasks depend on it. The existing build is used instead.
+
 #### --nopush
 Indicates that no publishing or releasing should be done. If
 publish or release targets are run, a message is displayed.
+
+#### --usage
+Displays this help message. No targets are run.

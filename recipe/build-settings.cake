@@ -203,7 +203,7 @@ public static class BuildSettings
 	public static string ZipDirectory					=> ProjectDirectory + ZIP_DIR;
 	public static string NuGetDirectory					=> ProjectDirectory + NUGET_DIR;
 	public static string ChocolateyDirectory			=> ProjectDirectory + CHOCO_DIR;
-	public static string PackagingDirectory				=> ProjectDirectory + PACKAGING_DIR;
+	public static string PackagingDirectory             => ProjectDirectory + PACKAGING_DIR;
 	public static string ZipImageDirectory				=> ProjectDirectory + ZIP_IMG_DIR;
 	public static string ToolsDirectory					=> ProjectDirectory + TOOLS_DIR;
 	public static string PackageTestDirectory			=> ProjectDirectory + PKG_TEST_DIR;
