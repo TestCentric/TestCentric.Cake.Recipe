@@ -114,6 +114,7 @@ public static class PackageReleaseManager
 				$"Package not found: {package.GetFilename()}.\nCode may have changed since package was last built.");
 	}
 
+	#if ISSUE_67_FIXED
 	public static void CreateDraftRelease(string releaseVersion)
 	{
 		if (CommandLineOptions.NoPush)
@@ -141,6 +142,7 @@ public static class PackageReleaseManager
 			}
 		}
 	}
+	#endif
 
 	public static void DownloadDraftRelease()
 	{
@@ -177,7 +179,7 @@ public static class PackageReleaseManager
 			_context.Information($"  Assets: {assets}");
 
 			_context.GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
-			_context.GitReleaseManagerClose(token, owner, repository, tagName);
+			//_context.GitReleaseManagerClose(token, owner, repository, tagName); Issue 67
 		}
 	}
 }
