@@ -227,7 +227,7 @@ public abstract class PackageDefinition
 			_context.CreateDirectory(testResultDir);
             string arguments = $"{packageTest.Arguments} {ExtraTestArguments} --work={testResultDir}";
             if (CommandLineOptions.TraceLevel.Value != "Off")
-                arguments += $" --trace:{CommandLineOptions.TraceLevel}";
+                arguments += $" --trace:{CommandLineOptions.TraceLevel.Value}";
 
             int rc = TestRunner.Run(arguments);
 
