@@ -22,14 +22,14 @@ public static class BuildTasks
 	// Packaging
 	public static  CakeTaskBuilder PackageTask { get; set; }
 	public static  CakeTaskBuilder BuildTestAndPackageTask { get; set; }
-	public static  CakeTaskBuilder BuildPackagesTask { get; set; }
-	public static  CakeTaskBuilder InstallPackagesTask { get; set; }
-	public static  CakeTaskBuilder VerifyPackagesTask { get; set; }
-	public static  CakeTaskBuilder TestPackagesTask { get; set; }
-	public static  CakeTaskBuilder AddPackagesToLocalFeedTask { get; set; }
+	public static  CakeTaskBuilder PackageBuildTask { get; set; }
+	public static  CakeTaskBuilder PackageInstallTask { get; set; }
+	public static  CakeTaskBuilder PackageVerifyTask { get; set; }
+	public static  CakeTaskBuilder PackageTestTask { get; set; }
 
 	// Publishing
 	public static  CakeTaskBuilder PublishTask { get; set; }
+	public static  CakeTaskBuilder PublishToLocalFeedTask { get; set; }
 	public static  CakeTaskBuilder PublishToMyGetTask { get; set; }
 	public static  CakeTaskBuilder PublishToNuGetTask { get; set; }
 	public static  CakeTaskBuilder PublishToChocolateyTask { get; set; }
