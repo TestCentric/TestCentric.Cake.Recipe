@@ -25,6 +25,24 @@ BuildSettings.Packages.Add(
 		tags: new [] { "testcentric", "cake", "recipe" }
 	) );
 
+Task("TestLatest")
+	.Does(() =>
+	{
+		TestLatest("TestCentric.Extension.Net462PluggableAgent");
+		TestLatest("TestCentric.Engine");
+		TestLatest("testcentric-extension-net462-pluggable-agent");
+		TestLatest("testcentric-gui");
+		TestLatest("TestCentric.GuiRunner");
+	});
+
+private void TestLatest(string id)
+{
+	var package = new PackageReference(id, "1.2.3");
+	var latestRelease = package.LatestRelease.Version;
+	var latestDevBuild = package.LatestDevBuild.Version;
+	Console.WriteLine($"{id}  {latestRelease}  {latestDevBuild}");
+}
+
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
