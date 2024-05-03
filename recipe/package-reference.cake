@@ -25,6 +25,7 @@ public class PackageReference
 		"TestCentric.GuiRunner", "2.0.0-beta3-1");
 	public static PackageReference InternalTrace = new PackageReference(
 		"TestCentric.InternalTrace", "1.0.0");
+
 	public PackageReference(string id, string version)
 	{
 		_context = BuildSettings.Context;
