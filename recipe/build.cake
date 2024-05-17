@@ -240,7 +240,7 @@ BuildTasks.ContinuousIntegrationTask = Task("ContinuousIntegration")
 	.IsDependentOn("Test")
 	.IsDependentOn("Package")
 	.IsDependentOn("Publish")
-	//.IsDependentOn("CreateDraftRelease") Issue 67
+	.IsDependentOn("CreateDraftRelease")
 	.IsDependentOn("CreateProductionRelease");
 
 BuildTasks.AppveyorTask = Task("Appveyor")

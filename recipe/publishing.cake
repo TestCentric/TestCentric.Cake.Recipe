@@ -177,7 +177,7 @@ public static class PackageReleaseManager
 			_context.Information($"  Assets: {assets}");
 
 			_context.GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
-			//_context.GitReleaseManagerClose(token, owner, repository, tagName); Issue 67
+			_context.GitReleaseManagerClose(token, owner, repository, tagName);
 		}
 	}
 }
