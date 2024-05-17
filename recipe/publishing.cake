@@ -114,7 +114,6 @@ public static class PackageReleaseManager
 				$"Package not found: {package.GetFilename()}.\nCode may have changed since package was last built.");
 	}
 
-	#if ISSUE_67_FIXED
 	public static void CreateDraftRelease(string releaseVersion)
 	{
 		if (CommandLineOptions.NoPush)
@@ -142,7 +141,6 @@ public static class PackageReleaseManager
 			}
 		}
 	}
-	#endif
 
 	public static void DownloadDraftRelease()
 	{
