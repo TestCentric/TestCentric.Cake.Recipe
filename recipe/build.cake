@@ -206,7 +206,6 @@ BuildTasks.PublishToChocolateyTask = Task("PublishToChocolatey")
 	.Description("Publish packages to Chocolatey")
 	.Does(() =>	PackageReleaseManager.PublishToChocolatey());
 
-#if ISSUE_67_FIXED
 BuildTasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
 	.Description("Create a draft release on GitHub")
 	.Does(() =>
@@ -222,7 +221,6 @@ BuildTasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
 		else
 			Information("Skipping creation of draft release because this is not a release branch");
 	});
-#endif
 
 BuildTasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
 	.Description("Download draft release for local use")
@@ -242,7 +240,7 @@ BuildTasks.ContinuousIntegrationTask = Task("ContinuousIntegration")
 	.IsDependentOn("Test")
 	.IsDependentOn("Package")
 	.IsDependentOn("Publish")
-	//.IsDependentOn("CreateDraftRelease") Issue 67
+	.IsDependentOn("CreateDraftRelease")
 	.IsDependentOn("CreateProductionRelease");
 
 BuildTasks.AppveyorTask = Task("Appveyor")
