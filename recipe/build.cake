@@ -218,6 +218,10 @@ BuildTasks.CreateProductionReleaseTask = Task("CreateProductionRelease")
 	.Description("Create a production GitHub Release")
 	.Does(() => PackageReleaseManager.CreateProductionRelease() );
 
+BuildTasks.UpdateReleaseNotesTask = Task("UpdateReleaseNotes")
+	.Description("Create a production GitHub Release")
+	.Does(() => PackageReleaseManager.UpdateReleaseNotes() );
+
 //////////////////////////////////////////////////////////////////////
 // CONTINUOUS INTEGRATION TASKS
 //////////////////////////////////////////////////////////////////////
