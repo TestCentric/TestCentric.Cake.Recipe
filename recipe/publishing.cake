@@ -163,6 +163,46 @@ public static class PackageReleaseManager
 		}
 	}
 
+	private const string UPDATE_RELEASE_ERROR =
+		"A direct call to UpdateReleaseNotes is permitted only:\r\n" +
+		"  * On the main branch tagged for a production release\r\n" +
+		"  * Using option --packageVersion to specify a release version";
+
+	public static void UpdateReleaseNotes()
+	{
+		string releaseVersion =
+			CommandLineOptions.PackageVersion.Exists ? CommandLineOptions.PackageVersion.Value :
+			BuildSettings.IsProductionRelease        ? BuildSettings.PackageVersion : null;
+
+		if (releaseVersion == null)
+			throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
+
+		if (CommandLineOptions.NoPush)
+			_context.Information($"NoPush option skipping update of release notes for version {releaseVersion}");
+		else
+		{
+			string releaseName = $"{BuildSettings.Title} {releaseVersion}";
+			_context.Information($"Updating release notes for {releaseName}");
+
+			try
+			{
+				_context.GitReleaseManagerCreate(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, new GitReleaseManagerCreateSettings()
+				{
+					Name = releaseName,
+					Milestone = releaseVersion
+				});
+			}
+			catch
+			{
+				_context.Error($"Unable to update release notes for {releaseName}.");
+				_context.Error($"Check that there is a {releaseVersion} milestone with a matching release.");
+				_context.Error("");
+				throw;
+			}
+		}
+
+	}
+
 	public static void DownloadDraftRelease()
 	{
 		if (!BuildSettings.IsReleaseBranch)
