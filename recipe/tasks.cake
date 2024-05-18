@@ -35,9 +35,10 @@ public static class BuildTasks
 	public static  CakeTaskBuilder PublishToChocolateyTask { get; set; }
 
 	// Releasing
-	public static  CakeTaskBuilder CreateDraftReleaseTask { get; set; }
-	public static  CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
-	public static  CakeTaskBuilder CreateProductionReleaseTask { get; set; }
+	public static CakeTaskBuilder CreateDraftReleaseTask { get; set; }
+	public static CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
+	public static CakeTaskBuilder UpdateReleaseNotesTask { get; set; } 
+	public static CakeTaskBuilder CreateProductionReleaseTask { get; set; }
 
 	// Continuous Integration
 	public static CakeTaskBuilder ContinuousIntegrationTask { get; set; }

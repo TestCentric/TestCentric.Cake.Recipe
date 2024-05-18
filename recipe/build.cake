@@ -208,19 +208,7 @@ BuildTasks.PublishToChocolateyTask = Task("PublishToChocolatey")
 
 BuildTasks.CreateDraftReleaseTask = Task("CreateDraftRelease")
 	.Description("Create a draft release on GitHub")
-	.Does(() =>
-	{
-		bool calledDirectly = CommandLineOptions.Target.Value == "CreateDraftRelease";
-
-		if (CommandLineOptions.PackageVersion.Exists)
-			PackageReleaseManager.CreateDraftRelease(CommandLineOptions.PackageVersion.Value);
-		else if (BuildSettings.IsReleaseBranch)
-			PackageReleaseManager.CreateDraftRelease(BuildSettings.BuildVersion.BranchName.Substring(8));
-		else if (calledDirectly)
-			throw new InvalidOperationException("CreateDraftRelease target requires --packageVersion");
-		else
-			Information("Skipping creation of draft release because this is not a release branch");
-	});
+	.Does(() => PackageReleaseManager.CreateDraftRelease() );
 
 BuildTasks.DownloadDraftReleaseTask = Task("DownloadDraftRelease")
 	.Description("Download draft release for local use")
