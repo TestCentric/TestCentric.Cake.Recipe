@@ -42,7 +42,7 @@ public class PackageReference
 		var packageList = _context.NuGetList(Id, new NuGetListSettings()
 		{
 			Prerelease = true, 
-			Source = new [] { "https://www.myget.org/F/testcentric/api/v3/index.json" } 
+			Source = new [] { $"https://www.myget.org/F/{GITHUB_OWNER}/api/v3/index.json" } 
 		} );
 
 		foreach (var package in packageList)

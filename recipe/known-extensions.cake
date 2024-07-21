@@ -6,6 +6,10 @@ public static class KnownExtensions
 		"NUnit.Extension.NUnitV2Driver", "nunit-extension-nunit-v2-driver", "3.9.0");
 	public static ExtensionSpecifier NUnitProjectLoader = new ExtensionSpecifier(
 		"NUnit.Extension.NUnitProjectLoader", "nunit-extension-nunit-project-loader", "3.7.1");
+	public static ExtensionSpecifier VSProjectLoader = new ExtensionSpecifier(
+		"NUnit.Extension.VSProjectLoader", "nunit-extension-vs-project-loader", "3.9.0");
+	public static ExtensionSpecifier NUnitV2ResultWriter = new ExtensionSpecifier(
+		"NUnit.Extension.NUnitV2ResultWriter", "nunit-extension-nunit-v2-result-writer", "3.7.0");
 	public static ExtensionSpecifier Net20PluggableAgent = new ExtensionSpecifier(
 		"NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.2.0");
 	public static ExtensionSpecifier Net462PluggableAgent = new ExtensionSpecifier(

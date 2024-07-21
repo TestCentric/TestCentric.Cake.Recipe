@@ -15,6 +15,9 @@ public class BuildVersion
     // then parsing it to provide information that is used in the build.
     public BuildVersion(ICakeContext context)
     {
+         if (context==null)
+            throw new ArgumentNullException(nameof(context));
+
         _context = context;
         _gitVersion = context.GitVersion();
 
@@ -75,6 +78,7 @@ public class BuildVersion
             return _gitVersion.MajorMinorPatch;
 
         string branchName = _gitVersion.BranchName;
+
         // We don't currently use this pattern, but check in case we do later.
         if (branchName.StartsWith("feature/"))
             branchName = branchName.Substring(8);

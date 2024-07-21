@@ -14,17 +14,13 @@ public class GuiRunner : InstallableTestRunner
 	{
 		if (packageId != NuGetId && packageId != ChocoId)
 			throw new ArgumentException($"Package Id invalid: {packageId}", nameof(packageId));
-
-		ExecutablePath = $"{InstallPath}{PackageId}.{Version}/tools/{RUNNER_EXE}";
 	}
+
+	protected override FilePath ExecutableRelativePath => "tools/testcentric.exe";
 
 	public string BuiltInAgentUnderTest { get; set; }
 
-	public override string InstallPath => PackageId == ChocoId
-		? BuildSettings.ChocolateyTestRunnerDirectory
-		: BuildSettings.NuGetTestRunnerDirectory;
-
-	public override int Run(string arguments)
+	public int Run(string arguments)
 	{
 		if (string.IsNullOrEmpty(arguments))
 			throw new ArgumentException("No run arguments supplied");
@@ -34,36 +30,6 @@ public class GuiRunner : InstallableTestRunner
 		if (!arguments.Contains(" --unattended"))
 			arguments += " --unattended";
 
-		return base.Run(arguments);
-	}
-
-	public override void Install()
-	{
-		var packageSources = new []
-		{
-			"https://www.myget.org/F/testcentric/api/v3/index.json",
-			PackageId == ChocoId
-				? "https://community.chocolatey.org/api/v2/"
-				: "https://api.nuget.org/v3/index.json"
-		};
-
-		// Use NuGet for installation even if using the Chocolatey 
-		// package in order to avoid running as administrator.
-		BuildSettings.Context.NuGetInstall(
-			PackageId, 
-			new NuGetInstallSettings()
-			{
-				Version = Version,
-				OutputDirectory = InstallPath,
-				Source = packageSources
-			});
-
-		// If we are testing one of the built-in agents, remove the copy of the agent
-		// which was installed alongside the GUI so our new build is used.
-		if (BuiltInAgentUnderTest != null)
-			foreach (DirectoryPath directoryPath in BuildSettings.Context.GetDirectories($"{InstallPath}{BuiltInAgentUnderTest}*"))
-				BuildSettings.Context.DeleteDirectory(
-					directoryPath,
-					new DeleteDirectorySettings() { Recursive = true });
+		return RunTest(ExecutablePath, arguments);
 	}
 }

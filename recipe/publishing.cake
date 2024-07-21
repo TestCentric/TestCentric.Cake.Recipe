@@ -31,7 +31,7 @@ public static class PackageReleaseManager
 			foreach (var package in BuildSettings.Packages)
 			{
 				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackagingDirectory + packageName;
+				var packagePath = BuildSettings.PackageDirectory + packageName;
 				try
 				{
 					if (package.PackageType == PackageType.NuGet)
@@ -57,7 +57,7 @@ public static class PackageReleaseManager
 			foreach (var package in BuildSettings.Packages)
 			{
 				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackagingDirectory + packageName;
+				var packagePath = BuildSettings.PackageDirectory + packageName;
 				try
 				{
 					if (package.PackageType == PackageType.NuGet)
@@ -81,7 +81,7 @@ public static class PackageReleaseManager
 			foreach (var package in BuildSettings.Packages)
 			{
 				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackagingDirectory + packageName;
+				var packagePath = BuildSettings.PackageDirectory + packageName;
 				try
 				{
 					if (package.PackageType == PackageType.Chocolatey)

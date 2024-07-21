@@ -54,6 +54,7 @@ public class ActualResult : ResultSummary
 	{
 		var doc = new XmlDocument();
 		doc.Load(resultFile);
+
 		Xml = doc.DocumentElement;
 		//if (Xml.Name != "test-run")
 		//	throw new Exception("The test-run element was not found.");
@@ -65,6 +66,7 @@ public class ActualResult : ResultSummary
 		Warnings = IntAttribute(Xml, "warnings");
 		Inconclusive = IntAttribute(Xml, "inconclusive");
 		Skipped = IntAttribute(Xml, "skipped");
+
 		var assemblies = new List<ActualAssemblyResult>();
 
 		foreach (XmlNode node in Xml.SelectNodes("//test-suite[@type='Assembly']"))
@@ -100,7 +102,7 @@ public class ActualAssemblyResult
 		//var env = xml.SelectSingleNode("environment");
 		var settings = xml.SelectSingleNode("settings");
 
-		// If TargetRuntimeFramework setting is not present, the GUI will probably crash
+		// If TargetRuntimeFramework setting is not present, the Runner will probably crash
 		// However, it is optional when using tc-lite directly.
 		var runtimeSetting = settings?.SelectSingleNode("setting[@name='TargetRuntimeFramework']");
 		TargetRuntime = runtimeSetting?.Attributes["value"]?.Value;

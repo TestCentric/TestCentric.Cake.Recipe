@@ -12,7 +12,7 @@ public static class BuildSettings
 		string title,
 		string githubRepository,
      
-	 // Optional parameters
+	 // Optional Parameters
 		bool suppressHeaderCheck = false,
 		string[] standardHeader = null,
 		string copyright = null,
@@ -24,7 +24,7 @@ public static class BuildSettings
 		string githubOwner = "TestCentric",
 		
 		string unitTests = null, // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
-		TestRunner unitTestRunner = null, // If not set, NUnitLite is used
+		IUnitTestRunner unitTestRunner = null, // If not set, NUnitLite is used
 		string unitTestArguments = null,
 
 		string defaultTarget = null, // Defaults to "Build"
@@ -35,28 +35,19 @@ public static class BuildSettings
 		bool chocolateyVerbosity = false )
 	{
 		// Required arguments
-		if (context == null)
-			throw new ArgumentNullException(nameof(context));
-		if (title == null)
-			throw new ArgumentNullException(nameof(title));
-		if (githubRepository == null)
-			throw new ArgumentNullException(nameof(githubRepository));
-
-		Context = context;
-		Title = title;
-		GitHubRepository = githubRepository;
+        Context = context ?? throw new ArgumentNullException(nameof(context));
+        Title = title ?? throw new ArgumentNullException(nameof(title));
+        GitHubRepository = githubRepository ?? throw new ArgumentNullException(nameof(githubRepository));
 
 		// NOTE: Order of initialization can be sensitive. Obviously,
 		// we have to set any properties in this method before we
 		// make use of them. Less obviously, some of the classes we
 		// construct here have dependencies on certain properties
 		// being set before the constructor is called. I have
-		// tried to annotate such dependenciess below.
+		// tried to annotate such dependencies below.
 
 		_buildSystem = context.BuildSystem();
 
-		// If not specified, uses TITLE.sln if it exists or uses solution
-		// found in the root directory provided there is only one. 
 		SolutionFile = solutionFile ?? DeduceSolutionFile();
 
 		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
@@ -112,21 +103,18 @@ public static class BuildSettings
 		}
 	}
 
-	// Try to figure out solution file when not provided
+	// If solution file was not provided, uses TITLE.sln if it exists or 
+    // the solution found in the root directory provided there is only one. 
 	private static string DeduceSolutionFile()			
 	{
-		string solutionFile = null;
+		if (SIO.File.Exists(Title + ".sln"))
+			return Title + ".sln";
 
-		if (System.IO.File.Exists(Title + ".sln"))
-			solutionFile = Title + ".sln";
-		else
-		{
-			var files = System.IO.Directory.GetFiles(ProjectDirectory, "*.sln");
-			if (files.Count() == 1 && System.IO.File.Exists(files[0]))
-				solutionFile = files[0];
-		}
+		var files = SIO.Directory.GetFiles(ProjectDirectory, "*.sln");
+		if (files.Length == 1 && SIO.File.Exists(files[0]))
+			return files[0];
 
-		return solutionFile;
+		return null;
 	}
 
 	private static int CalcPackageTestLevel()
@@ -160,7 +148,7 @@ public static class BuildSettings
 	// Cake Context
 	public static ICakeContext Context { get; private set; }
 
-	// Targets - not set until Setup runs
+    // NOTE: These are set in setup.cake
 	public static string Target { get; set; }
 	public static IEnumerable<string> TasksToExecute { get; set; }
 
@@ -195,28 +183,27 @@ public static class BuildSettings
 	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
 	public static bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
 
-
 	// Standard Directory Structure - not changeable by user
 	public static string ProjectDirectory => Context.Environment.WorkingDirectory.FullPath + "/";
-	public static string SourceDirectory				=> ProjectDirectory + SRC_DIR;
-	public static string OutputDirectory				=> ProjectDirectory + BIN_DIR + Configuration + "/";
-	public static string ZipDirectory					=> ProjectDirectory + ZIP_DIR;
-	public static string NuGetDirectory					=> ProjectDirectory + NUGET_DIR;
-	public static string ChocolateyDirectory			=> ProjectDirectory + CHOCO_DIR;
-	public static string PackagingDirectory             => ProjectDirectory + PACKAGING_DIR;
-	public static string ZipImageDirectory				=> ProjectDirectory + ZIP_IMG_DIR;
-	public static string ToolsDirectory					=> ProjectDirectory + TOOLS_DIR;
-	public static string PackageTestDirectory			=> ProjectDirectory + PKG_TEST_DIR;
-	public static string ZipTestDirectory				=> ProjectDirectory + ZIP_TEST_DIR;
-	public static string NuGetTestDirectory				=> ProjectDirectory + NUGET_TEST_DIR;
+	public static string SourceDirectory                => ProjectDirectory + SRC_DIR;
+	public static string OutputDirectory                => ProjectDirectory + BIN_DIR + Configuration + "/";
+	public static string NuGetDirectory                 => ProjectDirectory + NUGET_DIR;
+	public static string ChocolateyDirectory            => ProjectDirectory + CHOCO_DIR;
+	public static string ZipDirectory                   => ProjectDirectory + ZIP_DIR;
+	public static string PackageDirectory               => ProjectDirectory + PACKAGE_DIR;
+	public static string PackageTestDirectory           => ProjectDirectory + PKG_TEST_DIR;
+	public static string NuGetTestDirectory             => ProjectDirectory + NUGET_TEST_DIR;
+	public static string ChocolateyTestDirectory        => ProjectDirectory + CHOCO_TEST_DIR;
+	public static string ZipTestDirectory               => ProjectDirectory + ZIP_TEST_DIR;
+	public static string PackageResultDirectory         => ProjectDirectory + PKG_RSLT_DIR;
+	public static string NuGetResultDirectory           => ProjectDirectory + NUGET_RSLT_DIR;
+	public static string ChocolateyResultDirectory      => ProjectDirectory + CHOCO_RSLT_DIR;
+	public static string ZipResultDirectory             => ProjectDirectory + ZIP_RSLT_DIR;
+	public static string ZipImageDirectory              => ProjectDirectory + ZIP_IMG_DIR;
 	public static string NuGetTestRunnerDirectory		=> ProjectDirectory + NUGET_RUNNER_DIR;
-	public static string ChocolateyTestDirectory		=> ProjectDirectory + CHOCO_TEST_DIR;
 	public static string ChocolateyTestRunnerDirectory	=> ProjectDirectory + CHOCO_RUNNER_DIR;
-	public static string PackageResultDirectory			=> ProjectDirectory + PKG_RSLT_DIR;
-	public static string ZipResultDirectory				=> ProjectDirectory + ZIP_RSLT_DIR;
-	public static string NuGetResultDirectory			=> ProjectDirectory + NUGET_RSLT_DIR;
-	public static string ChocolateyResultDirectory		=> ProjectDirectory + CHOCO_RSLT_DIR;
 	public static string LocalPackagesDirectory			=> ProjectDirectory + LOCAL_PACKAGES_DIR;
+	public static string ToolsDirectory                 => ProjectDirectory + TOOLS_DIR;
 
 	// Files
 	public static string SolutionFile { get; set; }
@@ -249,7 +236,7 @@ public static class BuildSettings
 
 	//Testing
 	public static string UnitTests { get; set; }
-	public static TestRunner UnitTestRunner { get; private set; }
+	public static IUnitTestRunner UnitTestRunner { get; private set; }
 	public static string UnitTestArguments { get; private set; }
 
 	// Checking 
@@ -352,7 +339,7 @@ public static class BuildSettings
 		DisplaySetting("Source:           ", SourceDirectory);
 		DisplaySetting("NuGet:            ", NuGetDirectory);
 		DisplaySetting("Chocolatey:       ", ChocolateyDirectory);
-		DisplaySetting("Package:          ", PackagingDirectory);
+		DisplaySetting("Package:          ", PackageDirectory);
 		DisplaySetting("ZipImage:         ", ZipImageDirectory);
 		DisplaySetting("ZipTest:          ", ZipTestDirectory);
 		DisplaySetting("NuGetTest:        ", NuGetTestDirectory);

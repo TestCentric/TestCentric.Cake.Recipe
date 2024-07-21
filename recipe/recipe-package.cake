@@ -10,20 +10,22 @@ public class RecipePackage : NuGetPackage
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
 	public RecipePackage(
         string id,
+        string basePath = null,
+        string content = "recipe/*.cake",
         string title = null,
         string description = null,
         string summary = null,
         string[] releaseNotes = null,
-        string[] tags = null,
-        string basePath = null,
-        string content = "./recipe/*.cake")
+        string[] tags = null
+    )
     : base (
         id, 
         basePath: basePath ?? BuildSettings.ProjectDirectory,
         summary: summary ?? "No summary provided.",
         description: description ?? "No description provided.",
         releaseNotes: releaseNotes ?? new [] { "No release notes provided." },
-        tags: tags ?? new [] { "testcentric" })
+        tags: tags ?? new [] { "testcentric" }
+    )
     {
         _cakeFiles = _context.GetFiles(content).Select(f => f.GetFilename());
 
