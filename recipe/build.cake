@@ -1,10 +1,9 @@
-// The following inline statements do most of the task initialization.
-// The tasks created act exactly as if they had been defined in the
-// build.cake file of the applcation using the recipe.
+// This file defines what each of the tasks in the recipe actually does.
+// You should not change these definitions unless you intend to change
+// the behavior of a task for all projects that use the recipe.
 //
-// The initialization code is inline, so it runs before any tasks but 
-// after static initialization. A few tasks need a bit more initialization
-// in the BuildSettings constructor as indicated in comments below.
+// To make a change for a single project, you should add code to your build.cake
+// or another project-specific cake file. See extending.cake for examples.
 
 //////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
@@ -55,7 +54,7 @@ BuildTasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
 	.Description("Clean the package directory")
 	// TODO: Test with Package task
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
-	.Does(() => CleanDirectory(BuildSettings.PackagingDirectory));
+	.Does(() => CleanDirectory(BuildSettings.PackageDirectory));
 
 BuildTasks.CleanAllTask = Task("CleanAll")
 	.Description("Clean everything!")

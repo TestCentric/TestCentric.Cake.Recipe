@@ -1,24 +1,44 @@
 // This file contains both real constants and static readonly variables used
 // as constants. All values are initialized before any instance variables.
 
+// Alias used throughout the recipe
+using SIO = System.IO;
+
+// GitHub owner is the TestCentric organization
+const string GITHUB_OWNER = "TestCentric";
+
+// Defaults
+const string DEFAULT_CONFIGURATION = "Release";
+private static readonly string[] DEFAULT_VALID_CONFIGS = { "Release", "Debug" };
+
+const string DEFAULT_COPYRIGHT = "Copyright (c) Charlie Poole and TestCentric contributors.";
+static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
+	"// ***********************************************************************",
+	$"// {DEFAULT_COPYRIGHT}",
+	"// Licensed under the MIT License. See LICENSE file in root directory.",
+	"// ***********************************************************************"
+};
+
+const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
+
 // Standardized project directory structure - not changeable by user
 const string SRC_DIR			= "src/";
 const string BIN_DIR			= "bin/";
-const string ZIP_DIR			= "zip/";
 const string NUGET_DIR			= "nuget/";
 const string CHOCO_DIR			= "choco/";
-const string PACKAGING_DIR		= "packaging/";
-const string PKG_TEST_DIR		= "packaging/tests/";
-const string ZIP_TEST_DIR		= "packaging/tests/zip/";
-const string NUGET_TEST_DIR		= "packaging/tests/nuget/";
-const string NUGET_RUNNER_DIR	= "packaging/tests/nuget/runners/";
-const string CHOCO_TEST_DIR		= "packaging/tests/choco/";
-const string CHOCO_RUNNER_DIR	= "packaging/tests/choco/runners/";
-const string PKG_RSLT_DIR		= "packaging/results/";
-const string ZIP_RSLT_DIR		= "packaging/results/zip/";
-const string NUGET_RSLT_DIR		= "packaging/results/nuget/";
-const string CHOCO_RSLT_DIR		= "packaging/results/choco/";
-const string ZIP_IMG_DIR		= "packaging/zipimage/";
+const string ZIP_DIR			= "zip/";
+const string PACKAGE_DIR		= "package/";
+const string PKG_TEST_DIR		= "package/tests/";
+const string NUGET_TEST_DIR		= "package/tests/nuget/";
+const string NUGET_RUNNER_DIR	= "package/tests/nuget/runners/";
+const string CHOCO_TEST_DIR		= "package/tests/choco/";
+const string CHOCO_RUNNER_DIR	= "package/tests/choco/runners/";
+const string ZIP_TEST_DIR		= "package/tests/zip/";
+const string PKG_RSLT_DIR		= "package/results/";
+const string NUGET_RSLT_DIR		= "package/results/nuget/";
+const string CHOCO_RSLT_DIR		= "package/results/choco/";
+const string ZIP_RSLT_DIR		= "package/results/zip/";
+const string ZIP_IMG_DIR		= "package/zipimage/";
 const string TOOLS_DIR			= "tools/";
 
 const string LOCAL_PACKAGES_DIR	= "../LocalPackages";
@@ -60,20 +80,6 @@ private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev", "alpha", 
 private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
 private static readonly string[] LABELS_WE_RELEASE_ON_GITHUB = { "alpha", "beta", "rc" };
-
-// Defaults
-const string DEFAULT_CONFIGURATION = "Release";
-private static readonly string[] DEFAULT_VALID_CONFIGS = { "Release", "Debug" };
-
-const string DEFAULT_COPYRIGHT = "Copyright (c) Charlie Poole and TestCentric contributors.";
-static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
-	"// ***********************************************************************",
-	$"// {DEFAULT_COPYRIGHT}",
-	"// Licensed under the MIT License. See LICENSE file in root directory.",
-	"// ***********************************************************************"
-};
-
-const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
 
 // Common values used in all TestCentric packages
 static readonly string[] TESTCENTRIC_PACKAGE_AUTHORS = new[] { "Charlie Poole" };

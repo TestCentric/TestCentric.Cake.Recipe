@@ -33,7 +33,8 @@ public class NuGetPackage : PackageDefinition
         string[] tags = null,
         string source = null,
         string basePath = null,
-        TestRunner testRunner = null,
+        IPackageTestRunner testRunner = null,
+        TestRunnerSource testRunnerSource = null,
         string extraTestArguments = null,
         PackageCheck[] checks = null,
         PackageCheck[] symbols = null,
@@ -50,6 +51,7 @@ public class NuGetPackage : PackageDefinition
         source: source,
         basePath: basePath,
         testRunner: testRunner,
+        testRunnerSource: testRunnerSource,
         extraTestArguments: extraTestArguments,
         checks: checks,
         symbols: symbols,
@@ -62,7 +64,7 @@ public class NuGetPackage : PackageDefinition
     // The file name of this package, including extension
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
     // The file name of any symbol package, including extension
-    public override string SymbolPackageName => System.IO.Path.ChangeExtension(PackageFileName, ".snupkg");
+    public override string SymbolPackageName => SIO.Path.ChangeExtension(PackageFileName, ".snupkg");
     // The directory into which this package is installed
     public override string PackageInstallDirectory => BuildSettings.NuGetTestDirectory;
     // The directory used to contain results of package tests for this package
@@ -97,7 +99,7 @@ public class NuGetPackage : PackageDefinition
                 BasePath = BasePath,
                 // From BuildSettings
 		        Verbosity = BuildSettings.NuGetVerbosity,
-                OutputDirectory = BuildSettings.PackagingDirectory,
+                OutputDirectory = BuildSettings.PackageDirectory,
                 Repository = new NuGetRepository() { Type="Git", Url=repositoryUrl },
                 // Common to all packages
                 Authors = TESTCENTRIC_PACKAGE_AUTHORS,

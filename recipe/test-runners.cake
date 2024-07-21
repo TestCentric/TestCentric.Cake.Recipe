@@ -1,110 +1,238 @@
-﻿/// <summary>
-/// The TestRunner class is the abstract base for all TestRunners used to test packages.
-/// A TestRunner knows how to run a test assembly and provide a result.
-/// </summary>
-public abstract class TestRunner
+﻿/////////////////////////////////////////////////////////////////////////////
+// TEST RUNNER INTERFACES
+/////////////////////////////////////////////////////////////////////////////
+
+/// <Summary>
+/// Common interface for all test runners
+/// </Summary>
+public interface ITestRunner
 {
-	public virtual bool RequiresInstallation => false;
-
-	protected string ExecutablePath { get; set; }
-
-	protected ProcessSettings ProcessSettings { get; } = new ProcessSettings()
-	{
-		WorkingDirectory = BuildSettings.OutputDirectory
-	};
-
-	public virtual int Run(string arguments=null)
-	{
-		if (ExecutablePath == null)
-			throw new InvalidOperationException("Unable to run tests. Executable path has not been set.");
-
-		if (ExecutablePath.EndsWith(".dll"))
-		{
-			ProcessSettings.Arguments = $"{ExecutablePath} {arguments}";
-			return BuildSettings.Context.StartProcess("dotnet", ProcessSettings);
-		}
-		else
-		{
-			ProcessSettings.Arguments = arguments;
-			return BuildSettings.Context.StartProcess(ExecutablePath, ProcessSettings);
-		}
-	}
-
-	public virtual int Run(FilePath executablePath, string arguments=null)
-	{
-		ExecutablePath = executablePath.ToString();
-		return this.Run(arguments);
-	}
-
-	// Base install does nothing
-	public virtual void Install() { } 
+	string PackageId { get; }
+	string Version { get; }
 }
 
+/// <Summary>
+/// A runner capable of running unit tests
+/// </Summary>
+public interface IUnitTestRunner : ITestRunner
+{
+	int RunUnitTest(FilePath testPath);
+}
+
+/// <Summary>
+/// A runner capable of running package tests
+/// </Summary>
+public interface IPackageTestRunner : ITestRunner
+{
+	int RunPackageTest(string arguments);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// ABSTRACT TEST RUNNER
+/////////////////////////////////////////////////////////////////////////////
+
 /// <summary>
-/// The InstallableTestRunner class is the abstract base for TestRunners which
-/// must be installed using a published package before they can be used.
+/// The TestRunner class is the abstract base for all TestRunners used to run unit-
+/// or package-tests. A TestRunner knows how to run a test assembly and provide a result.
+/// All base functionality is implemented in this class. Derived classes make that
+/// functionality available selectively by implementing specific interfaces.
 /// </summary>
+public abstract class TestRunner : ITestRunner
+{
+	protected ICakeContext Context => BuildSettings.Context;
+
+	public string PackageId { get; protected set; }
+	public string Version { get; protected set; }
+
+	protected int RunTest(FilePath executablePath, string arguments = null)
+	{
+		return RunTest(executablePath, new ProcessSettings { Arguments = arguments });
+	}
+
+	protected int RunTest(FilePath executablePath, ProcessSettings processSettings=null)
+	{
+		if (executablePath == null)
+			throw new ArgumentNullException(nameof(executablePath));
+
+		if (processSettings == null)
+			processSettings = new ProcessSettings();
+
+		// Add default values to settings if not present
+		if (processSettings.WorkingDirectory == null)
+			processSettings.WorkingDirectory = BuildSettings.OutputDirectory;
+
+		if (executablePath.GetExtension() == ".dll")
+		{
+			processSettings.Arguments = $"\"{executablePath}\" {processSettings.Arguments}";
+			return Context.StartProcess("dotnet", processSettings);
+		}
+        else
+			return Context.StartProcess(executablePath, processSettings);
+    }
+}
+
+/// <Summary>
+/// A TestRunner requiring some sort of installation before use.
+/// </Summary>
 public abstract class InstallableTestRunner : TestRunner
 {
-	public override bool RequiresInstallation => true;
-
-	public InstallableTestRunner(string packageId, string version)
+	protected InstallableTestRunner(string packageId, string version)
 	{
-		if (packageId == null)
-			throw new ArgumentNullException(nameof(packageId));
-		if (version == null)
-			throw new ArgumentNullException(nameof(version));
-
 		PackageId = packageId;
 		Version = version;
 	}
 
-	public string PackageId { get; }
-	public string Version { get; }
+	protected abstract FilePath ExecutableRelativePath { get; }
 
-	public abstract string InstallPath { get; }
+	// Path under tools directory where package would be installed by Cake #tool directive.
+	// NOTE: When used to run unit tests, a #tool directive is required. If derived package
+	// is only used for package tests, it is optional.
+	protected DirectoryPath ToolInstallDirectory => BuildSettings.ToolsDirectory + $"{PackageId}.{Version}"; 
+	protected bool IsInstalledAsTool =>
+		ToolInstallDirectory != null && Context.DirectoryExists(ToolInstallDirectory);
+	
+	protected DirectoryPath InstallDirectory;
+
+	public FilePath ExecutablePath => InstallDirectory.CombineWithFilePath(ExecutableRelativePath);
+
+	public void Install(DirectoryPath installDirectory)
+	{
+		InstallDirectory = installDirectory.Combine($"{PackageId}.{Version}");
+
+		// If the runner package is already installed as a cake tool, we just copy it
+		if (IsInstalledAsTool)
+			Context.CopyDirectory(ToolInstallDirectory, InstallDirectory);
+		// Otherwise, we install it to the requested location
+		else
+			Context.NuGetInstall(
+				PackageId,
+				new NuGetInstallSettings() { OutputDirectory = installDirectory, Version = Version });
+	}
 }
 
-public class NUnitLiteRunner : TestRunner
-{
-	public override int Run(FilePath testPath, string arguments=null)
-	{
-		Console.WriteLine($"NUnitLite: Executing {testPath} args: {arguments ?? "NULL"}");
+/////////////////////////////////////////////////////////////////////////////
+// TEST RUNNER SOURCE
+/////////////////////////////////////////////////////////////////////////////
 
-		SetupProcessEnvironmentVariables();
-        
-		return base.Run(testPath, arguments);
+/// <Summary>
+/// TestRunnerSource is a provider of TestRunners. It is used when the tests
+/// are to be run under multiple TestRunners rather than just one.
+/// </Summary>
+public class TestRunnerSource
+{
+	public TestRunnerSource(TestRunner runner1, params TestRunner[] moreRunners)
+	{
+		AllRunners.Add(runner1);
+		AllRunners.AddRange(moreRunners);
 	}
 
-	private void SetupProcessEnvironmentVariables()
+	public List<TestRunner> AllRunners { get; } = new List<TestRunner>();
+
+	public IEnumerable<IUnitTestRunner> UnitTestRunners
 	{
+		get { foreach(var runner in AllRunners.Where(r => r is IUnitTestRunner)) yield return (IUnitTestRunner)runner; }
+	}
+
+	public IEnumerable<IPackageTestRunner> PackageTestRunners
+	{
+		get { foreach(var runner in AllRunners.Where(r => r is IPackageTestRunner)) yield return (IPackageTestRunner)runner; }
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// NUNITLITE RUNNER
+/////////////////////////////////////////////////////////////////////////////
+
+// For NUnitLite tests, the test is run directly
+public class NUnitLiteRunner : TestRunner, IUnitTestRunner
+{
+	public int RunUnitTest(FilePath testPath)
+	{
+		var processSettings = new ProcessSettings { Arguments = BuildSettings.UnitTestArguments };
 		if (CommandLineOptions.TraceLevel.Exists)
-			ProcessSettings.EnvironmentVariables = new Dictionary<string,string> {
+			processSettings.EnvironmentVariables = new Dictionary<string,string>
+			{
 				{ "TESTCENTRIC_INTERNAL_TRACE_LEVEL", CommandLineOptions.TraceLevel.Value }
 			};
+        
+		return RunTest(testPath, processSettings);
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// NUNIT CONSOLE RUNNERS
+/////////////////////////////////////////////////////////////////////////////
+
+// NUnitConsoleRunner is used for both unit and package tests. It must be pre-installed
+// in the tools directory by use of a #tools directive.
+public class NUnitConsoleRunner : InstallableTestRunner, IUnitTestRunner, IPackageTestRunner
+{
+	protected override FilePath ExecutableRelativePath => "tools/nunit3-console.exe";
+	
+	public NUnitConsoleRunner(string version) : base("NUnit.ConsoleRunner", version) { }
+
+	// Run a unit test
+	public int RunUnitTest(FilePath testPath) => RunTest(ToolInstallDirectory.CombineWithFilePath(ExecutableRelativePath), $"\"{testPath}\" {BuildSettings.UnitTestArguments}");
+
+	// Run a package test
+	public int RunPackageTest(string arguments) => RunTest(ExecutablePath, arguments);
+}
+
+public class NUnitNetCoreConsoleRunner : InstallableTestRunner, IUnitTestRunner, IPackageTestRunner
+{
+	protected override FilePath ExecutableRelativePath => "tools/net6.0/nunit3-console.exe";
+
+	public NUnitNetCoreConsoleRunner(string version) : base("NUnit.ConsoleRunner.NetCore", version) { }
+
+	// Run a unit test
+	public int RunUnitTest(FilePath testPath) => RunTest(ExecutablePath, $"\"{testPath}\" {BuildSettings.UnitTestArguments}");
+
+	// Run a package test
+	public int RunPackageTest(string arguments) => RunTest(ExecutablePath, arguments);
+}
+
+public class EngineExtensionTestRunner : TestRunner, IPackageTestRunner
+{
+	private IPackageTestRunner[] _runners = new IPackageTestRunner[] {
+		new NUnitConsoleRunner("3.17.0"),
+		new NUnitConsoleRunner("3.15.5")
+	};
+
+	public int RunPackageTest(string arguments)
+	{
+		
+		return _runners[0].RunPackageTest(arguments);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// AGENT RUNNER
+/////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// Class that knows how to run an agent directly.
 /// </summary>
-public class AgentRunner : TestRunner
+public class AgentRunner : TestRunner, IPackageTestRunner
 {
-    private string _stdExecutable;
-    private string _x86Executable;
+    private FilePath _stdExecutable;
+    private FilePath _x86Executable;
 
-	public AgentRunner(string stdExecutable, string x86Executable = null)
+	public AgentRunner(FilePath stdExecutable, FilePath x86Executable = null)
 	{
         _stdExecutable = stdExecutable;
         _x86Executable = x86Executable;
     }
 
-    public override int Run(string arguments)
+    public int RunPackageTest(string arguments)
     {
-		ExecutablePath = arguments.Contains("--x86")
+		FilePath executablePath = arguments.Contains("--x86")
             ? _x86Executable
             : _stdExecutable;
+		arguments = arguments.Replace("--x86", string.Empty);
 
-        return base.Run(arguments.Replace("--x86", string.Empty));
+		if (executablePath.GetExtension() == ".dll")
+			return RunTest("dotnet", $"\"{executablePath}\" {arguments}");
+		else
+			return base.RunTest(executablePath, arguments);
 	}
 }

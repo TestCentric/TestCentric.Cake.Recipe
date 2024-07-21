@@ -11,9 +11,10 @@ public struct PackageTest
 	public string Description;
 	public string Arguments;
 	public ExpectedResult ExpectedResult;
+    public IPackageTestRunner[] TestRunners;
 	public ExtensionSpecifier[] ExtensionsNeeded;
 	
-	public PackageTest(int level, string name, string description, string arguments, ExpectedResult expectedResult, params ExtensionSpecifier[] extensionsNeeded)
+	public PackageTest(int level, string name, string description, string arguments, ExpectedResult expectedResult )
 	{
         if (name == null)
             throw new ArgumentNullException(nameof(name));
@@ -29,6 +30,47 @@ public struct PackageTest
 		Description = description;
 		Arguments = arguments;
 		ExpectedResult = expectedResult;
+		ExtensionsNeeded = new ExtensionSpecifier[0];
+		TestRunners = new IPackageTestRunner[0];
+	}
+
+    public PackageTest(int level, string name, string description, string arguments, ExpectedResult expectedResult, params ExtensionSpecifier[] extensionsNeeded )
+    {
+        if (name == null)
+            throw new ArgumentNullException(nameof(name));
+		if (description == null)
+			throw new ArgumentNullException(nameof(description));
+		if (arguments == null)
+			throw new ArgumentNullException(nameof(arguments));
+		if (expectedResult == null)
+			throw new ArgumentNullException(nameof(expectedResult));
+
+		Level = level;
+        Name = name;
+        Description = description;
+        Arguments = arguments;
+        ExpectedResult = expectedResult;
 		ExtensionsNeeded = extensionsNeeded;
+        TestRunners = new IPackageTestRunner[0];
+    }
+
+	public PackageTest(int level, string name, string description, string arguments, ExpectedResult expectedResult, params IPackageTestRunner[] testRunners )
+    {
+        if (name == null)
+            throw new ArgumentNullException(nameof(name));
+		if (description == null)
+			throw new ArgumentNullException(nameof(description));
+		if (arguments == null)
+			throw new ArgumentNullException(nameof(arguments));
+		if (expectedResult == null)
+			throw new ArgumentNullException(nameof(expectedResult));
+
+		Level = level;
+        Name = name;
+        Description = description;
+        Arguments = arguments;
+        ExpectedResult = expectedResult;
+		TestRunners = testRunners;
+        ExtensionsNeeded = new ExtensionSpecifier[0];
 	}
 }

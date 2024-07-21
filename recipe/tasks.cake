@@ -7,32 +7,32 @@ public static class BuildTasks
 
 	// Building
 	public static CakeTaskBuilder BuildTask { get; set; }
-	public static  CakeTaskBuilder CheckHeadersTask { get; set; }
-	public static  CakeTaskBuilder CleanTask { get; set; }
-	public static  CakeTaskBuilder CleanAllTask { get; set; }
-	public static  CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
-	public static  CakeTaskBuilder CleanAllOutputDirectoriesTask { get; set; }
-	public static  CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
-	public static  CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
-	public static  CakeTaskBuilder RestoreTask { get; set; }
+	public static CakeTaskBuilder CheckHeadersTask { get; set; }
+	public static CakeTaskBuilder CleanTask { get; set; }
+	public static CakeTaskBuilder CleanAllTask { get; set; }
+	public static CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
+	public static CakeTaskBuilder CleanAllOutputDirectoriesTask { get; set; }
+	public static CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
+	public static CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
+	public static CakeTaskBuilder RestoreTask { get; set; }
 
 	// Unit Testing
-	public static  CakeTaskBuilder UnitTestTask { get; set; }
+	public static CakeTaskBuilder UnitTestTask { get; set; }
 
 	// Packaging
-	public static  CakeTaskBuilder PackageTask { get; set; }
-	public static  CakeTaskBuilder BuildTestAndPackageTask { get; set; }
-	public static  CakeTaskBuilder PackageBuildTask { get; set; }
-	public static  CakeTaskBuilder PackageInstallTask { get; set; }
-	public static  CakeTaskBuilder PackageVerifyTask { get; set; }
-	public static  CakeTaskBuilder PackageTestTask { get; set; }
+	public static CakeTaskBuilder PackageTask { get; set; }
+	public static CakeTaskBuilder BuildTestAndPackageTask { get; set; }
+	public static CakeTaskBuilder PackageBuildTask { get; set; }
+	public static CakeTaskBuilder PackageInstallTask { get; set; }
+	public static CakeTaskBuilder PackageVerifyTask { get; set; }
+	public static CakeTaskBuilder PackageTestTask { get; set; }
 
 	// Publishing
-	public static  CakeTaskBuilder PublishTask { get; set; }
-	public static  CakeTaskBuilder PublishToLocalFeedTask { get; set; }
-	public static  CakeTaskBuilder PublishToMyGetTask { get; set; }
-	public static  CakeTaskBuilder PublishToNuGetTask { get; set; }
-	public static  CakeTaskBuilder PublishToChocolateyTask { get; set; }
+	public static CakeTaskBuilder PublishTask { get; set; }
+	public static CakeTaskBuilder PublishToLocalFeedTask { get; set; }
+	public static CakeTaskBuilder PublishToMyGetTask { get; set; }
+	public static CakeTaskBuilder PublishToNuGetTask { get; set; }
+	public static CakeTaskBuilder PublishToChocolateyTask { get; set; }
 
 	// Releasing
 	public static CakeTaskBuilder CreateDraftReleaseTask { get; set; }

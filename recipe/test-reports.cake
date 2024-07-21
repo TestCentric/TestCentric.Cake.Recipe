@@ -7,23 +7,27 @@ public class PackageTestReport
 {
 	public PackageTest Test;
 	public ActualResult Result;
+	public ITestRunner Runner;
 	public List<string> Errors;
+	public List<string> Warnings;
 
-	public PackageTestReport(PackageTest test, ActualResult actualResult)
+	public PackageTestReport(PackageTest test, ActualResult actualResult, ITestRunner runner = null)
 	{
 		if (actualResult == null)
 			throw new ArgumentNullException(nameof(actualResult));
 
 		Test = test;
 		Result = actualResult;
+		Runner = runner;
 		Errors = new List<string>();
+		Warnings = new List<string>();
 
 		var expectedResult = test.ExpectedResult;
 
 		ReportMissingFiles();
 
 		if (actualResult.OverallResult == null)
-			Errors.Add("   No top-level result attribute was found.");
+			Errors.Add("   The test-run element has no result attribute.");
 		else if (expectedResult.OverallResult != actualResult.OverallResult)
 			Errors.Add($"   Expected: Overall Result = {expectedResult.OverallResult}\r\n   But was: {actualResult.OverallResult}");
 		CheckCounter("Test Count", expectedResult.Total, actualResult.Total);
@@ -43,8 +47,13 @@ public class PackageTestReport
 
 			if (expected.AssemblyName != actual.AssemblyName)
 				Errors.Add($"   Expected: {expected.AssemblyName}\r\n    But was: { actual.AssemblyName ?? "<null>"}");
-			else if (expected.AgentName != null && expected.AgentName != actual.AgentName)
-				Errors.Add($"   Assembly {actual.AssemblyName}\r\n     Expected: {expected.AgentName}\r\n      But was: {actual.AgentName ?? "<null>"}");
+			else if (runner == null || runner.PackageId == "NUnit.Console.Runner.NetCore")
+			{
+				if (actual.AgentName == null)
+					Warnings.Add($"Unable to determine actual runtime used for {expected.AssemblyName}");
+				else if (expected.AgentName != null && expected.AgentName != actual.AgentName)
+					Errors.Add($"   Assembly {actual.AssemblyName}\r\n     Expected: {expected.AgentName}\r\n      But was: {actual.AgentName}");
+			}
         }
 
 		for (int i = actualAssemblies.Length; i < expectedAssemblies.Length; i++)
@@ -54,25 +63,39 @@ public class PackageTestReport
 			Errors.Add($"   Found unexpected assembly {actualAssemblies[i].AssemblyName}");
 	}
 
-	public PackageTestReport(PackageTest test, Exception ex)
+	public PackageTestReport(PackageTest test, Exception ex, ITestRunner runner = null)
 	{
 		Test = test;
 		Result = null;
 		Errors = new List<string>();
 		Errors.Add($"     {ex.Message}");
+		Runner = runner;
 	}
 
-	public void Display(int index)
+	public void Display(int index, TextWriter writer)
 	{
-		Console.WriteLine($"\n{index}. {Test.Description}");
-		Console.WriteLine($"   Args: {Test.Arguments}\n");
+		writer.WriteLine();
+		writer.WriteLine($"{index}. {Test.Description}");
+		if (Runner != null)
+		    writer.WriteLine($"   Runner: {Runner.PackageId} {Runner.Version}");
+		writer.WriteLine($"   Args: {Test.Arguments}");
+		writer.WriteLine();
 
 		foreach (var error in Errors)
-			Console.WriteLine(error);
+			writer.WriteLine(error);
 
-		Console.WriteLine(Errors.Count == 0
-			? "   SUCCESS: Test Result matches expected result!"
-			: "\n   ERROR: Test Result not as expected!");
+		if (Errors.Count == 0)
+		{
+			writer.WriteLine("   SUCCESS: Test Result matches expected result!");
+		}
+		else
+		{
+			writer.WriteLine();
+			writer.WriteLine("   ERROR: Test Result not as expected!");
+		}
+
+		foreach (var warning in Warnings)
+			writer.WriteLine("   WARNING: " + warning);
 	}
 
 	// File level errors, like missing or mal-formatted files, need to be highlighted
@@ -110,7 +133,7 @@ public class PackageTestReport
 	{
 		// If expected value of counter is negative, it means no check is needed
 		if (expected >= 0 && expected != actual)
-			Errors.Add($"   Expected: {label} = {expected}\n    But was: {actual}");
+			Errors.Add($"   Expected: {label} = {expected}\r\n    But was: {actual}");
 	}
 
 	private string GetAttribute(XmlNode node, string name)
@@ -134,15 +157,15 @@ public class ResultReporter
 		_reports.Add(report);
 	}
 
-	public bool ReportResults()
+	public bool ReportResults(TextWriter writer)
 	{
-		Console.WriteLine("\n=================================================="); ;
-		Console.WriteLine($"Test Results for {_packageName}");
-		Console.WriteLine("=================================================="); ;
+		writer.WriteLine("\n==============================================================================");
+		writer.WriteLine($"Test Results for {_packageName}");
+		writer.WriteLine("==============================================================================");
 
-		Console.WriteLine("\nTest Environment");
-		Console.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
-		Console.WriteLine($"  CLR Version: {Environment.Version}\n");
+		writer.WriteLine("\nTest Environment");
+		writer.WriteLine($"   OS Version: {Environment.OSVersion.VersionString}");
+		writer.WriteLine($"  CLR Version: {Environment.Version}\n");
 
 		int index = 0;
 		bool hasErrors = false;
@@ -150,7 +173,7 @@ public class ResultReporter
 		foreach (var report in _reports)
 		{
 			hasErrors |= report.Errors.Count > 0;
-			report.Display(++index);
+			report.Display(++index, writer);
 		}
 
 		return hasErrors;

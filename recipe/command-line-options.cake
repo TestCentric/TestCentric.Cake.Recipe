@@ -12,6 +12,7 @@ public static class CommandLineOptions
 	static public ValueOption<string> Target;
 	static public ValueOption<string> Configuration;
 	static public ValueOption<string> PackageVersion;
+    static public ValueOption<string> PackageSelector; 
 	static public ValueOption<int> TestLevel;
 	static public ValueOption<string> TraceLevel;
 	static public SimpleOption NoBuild;
@@ -28,6 +29,8 @@ public static class CommandLineOptions
 		Configuration = new ValueOption<String>("configuration", DEFAULT_CONFIGURATION, 1);
 		
 		PackageVersion = new ValueOption<string>("packageVersion", null, 4);
+
+        PackageSelector = new ValueOption<string>("where", null, 1);
 
 		TestLevel = new ValueOption<int>("level", 0, 3);
 

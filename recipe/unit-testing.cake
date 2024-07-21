@@ -35,9 +35,9 @@ public static class UnitTesting
         bool isNUnitLite = runner is NUnitLiteRunner;
 
         if (isNUnitLite)
-            runner.Run(testPath, BuildSettings.UnitTestArguments);
+            runner.RunUnitTest(testPath);
         else
-		    runner.Run($"{testPath} {BuildSettings.UnitTestArguments}");
+		    runner.RunUnitTest($"{testPath} {BuildSettings.UnitTestArguments}");
 		    
         var result = new ActualResult(BuildSettings.OutputDirectory + "TestResult.xml");
 

@@ -19,7 +19,8 @@ public class ZipPackage : PackageDefinition
         string id, 
         string source = null, 
         string basePath = null, 
-        TestRunner testRunner = null,
+        IPackageTestRunner testRunner = null,
+        TestRunnerSource testRunnerSource = null,
         PackageCheck[] checks = null, 
         IEnumerable<PackageTest> tests = null,
         PackageReference[] preloadedExtensions = null,
@@ -30,6 +31,7 @@ public class ZipPackage : PackageDefinition
         source: source,
         basePath: basePath, 
         testRunner: testRunner, 
+        testRunnerSource: testRunnerSource,
         checks: checks,
         tests: tests,
         preloadedExtensions: preloadedExtensions)
@@ -37,13 +39,18 @@ public class ZipPackage : PackageDefinition
         BundledExtensions = bundledExtensions;
     }
 
-    public override string PackageFileName => $"{PackageId}-{PackageVersion}.zip";
-    public override string PackageInstallDirectory => BuildSettings.ZipTestDirectory;
-    public override string PackageResultDirectory => $"{BuildSettings.ZipResultDirectory}{PackageId}/";
-    public override string ExtensionInstallDirectory => $"{BuildSettings.ZipTestDirectory}{PackageId}/bin/addins/";
-  
+    // ZIP package supports bundling of extensions
     public ExtensionSpecifier[] BundledExtensions { get; }
 
+    // The file name of this package, including extension
+    public override string PackageFileName => $"{PackageId}-{PackageVersion}.zip";
+    // The directory into which this package is installed
+    public override string PackageInstallDirectory => BuildSettings.ZipTestDirectory;
+    // The directory used to contain results of package tests for this package
+    public override string PackageResultDirectory => $"{BuildSettings.ZipResultDirectory}{PackageId}/";
+    // The directory into which extensions to the test runner are installed
+    public override string ExtensionInstallDirectory => $"{BuildSettings.ZipTestDirectory}{PackageId}/bin/addins/";
+  
     public override void BuildPackage()
     {
         if (string.IsNullOrEmpty(PackageSource))
@@ -86,14 +93,14 @@ public class ZipPackage : PackageDefinition
                 
 
         // Zip the directory to create package
-        _context.Zip(BuildSettings.ZipImageDirectory, BuildSettings.PackagingDirectory + PackageFileName);
+        _context.Zip(BuildSettings.ZipImageDirectory, BuildSettings.PackageDirectory + PackageFileName);
 
 		bool IsPattern(string s) => s.IndexOfAny(new [] {'*', '?' }) >0;
     }
 
     public override void InstallPackage()
     {
-        _context.Unzip(BuildSettings.PackagingDirectory + PackageFileName, PackageInstallDirectory + PackageId);
+        _context.Unzip(BuildSettings.PackageDirectory + PackageFileName, PackageInstallDirectory + PackageId);
     }
 
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath)

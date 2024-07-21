@@ -7,8 +7,8 @@ packages
 # Visual Studio
 .vs
 
-# Packaging Directory
-packaging
+# Package Directory
+package
 
 # Tools pulled from nuget
 tools
