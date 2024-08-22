@@ -9,6 +9,7 @@ test: false
 artifacts:
 - path: package\*.nupkg
 
+
 environment:
   TESTCENTRIC_MYGET_API_KEY:
     secure: wtAvJDVl2tfwiVcyLExFHLvZVfUWiQRHsfdHBFCNEATeCHo1Nd8JP642PfY8xhji
