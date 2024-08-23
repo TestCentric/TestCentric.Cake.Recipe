@@ -20,9 +20,7 @@ BuildSettings.Packages.Add(
 	new RecipePackage
 	(
 		id: "TestCentric.Cake.Recipe",
-		description: "Cake Recipe used for building TestCentric applications and extensions",
-		//releaseNotes: new [] {"line1", "line2", "line3"},
-		tags: new [] { "testcentric", "cake", "recipe" }
+		source: "TestCentric.Cake.Recipe.nuspec"
 	) );
 
 //////////////////////////////////////////////////////////////////////

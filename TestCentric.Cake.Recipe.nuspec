@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+
+  <metadata>
+    <id>TestCentric.Cake.Recipe</id>
+    <version>0.0.0</version>
+    <title>TestCentric Cake Recipe</title>
+    <authors>Charlie Poole</authors>
+    <copyright>Copyright (c) YEAR RANGE Charlie Poole</copyright>
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Cake Recipe used for building TestCentric applications and extensions</description>
+    <releaseNotes>LINK TO RELEASE NOTES</releaseNotes>
+    <projectUrl>http://test-centric.org</projectUrl>
+    <repository type="git" url="https://github.com/TestCentric/REPOSITORY"/>
+    <icon>testcentric.png</icon>
+    <readme>README.md</readme>
+    <tags>testcentric cake recipe</tags>
+    <language>en-US</language>
+  </metadata>
+
+  <files>
+    <file src="../LICENSE.txt" />
+    <file src="../README.md" />
+    <file src="../testcentric.png" />
+    <file src="recipe/*.cake" target="content" />
+  </files>
+
+</package>
