@@ -1,3 +1,11 @@
+// All tasks incorporated in the recipe are defined using CakeTaskBuilders.
+// The actual specification of criteria, dependencies and actions for each
+// task is done separately in task-definitions.cake.
+//
+// This approach provides a level of indirection, permitting the user to
+// modify or completely redefine what a task does in their build.cake file,
+// without changing the definitions in the recipe.
+
 public static class BuildTasks
 {
 	// General
