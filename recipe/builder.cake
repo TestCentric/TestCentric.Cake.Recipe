@@ -2,9 +2,7 @@
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 
-public Builder Build => CommandLineOptions.Usage
-    ? new Builder(() => Information(HelpMessages.Usage))
-    : new Builder(() => RunTargets(CommandLineOptions.Targets.Values));
+public Builder Build => new Builder(() => RunTargets(CommandLineOptions.Targets.Values));
 
 CakeReport RunTargets(ICollection<string> targets)
     => RunTarget(GetOrAddTargetsTask(targets).Name);

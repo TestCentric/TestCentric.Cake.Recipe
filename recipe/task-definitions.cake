@@ -18,6 +18,18 @@ BuildTasks.DumpSettingsTask = Task("DumpSettings")
 	.Does(() => BuildSettings.DumpSettings());
 
 //////////////////////////////////////////////////////////////////////
+// HELP TASK
+//////////////////////////////////////////////////////////////////////
+
+BuildTasks.HelpTask = Task("Help")
+	.Description("Display Help Message")
+	.Does(() => 
+	{
+		// TODO: Add additional message selections
+		Information(HelpMessages.Usage);
+	});
+
+//////////////////////////////////////////////////////////////////////
 // BUILDING TASKS
 //////////////////////////////////////////////////////////////////////
 
@@ -113,15 +125,9 @@ BuildTasks.PackageTask = Task("Package")
 			package.BuildVerifyAndTest();
 	});
 
-BuildTasks.BuildTestAndPackageTask = Task("BuildTestAndPackage")
-	.Description("Do Build, Test and Package all in one run")
+BuildTasks.BuildPackagesTask = Task("BuildPackages")
+	.Description("Build all packages")
 	.IsDependentOn("Build")
-	.IsDependentOn("Test")
-	.IsDependentOn("Package");
-
-BuildTasks.PackageBuildTask = Task("PackageBuild")
-	.Description("Build any packages without re-compiling")
-	.IsDependentOn("CleanPackageDirectory")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
@@ -134,9 +140,9 @@ BuildTasks.PackageBuildTask = Task("PackageBuild")
 		}
 	});
 
-BuildTasks.PackageInstallTask = Task("PackageInstall")
-	.Description("Build and Install any packages without re-compiling")
-	.IsDependentOn("PackageBuild")
+BuildTasks.InstallPackagesTask = Task("InstallPackages")
+	.Description("Build and Install all packages")
+	.IsDependentOn("BuildPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
@@ -145,9 +151,9 @@ BuildTasks.PackageInstallTask = Task("PackageInstall")
 		}
 	});
 
-BuildTasks.PackageVerifyTask = Task("PackageVerify")
-	.Description("Build, Install and verify any packages without re-compiling")
-	.IsDependentOn("PackageInstall")
+BuildTasks.VerifyPackagesTask = Task("VerifyPackages")
+	.Description("Build, Install and Verify all packages")
+	.IsDependentOn("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
@@ -156,9 +162,9 @@ BuildTasks.PackageVerifyTask = Task("PackageVerify")
 		}
 	});
 
-BuildTasks.PackageTestTask = Task("PackageTest")
-	.Description("Build, Install and Test any packages without re-compiling")
-	.IsDependentOn("PackageInstall")
+BuildTasks.TestPackagesTask = Task("TestPackages")
+	.Description("Build, Install and Test all packages")
+	.IsDependentOn("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
@@ -180,7 +186,7 @@ BuildTasks.PublishTask = Task("Publish")
 	.Does(() => PackageReleaseManager.Publish());
 
 BuildTasks.PublishToLocalFeedTask = Task("PublishToLocalFeed")
-	.Description("Add any Nuget or Chocolatey packages we have built to our local feed")
+	.Description("Add Nuget and Chocolatey packages to local feed")
 	.Does(() =>	{
 		if (!BuildSettings.ShouldAddToLocalFeed)
 			Information("Nothing to add to local feed from this run.");

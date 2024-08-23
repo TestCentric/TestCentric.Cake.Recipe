@@ -56,7 +56,9 @@
                 publish or release targets are run, a message is displayed.
 
             --usage, -u
-                Displays this help message. No targets are run.
+                Used with the Help task to indicate that the usage message should
+                be displayed. Currently "usage" is the only display for Help, so
+                this is not needed but is provided for future use.
 
         Selected Cake Options:
             
