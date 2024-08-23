@@ -15,8 +15,9 @@
         Options:
 
             --target=TARGET              [-t]
-                The TARGET task to be run, e.g. Test. Default is Build. For a list
-                of supported targets, use the Cake `--description` option.
+                The TARGET task to be run, e.g. Test. Default is Build. This option
+                may be repeated to run multiple targets. For a list of supported
+                targets, use the Cake `--description` option.
 
             --configuration=CONFIG       [-c]
                 The name of the configuration to build. Default is Release.
