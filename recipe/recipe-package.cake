@@ -11,7 +11,8 @@ public class RecipePackage : NuGetPackage
 	public RecipePackage(
         string id,
         string basePath = null,
-        string content = "recipe/*.cake",
+        string source = null,
+        string content = null,
         string title = null,
         string description = null,
         string summary = null,
@@ -21,12 +22,14 @@ public class RecipePackage : NuGetPackage
     : base (
         id, 
         basePath: basePath ?? BuildSettings.ProjectDirectory,
+        source: source,
         summary: summary ?? "No summary provided.",
         description: description ?? "No description provided.",
         releaseNotes: releaseNotes ?? new [] { "No release notes provided." },
         tags: tags ?? new [] { "testcentric" }
     )
     {
+        if (content == null) content = "recipe/*.cake";
         _cakeFiles = _context.GetFiles(content).Select(f => f.GetFilename());
 
         PackageChecks = new PackageCheck[] {
