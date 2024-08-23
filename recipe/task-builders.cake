@@ -13,6 +13,9 @@ public static class BuildTasks
 	public static CakeTaskBuilder DumpSettingsTask { get; set; }
 	public static CakeTaskBuilder DefaultTask {get; set; }
 
+	// Help
+	public static CakeTaskBuilder HelpTask { get; set; }
+
 	// Building
 	public static CakeTaskBuilder BuildTask { get; set; }
 	public static CakeTaskBuilder CheckHeadersTask { get; set; }
@@ -29,11 +32,10 @@ public static class BuildTasks
 
 	// Packaging
 	public static CakeTaskBuilder PackageTask { get; set; }
-	public static CakeTaskBuilder BuildTestAndPackageTask { get; set; }
-	public static CakeTaskBuilder PackageBuildTask { get; set; }
-	public static CakeTaskBuilder PackageInstallTask { get; set; }
-	public static CakeTaskBuilder PackageVerifyTask { get; set; }
-	public static CakeTaskBuilder PackageTestTask { get; set; }
+	public static CakeTaskBuilder BuildPackagesTask { get; set; }
+	public static CakeTaskBuilder InstallPackagesTask { get; set; }
+	public static CakeTaskBuilder VerifyPackagesTask { get; set; }
+	public static CakeTaskBuilder TestPackagesTask { get; set; }
 
 	// Publishing
 	public static CakeTaskBuilder PublishTask { get; set; }
