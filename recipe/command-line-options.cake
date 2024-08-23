@@ -26,26 +26,26 @@ public static class CommandLineOptions
 		_context = context;
 
 		// The name of the TARGET task to be run, e.g. Test.
-		Target = new ValueOption<string>("target", "Default", 1);
+		Target = new ValueOption<string>("target|t", "Default");
 
 		// Multiple targets to be run
-		Targets = new MultiValueOption<string>("target", "Default", 1);
+		Targets = new MultiValueOption<string>("target|t", "Default");
 
-		Configuration = new ValueOption<String>("configuration", DEFAULT_CONFIGURATION, 1);
+		Configuration = new ValueOption<String>("configuration|c", DEFAULT_CONFIGURATION);
 		
-		PackageVersion = new ValueOption<string>("packageVersion", null, 4);
+		PackageVersion = new ValueOption<string>("packageVersion|p", null);
 
-        PackageSelector = new ValueOption<string>("where", null, 1);
+        PackageSelector = new ValueOption<string>("where|w", null);
 
-		TestLevel = new ValueOption<int>("level", 0, 3);
+		TestLevel = new ValueOption<int>("level|l", 0);
 
-		TraceLevel = new ValueOption<string>("trace", "Off", 2);
+		TraceLevel = new ValueOption<string>("trace|tr", "Off");
 
-		NoBuild = new SimpleOption("nobuild", 3);
+		NoBuild = new SimpleOption("nobuild|nob");
 
-		NoPush = new SimpleOption("nopush",  3);
+		NoPush = new SimpleOption("nopush|nop");
 
-		Usage = new SimpleOption("usage", 2);
+		Usage = new SimpleOption("usage|u");
 	}
 
 	// Nested classes to represent individual options
@@ -53,16 +53,14 @@ public static class CommandLineOptions
 	// AbstractOption has a name and can tell us if it exists.
 	public abstract class AbstractOption
 	{
-		public string Name { get; }
-		
-		public int MinimumAbbreviation { get; internal set; }
+		public List<string> Aliases { get; }
 		
 		public bool Exists 
 		{
 			get
 			{
-				for (int len = Name.Length; len >= MinimumAbbreviation; len--)
-					if (_context.HasArgument(Name.Substring(0,len)))
+				foreach (string alias in Aliases)
+					if (_context.HasArgument(alias))
 						return true;
 				return false;
 			}
@@ -70,12 +68,9 @@ public static class CommandLineOptions
 
 		public string Description { get; }
 
-		public AbstractOption(string name, int minimumAbbreviation = 0, string description = null)
+		public AbstractOption(string aliases, string description = null)
 		{
-			Name = name;
-			MinimumAbbreviation = minimumAbbreviation > 0 && minimumAbbreviation <= name.Length
-				? minimumAbbreviation
-				: name.Length;
+			Aliases = new List<string>(aliases.Split('|'));
 			Description = description;
 		}
 	}
@@ -86,11 +81,12 @@ public static class CommandLineOptions
 	{
 		static public implicit operator bool(SimpleOption o) => o.Exists;
 
-		public SimpleOption(string name, int minimumAbbreviation = 0, string description = null)
-			: base(name, minimumAbbreviation, description)
+		public SimpleOption(string aliases, string description = null)
+			: base(aliases, description)
 		{
-			if (_context.Argument(name, (string)null) != null)
-				throw new Exception($"Option --{name} does not take a value.");
+			foreach(string alias in Aliases)
+				if (_context.Argument(alias, (string)null) != null)
+					throw new Exception($"Option --{alias} does not take a value.");
 		}
 	}
 
@@ -99,8 +95,8 @@ public static class CommandLineOptions
 	{
 		public T DefaultValue { get; }
 
-		public ValueOption(string name, T defaultValue, int minimumAbbreviation = 0, string description = null)
-			: base(name, minimumAbbreviation, description)
+		public ValueOption(string aliases, T defaultValue, string description = null)
+			: base(aliases, description)
 		{
 			DefaultValue = defaultValue;
 		}
@@ -109,12 +105,9 @@ public static class CommandLineOptions
 		{
 			get
 			{
-				for (int len = Name.Length; len >= MinimumAbbreviation; len--)
-				{
-					string abbrev = Name.Substring(0,len);
-					if (_context.HasArgument(abbrev))
-						return _context.Argument<T>(abbrev);
-				}
+				foreach (string alias in Aliases)
+					if (_context.HasArgument(alias))
+						return _context.Argument<T>(alias);
 			
 				return DefaultValue;
 			}
@@ -124,8 +117,8 @@ public static class CommandLineOptions
     // Generic MultiValueOption adds Values, which returns a collection of values
     public class MultiValueOption<T> : ValueOption<T>
     {
-	    public MultiValueOption(string name, T defaultValue, int minimumAbbreviation = 0, string description = null)
-		    : base(name, defaultValue, minimumAbbreviation, description) { }
+	    public MultiValueOption(string aliases, T defaultValue, string description = null)
+		    : base(aliases, defaultValue, description) { }
 
 		public ICollection<T> Values
 		{
@@ -133,12 +126,9 @@ public static class CommandLineOptions
 			{
 				var result = new List<T>();
 
-			    for (int len = Name.Length; len >= MinimumAbbreviation; len--)
-			    {
-				    string abbrev = Name.Substring(0,len);
-				    if (_context.HasArgument(abbrev))
-					    result.AddRange(_context.Arguments<T>(abbrev));
-			    }
+				foreach (string alias in Aliases)
+				    if (_context.HasArgument(alias))
+					    result.AddRange(_context.Arguments<T>(alias));
 
 				if (result.Count == 0) result.Add(DefaultValue);
 
