@@ -27,7 +27,7 @@ public static class BuildSettings
 		IUnitTestRunner unitTestRunner = null, // If not set, NUnitLite is used
 		string unitTestArguments = null,
 
-		string defaultTarget = null, // Defaults to "Build"
+		string defaultTarget = "Build",
 		
 		// Verbosity
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
@@ -35,7 +35,7 @@ public static class BuildSettings
 		bool chocolateyVerbosity = false )
 	{
 		// Required arguments
-        Context = context ?? throw new ArgumentNullException(nameof(context));
+        Context = context as CakeContext ?? throw new ArgumentNullException(nameof(context));
         Title = title ?? throw new ArgumentNullException(nameof(title));
         GitHubRepository = githubRepository ?? throw new ArgumentNullException(nameof(githubRepository));
 
@@ -57,6 +57,7 @@ public static class BuildSettings
 		UnitTestRunner = unitTestRunner ?? new NUnitLiteRunner();
 		UnitTestArguments = unitTestArguments;
 
+		RecipeVersion = Recipe.Version;
 		BuildVersion = new BuildVersion(context);
 
 		GitHubOwner = githubOwner;
@@ -73,8 +74,8 @@ public static class BuildSettings
 		}
 		ExemptFiles = exemptFiles ?? new string[0];
 
-		if (defaultTarget != null)
-			BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
+        BuildTasks.Context = Context;
+		BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
 
 		MSBuildVerbosity = msbuildVerbosity;
 		MSBuildAllowPreviewVersion = msbuildAllowPreviewVersion;
@@ -83,7 +84,7 @@ public static class BuildSettings
 		ChocolateyVerbosity = chocolateyVerbosity;
 
 		// Skip remaining initialization if help was requested
-		if (CommandLineOptions.Usage)
+		if (CommandLineOptions.Target.Value == "Help")
 			return;
 			
 		ValidateSettings();
@@ -148,7 +149,7 @@ public static class BuildSettings
 	}
 
 	// Cake Context
-	public static ICakeContext Context { get; private set; }
+	public static CakeContext Context { get; private set; }
 
     // NOTE: These are set in setup.cake
 	public static string Target { get; set; }
@@ -176,8 +177,9 @@ public static class BuildSettings
 	public static bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
 	public static bool IsRunningOnGitHubActions => _buildSystem.GitHubActions.IsRunningOnGitHubActions;
 
-	// Versioning
-	public static BuildVersion BuildVersion { get; private set; }
+    // Versioning
+    public static string RecipeVersion { get; private set; }
+    public static BuildVersion BuildVersion { get; private set; }
 	public static string BranchName => BuildVersion.BranchName;
 	public static bool IsReleaseBranch => BuildVersion.IsReleaseBranch;
 	public static string PackageVersion => BuildVersion.PackageVersion;
@@ -328,7 +330,8 @@ public static class BuildSettings
 		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush ? "True" : "NOT SET");
 
 		DisplayHeading("VERSIONING");
-		DisplaySetting("PackageVersion:               ", PackageVersion);
+        DisplaySetting("RecipeVersion                 ", RecipeVersion);
+        DisplaySetting("PackageVersion:               ", PackageVersion);
 		DisplaySetting("AssemblyVersion:              ", AssemblyVersion);
 		DisplaySetting("AssemblyFileVersion:          ", AssemblyFileVersion);
 		DisplaySetting("AssemblyInformationalVersion: ", AssemblyInformationalVersion);

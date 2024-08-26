@@ -8,7 +8,10 @@
 
 public static class BuildTasks
 {
-	// General
+	// Our context - set by setup.cake
+	public static ICakeContext Context { get; set; }
+
+	// General Tasks
 	public static CakeTaskBuilder CheckScriptTask { get; set; }
 	public static CakeTaskBuilder DumpSettingsTask { get; set; }
 	public static CakeTaskBuilder DefaultTask {get; set; }
@@ -16,7 +19,7 @@ public static class BuildTasks
 	// Help
 	public static CakeTaskBuilder HelpTask { get; set; }
 
-	// Building
+	// BuildTasks
 	public static CakeTaskBuilder BuildTask { get; set; }
 	public static CakeTaskBuilder CheckHeadersTask { get; set; }
 	public static CakeTaskBuilder CleanTask { get; set; }
@@ -27,29 +30,29 @@ public static class BuildTasks
 	public static CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
 	public static CakeTaskBuilder RestoreTask { get; set; }
 
-	// Unit Testing
+	// Unit Testing Task
 	public static CakeTaskBuilder UnitTestTask { get; set; }
 
-	// Packaging
+	// Packaging Tasks
 	public static CakeTaskBuilder PackageTask { get; set; }
 	public static CakeTaskBuilder BuildPackagesTask { get; set; }
 	public static CakeTaskBuilder InstallPackagesTask { get; set; }
 	public static CakeTaskBuilder VerifyPackagesTask { get; set; }
 	public static CakeTaskBuilder TestPackagesTask { get; set; }
 
-	// Publishing
+	// Publishing Tasks
 	public static CakeTaskBuilder PublishTask { get; set; }
 	public static CakeTaskBuilder PublishToLocalFeedTask { get; set; }
 	public static CakeTaskBuilder PublishToMyGetTask { get; set; }
 	public static CakeTaskBuilder PublishToNuGetTask { get; set; }
 	public static CakeTaskBuilder PublishToChocolateyTask { get; set; }
 
-	// Releasing
+	// Releasing Tasks
 	public static CakeTaskBuilder CreateDraftReleaseTask { get; set; }
 	public static CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
 	public static CakeTaskBuilder UpdateReleaseNotesTask { get; set; } 
 	public static CakeTaskBuilder CreateProductionReleaseTask { get; set; }
 
-	// Continuous Integration
+	// Continuous Integration Task
 	public static CakeTaskBuilder ContinuousIntegrationTask { get; set; }
 }

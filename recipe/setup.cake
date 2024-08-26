@@ -41,6 +41,9 @@ Setup((context) =>
 	BuildSettings.Target = target;
 	BuildSettings.TasksToExecute = tasksToExecute;
 
+	// Add CakeContext to BuildTasks so it can lookup tasks
+	//BuildTasks.Context = context as CakeContext;
+
 	void DisplayErrorAndThrow(string message)
 	{
 		message += $"\r\n  Tasks: {string.Join(", ", tasksToExecute)}";
