@@ -18,7 +18,8 @@ public class RecipePackage : NuGetPackage
         string description = null,
         string summary = null,
         string[] releaseNotes = null,
-        string[] tags = null
+        string[] tags = null ,
+        PackageCheck[] checks = null
     )
     : base (
         id, 
@@ -27,7 +28,8 @@ public class RecipePackage : NuGetPackage
         summary: summary ?? "No summary provided.",
         description: description ?? "No description provided.",
         releaseNotes: releaseNotes ?? new [] { "No release notes provided." },
-        tags: tags ?? new [] { "testcentric" }
+        tags: tags ?? new [] { "testcentric" },
+        checks: checks
     )
     {
         if (source != null && source.EndsWith(".nuspec"))
