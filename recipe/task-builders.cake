@@ -25,9 +25,7 @@ public static class BuildTasks
 	public static CakeTaskBuilder CleanTask { get; set; }
 	public static CakeTaskBuilder CleanAllTask { get; set; }
 	public static CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
-	public static CakeTaskBuilder CleanAllOutputDirectoriesTask { get; set; }
 	public static CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
-	public static CakeTaskBuilder DeleteObjectDirectoriesTask { get; set; }
 	public static CakeTaskBuilder RestoreTask { get; set; }
 
 	// Unit Testing Task

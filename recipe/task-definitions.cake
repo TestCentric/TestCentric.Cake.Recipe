@@ -55,25 +55,14 @@ BuildTasks.CheckHeadersTask = Task("CheckHeaders")
 BuildTasks.CleanTask = Task("Clean")
 	.Description("Clean output directories for current config as well as the package directory.")
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
-	.IsDependentOn("CleanOutputDirectories")
-	.IsDependentOn("CleanPackageDirectory");
-
-BuildTasks.CleanOutputDirectoriesTask = Task("CleanOutputDirectories")
-	.Description("Clean output directories for current config.")
-	.WithCriteria(() => !CommandLineOptions.NoBuild)
-	.Does(() => 
-	{
-		foreach (var binDir in GetDirectories($"**/bin/{BuildSettings.Configuration}/"))
-			CleanDirectory(binDir);
-	});
-
-BuildTasks.CleanAllOutputDirectoriesTask = Task("CleanAllOutputDirectories")
-	.Description("Clean output directories for all configs.")
+	.IsDependentOn("CleanPackageDirectory")
 	.Does(() =>
-	{
-		foreach (var binDir in GetDirectories("**/bin/"))
-			CleanDirectory(binDir);
-	});
+     {
+         foreach (var binDir in GetDirectories($"**/bin/{BuildSettings.Configuration}/"))
+             CleanDirectory(binDir);
+
+         CleanDirectory(BuildSettings.PackageDirectory);
+     });
 
 BuildTasks.CleanPackageDirectoryTask = Task("CleanPackageDirectory")
 	.Description("Clean the package directory.")
@@ -86,17 +75,16 @@ BuildTasks.CleanAllTask = Task("CleanAll")
 		Clean all output directories and package directory and
 		delete all object directories.
 		""")
-	.IsDependentOn("CleanAllOutputDirectories")
-	.IsDependentOn("CleanPackageDirectory")
-	.IsDependentOn("DeleteObjectDirectories");
-
-BuildTasks.DeleteObjectDirectoriesTask = Task("DeleteObjectDirectories")
-	.Description("Delete all object directories.")
 	.Does(() =>
 	{
-		foreach (var dir in GetDirectories("src/**/obj/"))
-			DeleteDirectory(dir, new DeleteDirectorySettings() { Recursive = true });
-	});
+        foreach (var binDir in GetDirectories("**/bin/"))
+            CleanDirectory(binDir);
+
+		CleanDirectory(BuildSettings.PackageDirectory);
+
+        foreach (var dir in GetDirectories("src/**/obj/"))
+            DeleteDirectory(dir, new DeleteDirectorySettings() { Recursive = true });
+    });
 
 BuildTasks.RestoreTask = Task("Restore")
 	.Description("Restore all packages referenced by the solution.")

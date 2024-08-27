@@ -103,51 +103,24 @@
           project, the command is not available and an error is displayed.
         
           Depends On: Clean, Restore, CheckHeaders
-             Used By: Test, Package, BuildPackages, ContinuousIntegration
         
         Clean
           Clean output directories for current config as well as the package directory.
         
-          Depends On: CleanOutputDirectories, CleanPackageDirectory
-             Used By: Build
-
-        CleanOutputDirectories
-          Clean output directories for current config.
-
-             Used By: Clean
-        
         CleanPackageDirectory
           Clean the package directory.
 
-             Used By: Clean, CleanAll
-        
         Restore
           Restore all packages referenced by the solution.
 
-             Used By: Build
-        
         CheckHeaders
           Check source files for valid copyright headers. Currently, only C# files
           are checked. Normally a standard TestCentric header is used but a project
           may specify a different header when initializing BuildSettings.
 
-             Used By: Build
-        
         CleanAll
-          Clean all output directories and package directory and
-          delete all object directories.
-        
-          Depends On: CleanAllOutputDirectories, CleanPackageDirectory, DeleteObjectDirectories
-
-        CleanAllOutputDirectories
-          Clean output directories for all configs.
-
-             Used By: CleanAll
-        
-        DeleteObjectDirectories
-          Delete all object directories.
-
-             Used By: CleanAll
+          Clean all output directories and package directory. Delete all
+          object directories.
         
         ==============================================================================
             Unit Testing Task
@@ -159,7 +132,6 @@
           eliminate the compilation step.
         
           Depends On: Build
-             Used By: ContinuousIntegration
 
         ==============================================================================
             Packaging Tasks
@@ -173,20 +145,17 @@
           eliminate the compilation step.
         
           Depends On: Build
-             Used By: Publish, ContinuousIntegration
         
         BuildPackages
           Compiles your application and then builds the packages. Use --nobuild to skip
           compilation. Use for debugging the building of packages.
         
           Depends On: Build
-             Used By: InstallPackges
         
         InstallPackages
           Builds and installs packages. Useful for debugging installation.
         
           Depends On: BuildPackages
-             Used By: VerifyPackages, TestPackages
         
         VerifyPackages
           Builds, Installs and Verifies packages. Useful for debugging package content.
@@ -211,7 +180,6 @@
           used by those tasks.
         
           Depends On: Package Runs: 
-             Used By: ContinuousIntegration
         
         PublishToMyGet
           Publishes packages to MyGet for a dev build. If not, or if the --nopush
@@ -246,8 +214,6 @@
         DownloadDraftRelease
           Download draft release for local use
 
-             Used By: ContinuousIntegration
-        
         UpdateReleaseNotes
           Update Release Notes.
         
@@ -257,8 +223,6 @@
           fail with an error message if no milestone is found or if it doesn't meet
           criteria for a production release.
 
-             Used By ContinuousIntegration
-        
         ==============================================================================
             Continuous Integration Task
         ==============================================================================
