@@ -21,9 +21,9 @@
   </metadata>
 
   <files>
-    <file src="../LICENSE.txt" />
-    <file src="../README.md" />
-    <file src="../testcentric.png" />
+    <file src="LICENSE.txt" />
+    <file src="README.md" />
+    <file src="testcentric.png" />
     <file src="recipe/*.cake" target="content" />
   </files>
 

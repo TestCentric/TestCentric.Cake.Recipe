@@ -19,7 +19,8 @@ public static class CommandLineOptions
 	static public ValueOption<string> TraceLevel;
 	static public SimpleOption NoBuild;
 	static public SimpleOption NoPush;
-	static public SimpleOption Usage;
+	static public SimpleOption ShowUsage;
+	static public SimpleOption ShowTasks;
 
 	public static void Initialize(ICakeContext context)
 	{
@@ -45,7 +46,9 @@ public static class CommandLineOptions
 
 		NoPush = new SimpleOption("nopush|nop");
 
-		Usage = new SimpleOption("usage|u");
+		ShowUsage = new SimpleOption("usage");
+
+		ShowTasks = new SimpleOption("tasks");
 	}
 
 	// Nested classes to represent individual options
