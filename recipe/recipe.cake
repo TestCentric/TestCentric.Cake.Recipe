@@ -1,4 +1,4 @@
 public static class Recipe
 {
-    public static string Version => "1.3.0-ci00021-issue-100";
+    public static string Version => "1.3.1-dev00002";
 }

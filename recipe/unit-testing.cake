@@ -5,10 +5,12 @@
 public static class UnitTesting
 {
     static ICakeContext _context;
+    static IUnitTestRunner _runner;
 
     static UnitTesting()
     {
         _context = BuildSettings.Context;
+        _runner = BuildSettings.UnitTestRunner ?? new NUnitLiteRunner();
     }
 
     public static void RunAllTests()
@@ -75,7 +77,9 @@ public static class UnitTesting
         {
             // Use default patterns to find unit tests - case insensitive because
             // we don't know how the user may have named test assemblies.
-            var defaultPatterns = new [] { "**/*.tests.dll", "**/*.tests.exe" };
+            var defaultPatterns = _runner is NUnitLiteRunner
+                ? new[] { "**/*.tests.exe" }
+                : new[] { "**/*.tests.dll", "**/*.tests.exe" };
             var globberSettings = new GlobberSettings { IsCaseSensitive = false };
             foreach (string filePattern in defaultPatterns)
                 foreach (var testPath in _context.GetFiles(BuildSettings.OutputDirectory + filePattern, globberSettings))
