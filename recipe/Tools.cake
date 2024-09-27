@@ -1,6 +1,6 @@
 // Load all tools used by the recipe
 #tool NuGet.CommandLine&version=6.9.1
-#tool dotnet:?package=GitVersion.Tool&version=5.6.3
+#tool dotnet:?package=GitVersion.Tool&version=6.0.2
 #tool dotnet:?package=GitReleaseManager.Tool&version=0.18.0
 
 public static class Tools

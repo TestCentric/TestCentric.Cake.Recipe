@@ -356,6 +356,9 @@ public static class BuildSettings
 		DisplayHeading("BUILD");
 		DisplaySetting("Title:            ", Title);
 		DisplaySetting("SolutionFile:     ", SolutionFile);
+		Context.Information("StandardHeader:");
+		foreach (var line in StandardHeader)
+			Context.Information(line);
 
 		DisplayHeading("TESTING");
 		DisplaySetting("UnitTests:        ", UnitTests, "DEFAULT");
