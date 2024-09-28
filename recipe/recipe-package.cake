@@ -35,7 +35,7 @@ public class RecipePackage : NuGetPackage
         if (source != null && source.EndsWith(".nuspec"))
             _hasNuSpec = true;
 
-        // Rewrite recipe.cake so it has the version we are building
+        // Create or rewrite recipe.cake so it has the version we are building
         using (var writer = new StreamWriter("./recipe/recipe.cake"))
             writer.Write($$"""
                 public static class Recipe

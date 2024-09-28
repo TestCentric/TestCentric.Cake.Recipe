@@ -104,7 +104,8 @@ public class ChocolateyPackage : PackageDefinition
 		        RequireLicenseAcceptance = false,
 		        IconUrl = new Uri(TESTCENTRIC_ICON_URL),
                 DocsUrl = new Uri(TESTCENTRIC_PROJECT_URL),
-                MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL)
+                MailingListUrl = new Uri(TESTCENTRIC_MAILING_LIST_URL),
+                ArgumentCustomization = args => args.Append($"BIN_DIR={BuildSettings.OutputDirectory}")
 	        };
 
             if (PackageContent != null)
