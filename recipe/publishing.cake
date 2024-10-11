@@ -121,9 +121,18 @@ public static class PackageReleaseManager
 
 	public static void CreateDraftRelease()
 	{
-		string releaseVersion =
-			CommandLineOptions.PackageVersion.Exists ? CommandLineOptions.PackageVersion.Value :
-			BuildSettings.IsReleaseBranch            ? BuildSettings.BuildVersion.BranchName.Substring(8) : null;
+		// If we are called for a production release, we only create a draft release if
+		// the target was called directly on a local system. Otherwise, we risk either
+		// an exception or possibly modifying a user-edited draft release.
+        bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
+
+        string releaseVersion =
+			CommandLineOptions.PackageVersion.Exists 
+				? CommandLineOptions.PackageVersion.Value 
+				: BuildSettings.IsReleaseBranch
+					? BuildSettings.BuildVersion.BranchName.Substring(8) 
+					: localDirectCall && BuildSettings.IsProductionRelease
+						? BuildSettings.PackageVersion : null;
 
 		if (releaseVersion != null)
 		{
@@ -153,8 +162,7 @@ public static class PackageReleaseManager
 		}
 		else
 		{
-			bool calledDirectly = CommandLineOptions.Target.Value == "CreateDraftRelease";
-			if (calledDirectly)
+			if (localDirectCall)
 				throw new InvalidOperationException(DRAFT_RELEASE_ERROR);
 			else
 				_context.Information("Skipping creation of draft release because this is not a release branch");
