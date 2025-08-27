@@ -81,7 +81,7 @@ public class PackageTestReport
 		writer.WriteLine($"   Args: {Test.Arguments}");
 		writer.WriteLine();
 
-		foreach (var error in Errors)
+		foreach (string error in Errors)
 			writer.WriteLine(error);
 
 		if (Errors.Count == 0)
@@ -94,7 +94,7 @@ public class PackageTestReport
 			writer.WriteLine("   ERROR: Test Result not as expected!");
 		}
 
-		foreach (var warning in Warnings)
+		foreach (string warning in Warnings)
 			writer.WriteLine("   WARNING: " + warning);
 	}
 
