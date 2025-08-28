@@ -34,11 +34,11 @@ public static class CommandLineOptions
 
 		Configuration = new ValueOption<String>("configuration|c", DEFAULT_CONFIGURATION);
 		
-		PackageVersion = new ValueOption<string>("packageVersion|p", null);
+		PackageVersion = new ValueOption<string>("packageVersion|package|pv|p", null);
 
         PackageSelector = new ValueOption<string>("where|w", null);
 
-		TestLevel = new ValueOption<int>("level|l", 0);
+		TestLevel = new ValueOption<int>("level|lev|l", 0);
 
 		TraceLevel = new ValueOption<string>("trace|tr", "Off");
 

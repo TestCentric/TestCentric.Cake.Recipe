@@ -216,10 +216,6 @@ public static class PackageReleaseManager
 			string tagName = BuildSettings.PackageVersion;
 			string assets = string.Join<string>(',', BuildSettings.Packages.Select(p => p.PackageFilePath));
 
-			//IsRunningOnWindows()
-			//	? $"\"{BuildSettings.NuGetPackage},{BuildSettings.ChocolateyPackage}\""
-			//	: $"\"{BuildSettings.NuGetPackage}\"";
-
 			_context.Information($"Publishing release {tagName} to GitHub");
 			_context.Information($"  Assets: {assets}");
 

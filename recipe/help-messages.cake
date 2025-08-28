@@ -23,7 +23,7 @@
             --configuration, -c=CONFIG
                 The name of the configuration to build. Default is Release.
 
-            --packageVersion, -p=VERSION
+            --packageVersion, --package, --pv, -p=VERSION
                 Specifies the full package version, including any pre-release
                 suffix. If provided, this version is used directly in place of
                 the default version calculated by the script.
@@ -38,7 +38,7 @@
                     --where id=NUnit.Engine.Api
                     --where "type=nuget|type=choco"
 
-            --level, -l=LEVEL
+            --level, --lev, -l=LEVEL
                 Specifies the level of package testing, 1, 2 or 3. Defaults are
                   1 = for normal CI tests run every time you build a package
                   2 = for PRs and Dev builds uploaded to MyGet
