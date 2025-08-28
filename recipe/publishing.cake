@@ -136,24 +136,19 @@ public static class PackageReleaseManager
 
 		if (releaseVersion != null)
 		{
-			if (CommandLineOptions.NoPush)
-				_context.Information($"NoPush option skipping creation of draft release for version {releaseVersion}");
-			else
-			{
-				string releaseName = $"{BuildSettings.Title} {releaseVersion}";
-				_context.Information($"Creating draft release for {releaseName}");
+			string releaseName = $"{BuildSettings.Title} {releaseVersion}";
+			_context.Information($"Creating draft release for {releaseName}");
 
-				try
-				{
-                    GRM.Create(releaseName, releaseVersion);
-				}
-				catch
-				{
-					_context.Error($"Unable to create draft release for {releaseName}.");
-					_context.Error($"Check that there is a {releaseVersion} milestone with at least one closed issue.");
-					_context.Error("");
-					throw;
-				}
+			try
+			{
+                GRM.Create(releaseName, releaseVersion);
+			}
+			catch
+			{
+				_context.Error($"Unable to create draft release for {releaseName}.");
+				_context.Error($"Check that there is a {releaseVersion} milestone with at least one closed issue.");
+				_context.Error("");
+				throw;
 			}
 		}
 		else
@@ -180,24 +175,19 @@ public static class PackageReleaseManager
 		if (releaseVersion == null)
 			throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
 
-		if (CommandLineOptions.NoPush)
-			_context.Information($"NoPush option skipping update of release notes for version {releaseVersion}");
-		else
-		{
-			string releaseName = $"{BuildSettings.Title} {releaseVersion}";
-			_context.Information($"Updating release notes for {releaseName}");
+		string releaseName = $"{BuildSettings.Title} {releaseVersion}";
+		_context.Information($"Updating release notes for {releaseName}");
 
-			try
-			{
-				GRM.Create(releaseName, releaseVersion);
-			}
-			catch
-			{
-				_context.Error($"Unable to update release notes for {releaseName}.");
-				_context.Error($"Check that there is a {releaseVersion} milestone with a matching release.");
-				_context.Error("");
-				throw;
-			}
+		try
+		{
+			GRM.Create(releaseName, releaseVersion);
+		}
+		catch
+		{
+			_context.Error($"Unable to update release notes for {releaseName}.");
+			_context.Error($"Check that there is a {releaseVersion} milestone with a matching release.");
+			_context.Error("");
+			throw;
 		}
 
 	}
@@ -218,8 +208,6 @@ public static class PackageReleaseManager
 		{
 			_context.Information("Skipping CreateProductionRelease because this is not a production release");
 		}
-		else if (CommandLineOptions.NoPush)
-			_context.Information($"NoPush option skipping creation of production release for version {BuildSettings.PackageVersion}");
 		else
 		{
 			string token = BuildSettings.GitHubAccessToken;
@@ -267,9 +255,12 @@ public static class PackageReleaseManager
 
 		private static void Execute(string arguments)
 		{
-			arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
-			_context.StartProcess("dotnet", arguments);
-			//_context.Information($"Would run 'dotnet {arguments}'");
+            arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
+            
+			if (CommandLineOptions.NoPush)
+                _context.Information($"NoPush option skipping command `{arguments}`");
+			else
+				_context.StartProcess("dotnet", arguments);
 		}
     }
 }
