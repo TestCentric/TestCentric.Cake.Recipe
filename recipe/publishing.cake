@@ -1,7 +1,7 @@
 public static class PackageReleaseManager
 {
 	private static ICakeContext _context;
-	
+
 	static PackageReleaseManager()
 	{
 		_context = BuildSettings.Context;
@@ -124,13 +124,13 @@ public static class PackageReleaseManager
 		// If we are called for a production release, we only create a draft release if
 		// the target was called directly on a local system. Otherwise, we risk either
 		// an exception or possibly modifying a user-edited draft release.
-        bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
+		bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
 
-        string releaseVersion =
-			CommandLineOptions.PackageVersion.Exists 
-				? CommandLineOptions.PackageVersion.Value 
+		string releaseVersion =
+			CommandLineOptions.PackageVersion.Exists
+				? CommandLineOptions.PackageVersion.Value
 				: BuildSettings.IsReleaseBranch
-					? BuildSettings.BuildVersion.BranchName.Substring(8) 
+					? BuildSettings.BuildVersion.BranchName.Substring(8)
 					: localDirectCall && BuildSettings.IsProductionRelease
 						? BuildSettings.PackageVersion : null;
 
@@ -145,11 +145,7 @@ public static class PackageReleaseManager
 
 				try
 				{
-					_context.GitReleaseManagerCreate(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, new GitReleaseManagerCreateSettings()
-					{
-						Name = releaseName,
-						Milestone = releaseVersion
-					});
+                    GRM.Create(releaseName, releaseVersion);
 				}
 				catch
 				{
@@ -176,9 +172,10 @@ public static class PackageReleaseManager
 
 	public static void UpdateReleaseNotes()
 	{
-		string releaseVersion =
-			CommandLineOptions.PackageVersion.Exists ? CommandLineOptions.PackageVersion.Value :
-			BuildSettings.IsProductionRelease        ? BuildSettings.PackageVersion : null;
+		string releaseVersion = CommandLineOptions.PackageVersion.Exists
+			? CommandLineOptions.PackageVersion.Value
+			: BuildSettings.IsProductionRelease
+				? BuildSettings.PackageVersion : null;
 
 		if (releaseVersion == null)
 			throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
@@ -192,11 +189,7 @@ public static class PackageReleaseManager
 
 			try
 			{
-				_context.GitReleaseManagerCreate(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, new GitReleaseManagerCreateSettings()
-				{
-					Name = releaseName,
-					Milestone = releaseVersion
-				});
+				GRM.Create(releaseName, releaseVersion);
 			}
 			catch
 			{
@@ -216,8 +209,7 @@ public static class PackageReleaseManager
 
 		string milestone = BuildSettings.BranchName.Substring(8);
 
-		_context.GitReleaseManagerExport(BuildSettings.GitHubAccessToken, BuildSettings.GitHubOwner, BuildSettings.GitHubRepository, "DraftRelease.md",
-			new GitReleaseManagerExportSettings() { TagName = milestone });
+		GRM.Export("DraftRelease.md", milestone);
 	}
 
 	public static void CreateProductionRelease()
@@ -234,17 +226,50 @@ public static class PackageReleaseManager
 			string owner = BuildSettings.GitHubOwner;
 			string repository = BuildSettings.GitHubRepository;
 			string tagName = BuildSettings.PackageVersion;
-            string assets = string.Join<string>(',', BuildSettings.Packages.Select(p => p.PackageFilePath));
+			string assets = string.Join<string>(',', BuildSettings.Packages.Select(p => p.PackageFilePath));
 
 			//IsRunningOnWindows()
-            //	? $"\"{BuildSettings.NuGetPackage},{BuildSettings.ChocolateyPackage}\""
-            //	: $"\"{BuildSettings.NuGetPackage}\"";
+			//	? $"\"{BuildSettings.NuGetPackage},{BuildSettings.ChocolateyPackage}\""
+			//	: $"\"{BuildSettings.NuGetPackage}\"";
 
 			_context.Information($"Publishing release {tagName} to GitHub");
 			_context.Information($"  Assets: {assets}");
 
-			_context.GitReleaseManagerAddAssets(token, owner, repository, tagName, assets);
-			_context.GitReleaseManagerClose(token, owner, repository, tagName);
+			GRM.AddAssets(tagName, assets);
+			GRM.Close(tagName);
 		}
 	}
+
+	private static class GRM
+	{
+		private static readonly string CREDENTIALS =
+				$"--token {BuildSettings.GitHubAccessToken}" + $" -o {BuildSettings.GitHubOwner} -r {BuildSettings.GitHubRepository}";
+
+		public static void Create(string name, string milestone)
+		{
+			Execute($"create -n \"{name}\" -m {milestone}");
+		}
+
+		public static void Export(string filename, string milestone)
+		{
+			Execute($"export -f \"{filename}\" -m {milestone}");
+		}
+
+		public static void AddAssets(string tagname, string assets)
+		{
+			Execute($"addasset -t {tagname} -a \"{assets}\"");
+		}
+
+		public static void Close(string milestone)
+		{
+			Execute($"close -m {milestone}");
+		}
+
+		private static void Execute(string arguments)
+		{
+			arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
+			_context.StartProcess("dotnet", arguments);
+			//_context.Information($"Would run 'dotnet {arguments}'");
+		}
+    }
 }

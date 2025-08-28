@@ -1,0 +1,8 @@
+CREATE DRAFT RELEASE
+dotnet gitreleasemanager create --token %GITHUB_ACCESS_TOKEN% -o TestCentric -r TestCentric.Cake.Recipe -m 1.3.4
+
+PUBLISH RELEASE
+dotnet gitreleasemanager publish --token %GITHUB_ACCESS_TOKEN% -o TestCentric -r TestCentric.Cake.Recipe -t 1.3.4
+
+UPLOAD ASSETS
+dotnet gitreleasemanager addasset --token %GITHUB_ACCESS_TOKEN% -o TestCentric -r TestCentric.Cake.Recipe -t 1.3.4 -a package\TestCentric.Cake.Recipe.1.3.4.nupkg
