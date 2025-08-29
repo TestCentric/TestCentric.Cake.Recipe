@@ -2,10 +2,8 @@
 next-version: 1.4.0
 mode: ContinuousDelivery
 branches:
-  master:
-    regex: ^main$
+  main:
     label: dev
-    source-branches: []
   release:
     label: pre
   pull-request:

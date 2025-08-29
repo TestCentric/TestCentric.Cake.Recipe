@@ -87,7 +87,7 @@ public class BuildVersion
         if (label == branchName)
             label = "ci";
 
-        string suffix = "-" + label + _gitVersion.CommitsSinceVersionSourcePadded;
+        string suffix = "-" + label + _gitVersion.CommitsSinceVersionSource.ToString().PadLeft(5, '0');
 
         switch (label)
         {
