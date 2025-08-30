@@ -89,29 +89,17 @@ public class BuildVersion
 
         string suffix = "-" + label + _gitVersion.CommitsSinceVersionSource.ToString().PadLeft(5, '0');
 
-        switch (label)
+        if (label == "ci")
         {
-            case "ci":
-                branchName = Regex.Replace(branchName, "[^0-9A-Za-z-]+", "-");
-                suffix += "-" + branchName;
-                // Nuget limits "special version part" to 20 chars. Add one for the hyphen.
-                if (suffix.Length > 21)
-                    suffix = suffix.Substring(0, 21);
-                return _gitVersion.MajorMinorPatch + suffix;
-
-            case "dev":
-            case "pre":
-                return _gitVersion.MajorMinorPatch + suffix;
-
-            case "pr":
-                return _gitVersion.LegacySemVerPadded;
-
-            case "rc":
-            case "alpha":
-            case "beta":
-            default:
-                return _gitVersion.LegacySemVer;
+            branchName = Regex.Replace(branchName, "[^0-9A-Za-z-]+", "-");
+            suffix += "-" + branchName;
+            // Nuget limits "special version part" to 20 chars. Add one for the hyphen.
+            if (suffix.Length > 21)
+                suffix = suffix.Substring(0, 21);
+            return _gitVersion.MajorMinorPatch + suffix;
         }
+
+        return _gitVersion.MajorMinorPatch + suffix;
     }
 
     string ReplaceAttributeString(string source, string attributeName, string value)

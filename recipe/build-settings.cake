@@ -35,7 +35,7 @@ public static class BuildSettings
 		bool chocolateyVerbosity = false )
 	{
 		// Required arguments
-        Context = context as CakeContext ?? throw new ArgumentNullException(nameof(context));
+		Context = context;
         Title = title ?? throw new ArgumentNullException(nameof(title));
         GitHubRepository = githubRepository ?? throw new ArgumentNullException(nameof(githubRepository));
 
@@ -74,7 +74,7 @@ public static class BuildSettings
 		}
 		ExemptFiles = exemptFiles ?? new string[0];
 
-        BuildTasks.Context = Context;
+        BuildTasks.Context = context;
 		BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
 
 		MSBuildVerbosity = msbuildVerbosity;
@@ -93,8 +93,8 @@ public static class BuildSettings
 
 		// Output like this should go after the run title display
 		if (solutionFile == null && SolutionFile != null)
-			Context.Warning($"  SolutionFile: '{SolutionFile}'");
-		Context.Information($"  PackageTestLevel: {PackageTestLevel}");
+			context.Warning($"  SolutionFile: '{SolutionFile}'");
+		context.Information($"  PackageTestLevel: {PackageTestLevel}");
 
 		// Keep this last
 		if (IsRunningOnAppVeyor)
@@ -149,7 +149,7 @@ public static class BuildSettings
 	}
 
 	// Cake Context
-	public static CakeContext Context { get; private set; }
+	public static ICakeContext Context { get; private set; }
 
     // NOTE: These are set in setup.cake
 	public static string Target { get; set; }
