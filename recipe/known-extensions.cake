@@ -63,6 +63,6 @@ public class ExtensionSpecifier
 			? ChocoPackage
 			: NuGetPackage;
 		
-		extensionPackage.Install(targetPackage.ExtensionInstallDirectory);
+		extensionPackage.Install(targetPackage.PackageTestDirectory);
 	}
 }

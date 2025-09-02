@@ -19,7 +19,10 @@ public class BuildVersion
             throw new ArgumentNullException(nameof(context));
 
         _context = context;
-        _gitVersion = context.GitVersion();
+        _gitVersion = context.GitVersion(new GitVersionSettings
+        {
+            Verbosity = BuildSettings.GitVersionVerbosity
+        });
 
         BranchName = _gitVersion.BranchName;
         IsReleaseBranch = BranchName.StartsWith("release-");

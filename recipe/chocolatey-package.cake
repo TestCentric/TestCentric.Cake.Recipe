@@ -32,7 +32,7 @@ public class ChocolateyPackage : PackageDefinition
         PackageCheck[] symbols = null,
         IEnumerable<PackageTest> tests = null,
         PackageReference[] preloadedExtensions = null,
-        PackageContent packageContent = null)
+        PackageContent packageContent = null )
     : base (
         PackageType.Chocolatey,
         id, 
@@ -50,7 +50,7 @@ public class ChocolateyPackage : PackageDefinition
         symbols: symbols,
         tests: tests,
         preloadedExtensions: preloadedExtensions,
-        packageContent: packageContent)
+        packageContent: packageContent )
     {
     }
 
@@ -58,12 +58,8 @@ public class ChocolateyPackage : PackageDefinition
     public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
     // The file name of any symbol package, including extension
     public override string SymbolPackageName => SIO.Path.ChangeExtension(PackageFileName, ".snupkg");
-    // The directory into which this package is installed
-    public override string PackageInstallDirectory => BuildSettings.ChocolateyTestDirectory;
-    // The directory used to contain results of package tests for this package
-    public override string PackageResultDirectory => BuildSettings.ChocolateyResultDirectory + PackageId + "/";
-    // The directory into which extensions to the test runner are installed
-    public override string ExtensionInstallDirectory => BuildSettings.PackageTestDirectory;
+    // The directory into which this package and any exensions used are installed
+    public override string PackageInstallDirectory => BuildSettings.PackageTestDirectory + PackageId + "/";
 
     protected virtual ChocolateyPackSettings ChocolateyPackSettings
     {

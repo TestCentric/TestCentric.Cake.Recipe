@@ -128,7 +128,7 @@ public class PluggableAgentFactory
 				.WithDirectories(
 					new DirectoryContent("tools").WithFiles( LauncherFiles ),
 					new DirectoryContent("tools/agent").WithFiles( AgentFiles ) ),
-			testRunner: new AgentRunner($"{BuildSettings.NuGetTestDirectory}{NuGetId}.{BuildSettings.PackageVersion}/tools/agent/{TargetAgentFileName}"),
+			testRunner: new AgentRunner($"{BuildSettings.PackageTestDirectory}{NuGetId}.{BuildSettings.PackageVersion}/tools/agent/{TargetAgentFileName}"),
 			tests: PackageTests);
 	
 	public ChocolateyPackage ChocolateyPackage =>
@@ -142,7 +142,7 @@ public class PluggableAgentFactory
 				.WithDirectories(
 					new DirectoryContent("tools").WithFiles( LICENSE, README, CHOCO_VERIFICATION ).AndFiles( LauncherFiles ),
 					new DirectoryContent("tools/agent").WithFiles( AgentFiles ) ),
-			testRunner: new AgentRunner($"{BuildSettings.ChocolateyTestDirectory}{ChocoId}.{BuildSettings.PackageVersion}/tools/agent/{TargetAgentFileName}"),
+			testRunner: new AgentRunner($"{BuildSettings.PackageTestDirectory}{ChocoId}.{BuildSettings.PackageVersion}/tools/agent/{TargetAgentFileName}"),
 			tests: PackageTests);
 
 	public PackageDefinition[] Packages => new PackageDefinition[] { NuGetPackage, ChocolateyPackage };

@@ -5,8 +5,7 @@
 public enum PackageType
 {
 	NuGet,
-	Chocolatey,
-	Zip
+	Chocolatey
 }
 
 public abstract class PackageDefinition
@@ -44,7 +43,7 @@ public abstract class PackageDefinition
 		PackageCheck[] symbols = null,
 		IEnumerable<PackageTest> tests = null,
         PackageReference[] preloadedExtensions = null,
-        PackageContent packageContent = null)
+        PackageContent packageContent = null )
 	{
         if (testRunner == null && testRunnerSource == null && tests != null)
             throw new System.InvalidOperationException($"Unable to create {packageType} package {id}: TestRunner or TestRunnerSource must be provided if there are tests.");
@@ -71,7 +70,7 @@ public abstract class PackageDefinition
 		PackageTests = tests;
         PreLoadedExtensions = preloadedExtensions ?? new PackageReference[0];
         PackageContent = packageContent ?? new PackageContent();
-	}
+    }
 
     public PackageType PackageType { get; }
 	public string PackageId { get; }
@@ -95,15 +94,13 @@ public abstract class PackageDefinition
 
     // The file name of this package, including extension
     public abstract string PackageFileName { get; }
-    // The directory into which this package is installed
+    // The directory into which this package and any extensions used are installed
     public abstract string PackageInstallDirectory { get; }
-    // The directory used to contain results of package tests for this package
-    public abstract string PackageResultDirectory { get; }
-    // The directory into which extensions to the test runner are installed
-    public abstract string ExtensionInstallDirectory { get; }
 
     public string PackageFilePath => BuildSettings.PackageDirectory + PackageFileName;
     public string PackageTestDirectory => $"{PackageInstallDirectory}{PackageId}.{PackageVersion}/";
+    // The directory used to contain results of package tests for this package
+    public string PackageResultDirectory => $"{PackageInstallDirectory}results/";
 
     public bool IsSelectedBy(string selectionExpression)
     {
@@ -238,7 +235,7 @@ public abstract class PackageDefinition
 		// Ensure we start out each package with no extensions installed.
 		// If any package test installs an extension, it remains available
 		// for subsequent tests of the same package only. 
-		foreach (DirectoryPath dirPath in _context.GetDirectories(ExtensionInstallDirectory + "*"))
+		foreach (DirectoryPath dirPath in _context.GetDirectories(PackageTestDirectory + "*"))
 			if (IsRemovableExtensionDirectory(dirPath))
             {
 		        _context.DeleteDirectory(dirPath, new DeleteDirectorySettings() { Recursive = true });
@@ -248,7 +245,7 @@ public abstract class PackageDefinition
         // Pre-install any required extensions specified in BuildSettings.
         // Individual tests may still call for additional extensions.
         foreach(PackageReference package in PreLoadedExtensions)
-            package.Install(ExtensionInstallDirectory);
+            package.Install(PackageTestDirectory);
 
         // Package was defined with either a TestRunnerSource or a single TestRunner. In either
         // case, these will all be package test runners and may or may not require installation.
@@ -337,7 +334,7 @@ public abstract class PackageDefinition
         }
     }
 
-public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
+    public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
 
     protected abstract bool IsRemovableExtensionDirectory(DirectoryPath dirPath);
 }

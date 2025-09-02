@@ -56,7 +56,6 @@
 		<file src="recipe/tools.cake" target="content" />
 		<file src="recipe/unit-testing.cake" target="content" />
 		<file src="recipe/versioning.cake" target="content" />
-		<file src="recipe/zip-package.cake" target="content" />
 	</files>
 
 </package>

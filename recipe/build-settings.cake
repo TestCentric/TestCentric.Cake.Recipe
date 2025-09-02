@@ -32,7 +32,8 @@ public static class BuildSettings
 		// Verbosity
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
-		bool chocolateyVerbosity = false )
+		bool chocolateyVerbosity = false,
+		GitVersionVerbosity gitVersionVerbosity = GitVersionVerbosity.Normal )
 	{
 		// Required arguments
 		Context = context;
@@ -82,6 +83,8 @@ public static class BuildSettings
 
 		NuGetVerbosity = nugetVerbosity;
 		ChocolateyVerbosity = chocolateyVerbosity;
+
+		GitVersionVerbosity = gitVersionVerbosity;
 
 		// Skip remaining initialization if help was requested
 		if (CommandLineOptions.Target.Value == "Help")
@@ -187,6 +190,7 @@ public static class BuildSettings
 	public static string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
 	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
 	public static bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
+	public static GitVersionVerbosity GitVersionVerbosity { get; private set; }
 
 	// Standard Directory Structure - not changeable by user
 	public static string ProjectDirectory => Context.Environment.WorkingDirectory.FullPath + "/";
@@ -194,19 +198,8 @@ public static class BuildSettings
 	public static string OutputDirectory                => ProjectDirectory + BIN_DIR + Configuration + "/";
 	public static string NuGetDirectory                 => ProjectDirectory + NUGET_DIR;
 	public static string ChocolateyDirectory            => ProjectDirectory + CHOCO_DIR;
-	public static string ZipDirectory                   => ProjectDirectory + ZIP_DIR;
 	public static string PackageDirectory               => ProjectDirectory + PACKAGE_DIR;
 	public static string PackageTestDirectory           => ProjectDirectory + PKG_TEST_DIR;
-	public static string NuGetTestDirectory             => ProjectDirectory + NUGET_TEST_DIR;
-	public static string ChocolateyTestDirectory        => ProjectDirectory + CHOCO_TEST_DIR;
-	public static string ZipTestDirectory               => ProjectDirectory + ZIP_TEST_DIR;
-	public static string PackageResultDirectory         => ProjectDirectory + PKG_RSLT_DIR;
-	public static string NuGetResultDirectory           => ProjectDirectory + NUGET_RSLT_DIR;
-	public static string ChocolateyResultDirectory      => ProjectDirectory + CHOCO_RSLT_DIR;
-	public static string ZipResultDirectory             => ProjectDirectory + ZIP_RSLT_DIR;
-	public static string ZipImageDirectory              => ProjectDirectory + ZIP_IMG_DIR;
-	public static string NuGetTestRunnerDirectory		=> ProjectDirectory + NUGET_RUNNER_DIR;
-	public static string ChocolateyTestRunnerDirectory	=> ProjectDirectory + CHOCO_RUNNER_DIR;
 	public static string LocalPackagesDirectory			=> ProjectDirectory + LOCAL_PACKAGES_DIR;
 	public static string ToolsDirectory                 => ProjectDirectory + TOOLS_DIR;
 
@@ -347,10 +340,6 @@ public static class BuildSettings
 		DisplaySetting("NuGet:            ", NuGetDirectory);
 		DisplaySetting("Chocolatey:       ", ChocolateyDirectory);
 		DisplaySetting("Package:          ", PackageDirectory);
-		DisplaySetting("ZipImage:         ", ZipImageDirectory);
-		DisplaySetting("ZipTest:          ", ZipTestDirectory);
-		DisplaySetting("NuGetTest:        ", NuGetTestDirectory);
-		DisplaySetting("ChocolateyTest:   ", ChocolateyTestDirectory);
 		DisplaySetting("LocalPackages:    ", LocalPackagesDirectory);
 
 		DisplayHeading("BUILD");

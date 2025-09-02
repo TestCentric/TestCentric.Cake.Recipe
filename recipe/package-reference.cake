@@ -77,7 +77,7 @@ public class PackageReference
 
 	public void InstallExtension(PackageDefinition targetPackage)
 	{
-		Install(targetPackage.ExtensionInstallDirectory);
+		Install(targetPackage.PackageTestDirectory);
 	}
 
 	public void Install(string installDirectory)
