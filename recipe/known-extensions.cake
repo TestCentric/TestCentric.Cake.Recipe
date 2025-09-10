@@ -9,7 +9,7 @@ public static class KnownExtensions
 	public static ExtensionSpecifier VSProjectLoader = new ExtensionSpecifier(
 		"NUnit.Extension.VSProjectLoader", "nunit-extension-vs-project-loader", "3.9.0");
 	public static ExtensionSpecifier NUnitV2ResultWriter = new ExtensionSpecifier(
-		"NUnit.Extension.NUnitV2ResultWriter", "nunit-extension-nunit-v2-result-writer", "3.7.0");
+		"NUnit.Extension.NUnitV2ResultWriter", "nunit-extension-nunit-v2-result-writer", "4.0.0-alpha.9");
 	public static ExtensionSpecifier Net20PluggableAgent = new ExtensionSpecifier(
 		"NUnit.Extension.Net20PluggableAgent", "nunit-extension-net20-pluggable-agent", "2.2.0");
 	public static ExtensionSpecifier Net462PluggableAgent = new ExtensionSpecifier(
