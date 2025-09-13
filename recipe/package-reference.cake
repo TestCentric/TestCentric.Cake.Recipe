@@ -89,7 +89,8 @@ public class PackageReference
 			var packageSources = new []
 			{
 				BuildSettings.LocalPackagesDirectory,
-				"https://www.myget.org/F/testcentric/api/v3/index.json",
+                "https://www.myget.org/F/testcentric/api/v3/index.json",
+                "https://www.myget.org/F/nunit/api/v3/index.json",
 				"https://api.nuget.org/v3/index.json",
 				"https://community.chocolatey.org/api/v2/"
 			};
