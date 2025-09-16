@@ -218,7 +218,7 @@ public static class BuildSettings
 	};
 
 	public static bool ShouldAddToLocalFeed =>
-		IsLocalBuild
+		IsLocalBuild && SIO.Directory.Exists(LocalPackagesDirectory)
 			? !IsPreRelease || LABELS_WE_ADD_TO_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel)
 			: false;
 
