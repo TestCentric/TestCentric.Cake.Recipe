@@ -196,7 +196,8 @@ public abstract class PackageDefinition
                 // Dependencies may be in any of these
                 BuildSettings.LocalPackagesDirectory,
 			    "https://www.myget.org/F/testcentric/api/v3/index.json",
-			    "https://api.nuget.org/v3/index.json" },
+                "https://www.myget.org/F/nunit/api/v3/index.json",
+                "https://api.nuget.org/v3/index.json" },
             Version = PackageVersion,
             OutputDirectory = PackageInstallDirectory,
             //ExcludeVersion = true,
