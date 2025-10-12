@@ -24,7 +24,6 @@
 		<file src="LICENSE.txt" />
 		<file src="README.md" />
 		<file src="testcentric.png" />
-		<file src="recipe/*.cake" target="content" />
 		<file src="recipe/agent-factory.cake" target="content" />
 		<file src="recipe/banner.cake" target="content" />
 		<file src="recipe/build-settings.cake" target="content" />
@@ -34,10 +33,10 @@
 		<file src="recipe/console-reporter.cake" target="content" />
 		<file src="recipe/constants.cake" target="content" />
 		<file src="recipe/dotnet-tool-package.cake" target="content" />
+		<file src="recipe/extension-specifier.cake" target="content" />
 		<file src="recipe/gui-runner.cake" target="content" />
 		<file src="recipe/headers.cake" target="content" />
 		<file src="recipe/help-messages.cake" target="content" />
-		<file src="recipe/known-extensions.cake" target="content" />
 		<file src="recipe/nuget-package.cake" target="content" />
 		<file src="recipe/package-checks.cake" target="content" />
 		<file src="recipe/package-content.cake" target="content" />

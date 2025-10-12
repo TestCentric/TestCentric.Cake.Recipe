@@ -28,7 +28,7 @@ BuildSettings.Packages.Add(
 				"agent-factory.cake", "banner.cake", "build-settings.cake", "builder.cake",
 				"chocolatey-package.cake", "command-line-options.cake", "console-reporter.cake",
 				"constants.cake", "dotnet-tool-package.cake", "gui-runner.cake", "headers.cake",
-				"help-messages.cake", "known-extensions.cake", "nuget-package.cake", "package-checks.cake",
+				"help-messages.cake", "extension-specifier.cake", "nuget-package.cake", "package-checks.cake",
 				"package-content.cake", "package-definition.cake", "package-reference.cake",
 				"package-test.cake", "publishing.cake", "recipe-package.cake", "recipe.cake",
 				"setup.cake", "task-builders.cake", "task-definitions.cake", "test-reports.cake",
