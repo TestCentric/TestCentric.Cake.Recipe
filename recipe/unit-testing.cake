@@ -15,7 +15,7 @@ public static class UnitTesting
 
     public static void RunAllTests()
     {
-		var unitTests = FindUnitTestFiles(BuildSettings.UnitTests);
+        var unitTests = FindUnitTestFiles(BuildSettings.UnitTests);
 
         _context.Information($"Located {unitTests.Count} unit test assemblies.");
     
@@ -48,6 +48,8 @@ public static class UnitTesting
 
 		if (result.OverallResult == "Failed")
 			throw new System.Exception("There were test failures or errors. See listing.");
+
+        Console.WriteLine("Unit Test Run Completed");
 
         static bool IsValidRuntime(string text)
         {

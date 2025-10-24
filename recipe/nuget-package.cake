@@ -88,7 +88,6 @@ public class NuGetPackage : PackageDefinition
 		        Id = PackageId,
                 Version = PackageVersion,
                 Title = PackageTitle ?? PackageId,
-                //Summary = PackageSummary, // Deprecated
                 Description = PackageDescription,
                 ReleaseNotes = ReleaseNotes,
                 Tags = Tags,
@@ -99,12 +98,10 @@ public class NuGetPackage : PackageDefinition
                 Repository = new NuGetRepository() { Type="Git", Url=repositoryUrl },
                 // Common to all packages
                 Authors = TESTCENTRIC_PACKAGE_AUTHORS,
-		        //Owners = TESTCENTRIC_PACKAGE_OWNERS, // Deprecated by NuGet
 		        Copyright = TESTCENTRIC_COPYRIGHT,
 		        ProjectUrl = new Uri(TESTCENTRIC_PROJECT_URL),
 		        License = TESTCENTRIC_LICENSE,
 		        RequireLicenseAcceptance = false,
-		        //IconUrl = new Uri(TESTCENTRIC_ICON_URL), // Deprecated
 		        Icon = TESTCENTRIC_ICON,
 		        Language = "en-US",
                 NoPackageAnalysis = true,

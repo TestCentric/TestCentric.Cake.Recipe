@@ -12,7 +12,7 @@ public class ChocolateyPackage : PackageDefinition
     /// <param name="source">A string representing the source used to create the package, e.g. a nuspec file</param>
     /// <param name="basePath">Path used in locating binaries for the package</param>
     /// <param name="testRunner">A TestRunner instance used to run package tests.</param>
-    /// <param name="extraTestArguments>Additional arguments passed to the test runner.</param<
+    /// <param name="extraTestArguments>Additional arguments passed to the test runner.</param>
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>

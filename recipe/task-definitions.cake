@@ -218,11 +218,14 @@ BuildTasks.PublishToLocalFeedTask = Task("PublishToLocalFeed")
 	or for a final release. If not, or if the --nopush option was used,
 	a message is displayed.
 	""")
+	.WithCriteria(() => BuildSettings.IsLocalBuild)
     .Does(() =>	{
 		if (!BuildSettings.ShouldAddToLocalFeed)
 			Information("Nothing to add to local feed from this run.");
-		else
-			foreach(var package in BuildSettings.Packages)
+        else if (!SIO.Directory.Exists(BuildSettings.LocalPackagesDirectory))
+            throw new Exception("Local packages directory not found");
+        else
+            foreach (var package in BuildSettings.Packages)
 				if (package.PackageType == PackageType.NuGet || package.PackageType == PackageType.Chocolatey)
 					package.AddPackageToLocalFeed();
 	});

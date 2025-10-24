@@ -99,8 +99,10 @@ public static class BuildSettings
 			context.Warning($"  SolutionFile: '{SolutionFile}'");
 		context.Information($"  PackageTestLevel: {PackageTestLevel}");
 
+        LocalPackagesDirectory = FindLocalPackagesDirectory() ?? ProjectDirectory + $"../{LOCAL_PACKAGES_DIR}";
+        
 		// Keep this last
-		if (IsRunningOnAppVeyor)
+        if (IsRunningOnAppVeyor)
 		{
 			var buildNumber = _buildSystem.AppVeyor.Environment.Build.Number;
 			_buildSystem.AppVeyor.UpdateBuildVersion($"{PackageVersion}-{buildNumber}");
@@ -121,7 +123,19 @@ public static class BuildSettings
 		return null;
 	}
 
-	private static int CalcPackageTestLevel()
+    private static string FindLocalPackagesDirectory()
+    {
+        for (var dir = new DirectoryInfo(ProjectDirectory); dir != null; dir = dir.Parent)
+        {
+            string candidate = SIO.Path.Combine(dir.FullName, "LocalPackages");
+            if (SIO.Directory.Exists(candidate))
+                return candidate;
+        }
+
+        return null;
+    }
+
+    private static int CalcPackageTestLevel()
 	{
 		if (!BuildVersion.IsPreRelease)
 			return 3;
@@ -242,8 +256,8 @@ public static class BuildSettings
 	public static string ChocolateyDirectory            => ProjectDirectory + CHOCO_DIR;
 	public static string PackageDirectory               => ProjectDirectory + PACKAGE_DIR;
 	public static string PackageTestDirectory           => ProjectDirectory + PKG_TEST_DIR;
-	public static string LocalPackagesDirectory			=> ProjectDirectory + LOCAL_PACKAGES_DIR;
 	public static string ToolsDirectory                 => ProjectDirectory + TOOLS_DIR;
+	public static string LocalPackagesDirectory {  get; private set; }
 
 	// Files
 	public static string SolutionFile { get; set; }

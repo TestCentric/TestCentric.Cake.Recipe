@@ -29,9 +29,7 @@ const string CHOCO_DIR			= "choco/";
 const string PACKAGE_DIR		= "packages/";
 const string PKG_TEST_DIR		= "packages/tests/";
 const string TOOLS_DIR			= "tools/";
-
-const string LOCAL_PACKAGES_DIR	= "../LocalPackages";
-private static readonly string[] LABELS_WE_ADD_TO_LOCAL_FEED = { "dev", "alpha", "beta", "rc" };
+const string LOCAL_PACKAGES_DIR	= "LocalPackages/";
 
 // WARNING: When comparing versions, it's important to keep in mind some anomalies.
 // For example, new Version(6,0) is NOT equal to new Version(6,0,0). Instead the
@@ -69,6 +67,7 @@ private static readonly string[] LABELS_WE_PUBLISH_ON_MYGET = { "dev", "alpha", 
 private static readonly string[] LABELS_WE_PUBLISH_ON_NUGET = { "alpha", "beta", "rc" };
 private static readonly string[] LABELS_WE_PUBLISH_ON_CHOCOLATEY = { "alpha", "beta", "rc" };
 private static readonly string[] LABELS_WE_RELEASE_ON_GITHUB = { "alpha", "beta", "rc" };
+private static readonly string[] LABELS_WE_ADD_TO_LOCAL_FEED = { "dev", "alpha", "beta", "rc" };
 
 // Common values used in all TestCentric packages
 static readonly string[] TESTCENTRIC_PACKAGE_AUTHORS = new[] { "Charlie Poole" };

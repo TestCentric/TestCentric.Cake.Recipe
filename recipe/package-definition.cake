@@ -21,11 +21,11 @@ public abstract class PackageDefinition
     /// <param name="basePath">Path used in locating binaries for the package</param>
     /// <param name="testRunner">A TestRunner instance used to run package tests.</param>
     /// <param name="testRunnerSource">A TestRunnerSource instance used to provide runners for package tests.</param>
-    /// <param name="extraTestArguments>Additional arguments passed to the test runner.</param<
+    /// <param name="extraTestArguments>Additional arguments passed to the test runner.</param>
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
     /// <param name="tests">A collection of PackageTests to be run against the package. Optional.</param>
-    /// <param name="preloadedExtensions">An array of PackgaeReferences indicating extensions to be preinstalled before running tests. Optional.</param>
+    /// <param name="preloadedExtensions">An array of PackageReferences indicating extensions to be preinstalled before running tests. Optional.</param>
 	protected PackageDefinition(
 		PackageType packageType,
 		string id,
