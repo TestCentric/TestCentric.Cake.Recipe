@@ -111,35 +111,6 @@ public abstract class InstallableTestRunner : TestRunner
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// TEST RUNNER SOURCE
-/////////////////////////////////////////////////////////////////////////////
-
-/// <Summary>
-/// TestRunnerSource is a provider of TestRunners. It is used when the tests
-/// are to be run under multiple TestRunners rather than just one.
-/// </Summary>
-public class TestRunnerSource
-{
-	public TestRunnerSource(TestRunner runner1, params TestRunner[] moreRunners)
-	{
-		AllRunners.Add(runner1);
-		AllRunners.AddRange(moreRunners);
-	}
-
-	public List<TestRunner> AllRunners { get; } = new List<TestRunner>();
-
-	public IEnumerable<IUnitTestRunner> UnitTestRunners
-	{
-		get { foreach(var runner in AllRunners.Where(r => r is IUnitTestRunner)) yield return (IUnitTestRunner)runner; }
-	}
-
-	public IEnumerable<IPackageTestRunner> PackageTestRunners
-	{
-		get { foreach(var runner in AllRunners.Where(r => r is IPackageTestRunner)) yield return (IPackageTestRunner)runner; }
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // NUNITLITE RUNNER
 /////////////////////////////////////////////////////////////////////////////
 

@@ -20,7 +20,6 @@ public abstract class PackageDefinition
     /// <param name="source">A string representing the source used to create the package, e.g. a nuspec file</param>
     /// <param name="basePath">Path used in locating binaries for the package</param>
     /// <param name="testRunner">A TestRunner instance used to run package tests.</param>
-    /// <param name="testRunnerSource">A TestRunnerSource instance used to provide runners for package tests.</param>
     /// <param name="extraTestArguments>Additional arguments passed to the test runner.</param>
     /// <param name="checks">An array of PackageChecks be made on the content of the package. Optional.</param>
     /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
@@ -37,7 +36,6 @@ public abstract class PackageDefinition
         string[] releaseNotes = null,
         string[] tags = null,
         IPackageTestRunner testRunner = null,
-        TestRunnerSource testRunnerSource = null,
         string extraTestArguments = null,
 		PackageCheck[] checks = null,
 		PackageCheck[] symbols = null,
@@ -45,10 +43,8 @@ public abstract class PackageDefinition
         PackageReference[] preloadedExtensions = null,
         PackageContent packageContent = null )
 	{
-        if (testRunner == null && testRunnerSource == null && tests != null)
-            throw new System.InvalidOperationException($"Unable to create {packageType} package {id}: TestRunner or TestRunnerSource must be provided if there are tests.");
-        if (testRunner != null && testRunnerSource != null)
-            throw new System.InvalidOperationException($"Unable to create {packageType} package {id}: Either TestRunner or TestRunnerSource must be provided, but not both.");
+        if (testRunner == null && tests != null)
+            throw new System.InvalidOperationException($"Unable to create {packageType} package {id}: TestRunner must be provided if there are tests.");
 
         _context = BuildSettings.Context;
 
@@ -63,7 +59,6 @@ public abstract class PackageDefinition
         ReleaseNotes = releaseNotes;
         Tags = tags ?? new [] { "testcentric" };
 		TestRunner = testRunner;
-        TestRunnerSource = testRunnerSource;
         ExtraTestArguments = extraTestArguments;
 		PackageChecks = checks;
 		SymbolChecks = symbols;
@@ -78,7 +73,6 @@ public abstract class PackageDefinition
 	public string PackageSource { get; }
     public string BasePath { get; }
     public IPackageTestRunner TestRunner { get; protected set; }
-    public TestRunnerSource TestRunnerSource { get; }
     public string PackageTitle { get; }
     public string PackageSummary { get; }
     public string PackageDescription { get; }
@@ -247,12 +241,10 @@ public abstract class PackageDefinition
         foreach(PackageReference package in PreLoadedExtensions)
             package.Install(PackageTestDirectory);
 
-        // Package was defined with either a TestRunnerSource or a single TestRunner. In either
-        // case, these will all be package test runners and may or may not require installation.
-        var defaultRunners = TestRunnerSource ?? new TestRunnerSource((TestRunner)TestRunner);
-
-        // Preinstall all runners requiring installation
-        InstallRunners(defaultRunners.PackageTestRunners);
+        // Preinstall the TestRunner if required
+        var installableTestRunner = TestRunner as InstallableTestRunner;
+        if (installableTestRunner is not null)
+            InstallRunner(installableTestRunner);
 
         foreach (var packageTest in PackageTests)
         {
@@ -260,7 +252,6 @@ public abstract class PackageDefinition
                 continue;
 
             InstallExtensions(packageTest.ExtensionsNeeded);
-            InstallRunners(packageTest.TestRunners);
 
             var testResultDir = $"{PackageResultDirectory}/{packageTest.Name}/";
             var resultFile = testResultDir + "TestResult.xml";
@@ -303,14 +294,6 @@ public abstract class PackageDefinition
     {
         foreach (ExtensionSpecifier extension in extensionsNeeded)
             extension.InstallExtension(this);
-    }
-
-    private void InstallRunners(IEnumerable<IPackageTestRunner> runners)
-    {
-        // Install any runners needing installation
-        foreach (var runner in runners)
-            if (runner is InstallableTestRunner)
-                InstallRunner((InstallableTestRunner)runner);
     }
 
     private void InstallRunner(InstallableTestRunner runner)

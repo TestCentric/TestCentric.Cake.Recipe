@@ -6,7 +6,6 @@ public class DotNetToolPackage : NuGetPackage
         string source, 
         string basePath = null,
         IPackageTestRunner testRunner = null,
-        TestRunnerSource testRunnerSource = null,
         PackageCheck[] checks = null, 
         PackageCheck[] symbols = null, 
         IEnumerable<PackageTest> tests = null)
@@ -15,7 +14,6 @@ public class DotNetToolPackage : NuGetPackage
         source, 
         basePath: basePath,
         testRunner: testRunner, 
-        testRunnerSource: testRunnerSource,
         checks: checks, 
         symbols: symbols, 
         tests: tests)

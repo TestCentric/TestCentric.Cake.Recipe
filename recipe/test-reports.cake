@@ -69,7 +69,8 @@ public class PackageTestReport
 		Result = null;
 		Errors = new List<string>();
 		Errors.Add($"     {ex.Message}");
-		Runner = runner;
+		Warnings = new List<string>();
+        Runner = runner;
 	}
 
 	public void Display(int index, TextWriter writer)
