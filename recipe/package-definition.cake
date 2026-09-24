@@ -184,17 +184,8 @@ public abstract class PackageDefinition
     {
         var installSettings = new NuGetInstallSettings
         {
-            Source = new[] {
-                // Package will be found here
-                BuildSettings.PackageDirectory,
-                // Dependencies may be in any of these
-                BuildSettings.LocalPackagesDirectory,
-                "https://www.myget.org/F/testcentric/api/v3/index.json",
-                "https://www.myget.org/F/nunit/api/v3/index.json",
-                "https://api.nuget.org/v3/index.json" },
             Version = PackageVersion,
             OutputDirectory = PackageInstallDirectory,
-            //ExcludeVersion = true,
             Prerelease = true,
             Verbosity = BuildSettings.NuGetVerbosity
         };
