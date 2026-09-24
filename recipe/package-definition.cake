@@ -141,6 +141,9 @@ public abstract class PackageDefinition
         Banner.Display($"Building {PackageFileName}");
         BuildPackage();
 
+        Banner.Display($"Adding {PackageFileName} to local feed");
+        AddPackageToLocalFeed();
+
         Banner.Display($"Installing {PackageFileName}");
         InstallPackage();
 
@@ -152,6 +155,7 @@ public abstract class PackageDefinition
 
         if (SymbolChecks != null)
         {
+            Banner.Display($"Verifying symbols for {PackageFileName}");
             // TODO: Override this in NuGetPackage
             VerifySymbolPackage();
         }
@@ -184,19 +188,11 @@ public abstract class PackageDefinition
     {
         var installSettings = new NuGetInstallSettings
         {
-            Source = new[] {
-                // Package will be found here
-                BuildSettings.PackageDirectory,
-                // Dependencies may be in any of these
-                BuildSettings.LocalPackagesDirectory,
-                "https://www.myget.org/F/testcentric/api/v3/index.json",
-                "https://www.myget.org/F/nunit/api/v3/index.json",
-                "https://api.nuget.org/v3/index.json" },
             Version = PackageVersion,
             OutputDirectory = PackageInstallDirectory,
-            //ExcludeVersion = true,
             Prerelease = true,
-            Verbosity = BuildSettings.NuGetVerbosity
+            Verbosity = BuildSettings.NuGetVerbosity,
+            ArgumentCustomization = args => args.Append("-NoHttpCache")
         };
 
         _context.NuGetInstall(PackageId, installSettings);
