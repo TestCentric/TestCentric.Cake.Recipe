@@ -273,6 +273,24 @@ public static class BuildSettings
 		AllowPreviewVersion = MSBuildAllowPreviewVersion
 	};
 
+	public static DotNetBuildSettings DotNetBuildSettings => new DotNetBuildSettings
+	{
+		Configuration = Configuration,
+		NoRestore = true,
+		Verbosity = DotNetVerbosity.Minimal,
+		MSBuildSettings = new DotNetMSBuildSettings
+		{
+			BinaryLogger = new MSBuildBinaryLoggerSettings
+			{
+				Enabled = true,
+				FileName = "build-results/NUnitConsole.binlog",
+				Imports = MSBuildBinaryLoggerImports.Embed
+			}
+		}
+		.WithProperty("Version", PackageVersion)
+		.WithProperty("GenerateResourceUsePreserializedResources", "true")
+	};
+
 	public static bool ShouldAddToLocalFeed =>
 		IsLocalBuild && SIO.Directory.Exists(LocalPackagesDirectory)
 			? !IsPreRelease || LABELS_WE_ADD_TO_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel)

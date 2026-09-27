@@ -92,7 +92,7 @@ BuildTasks.RestoreTask = Task("Restore")
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.Does(() =>
 	{
-		NuGetRestore(BuildSettings.SolutionFile, BuildSettings.RestoreSettings);
+        DotNetRestore(BuildSettings.SolutionFile);
 	});
 
 
@@ -109,7 +109,7 @@ BuildTasks.BuildTask = Task("Build")
         """)
 	.Does(() =>
 	{
-		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings.WithProperty("Version", BuildSettings.PackageVersion));
+        DotNetBuild(BuildSettings.SolutionFile, BuildSettings.DotNetBuildSettings);
 	});
 
 //////////////////////////////////////////////////////////////////////
