@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration: https://docs.coderabbit.ai/reference/configuration
+# Project conventions live in AGENTS.md, which CodeRabbit reads as code guidelines.
+
+language: en-US
+
+reviews:
+  profile: chill
+  poem: false
+  in_progress_fortune: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+
+  pre_merge_checks:
+    # The project does not require XML docs on every member, so this check
+    # only produced warnings on ordinary PRs.
+    docstrings:
+      mode: "off"
+
+  path_instructions:
+    - path: "**/*.cake"
+      instructions: |
+        Cake build scripts. build.cake loads the cake files in the recipe directory.
+        Cake is a C#-based build automation system and the code may be treated as such.
+        See https://cakebuild.net/ for more information.

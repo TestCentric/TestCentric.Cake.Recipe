@@ -32,8 +32,7 @@ public static class BuildSettings
 		// Verbosity
 		Verbosity msbuildVerbosity = Verbosity.Minimal,
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
-		bool chocolateyVerbosity = false,
-		GitVersionVerbosity gitVersionVerbosity = GitVersionVerbosity.Normal )
+		bool chocolateyVerbosity = false )
 	{
 		// Required arguments
 		Context = context;
@@ -83,8 +82,6 @@ public static class BuildSettings
 
 		NuGetVerbosity = nugetVerbosity;
 		ChocolateyVerbosity = chocolateyVerbosity;
-
-		GitVersionVerbosity = gitVersionVerbosity;
 
 		// Skip remaining initialization if help was requested
 		if (CommandLineOptions.Target.Value == "Help")
@@ -140,8 +137,7 @@ public static class BuildSettings
 		if (!BuildVersion.IsPreRelease)
 			return 3;
 
-		// TODO: The prerelease label is no longer being set to pr by GitVersion
-		// for some reason. This check is a workaround.
+		// The version label doesn't show whether this is a pull request, so ask the CI system.
 		if (IsRunningOnAppVeyor && _buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest)
 			return 2;
 		if (IsRunningOnGitHubActions && _buildSystem.GitHubActions.Environment.PullRequest.IsPullRequest)
@@ -197,14 +193,17 @@ public static class BuildSettings
     // Versioning
     public static string RecipeVersion { get; private set; }
     public static BuildVersion BuildVersion { get; private set; }
-	public static string BranchName => BuildVersion.BranchName;
-	public static bool IsReleaseBranch => BuildVersion.IsReleaseBranch;
+	// BranchName is "(no branch)" when HEAD is detached, as in pull request and tag builds on CI.
+	public static string BranchName => Context.GitBranchCurrent(ProjectDirectory).FriendlyName;
+	public static bool IsMainBranch => BranchName == "main";
+	public static bool IsReleaseBranch => BranchName.StartsWith("release-");
+	// The exact tag on HEAD, or a "describe" string like 2.0.0-beta.1-3-gabc1234 if HEAD isn't tagged
+	public static string BranchTag => Context.GitDescribe(ProjectDirectory, GitDescribeStrategy.Tags);
 	public static string PackageVersion => BuildVersion.PackageVersion;
 	public static string AssemblyVersion => BuildVersion.AssemblyVersion;
 	public static string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
 	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
 	public static bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
-	public static GitVersionVerbosity GitVersionVerbosity { get; private set; }
 
     // Chocolatey.org does not yet support semver 2.0, so we have to use a legacy format
     private static string _chocolateyPackageVersion;
@@ -273,6 +272,24 @@ public static class BuildSettings
 		AllowPreviewVersion = MSBuildAllowPreviewVersion
 	};
 
+	public static DotNetBuildSettings DotNetBuildSettings => new DotNetBuildSettings
+	{
+		Configuration = Configuration,
+		NoRestore = true,
+		Verbosity = DotNetVerbosity.Minimal,
+		MSBuildSettings = new DotNetMSBuildSettings
+		{
+			BinaryLogger = new MSBuildBinaryLoggerSettings
+			{
+				Enabled = true,
+				FileName = "build-results/NUnitConsole.binlog",
+				Imports = MSBuildBinaryLoggerImports.Embed
+			}
+		}
+		.WithProperty("Version", PackageVersion)
+		.WithProperty("GenerateResourceUsePreserializedResources", "true")
+	};
+
 	public static bool ShouldAddToLocalFeed =>
 		IsLocalBuild && SIO.Directory.Exists(LocalPackagesDirectory)
 			? !IsPreRelease || LABELS_WE_ADD_TO_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel)
@@ -325,15 +342,25 @@ public static class BuildSettings
 	public static string GitHubRepository { get; set; }
 	public static string GitHubAccessToken => GetApiKey(GITHUB_ACCESS_TOKEN);
 
+	// Publishing policy
+	// * Only builds of main publish anything.
+	// * MyGet takes every main build with a label we publish there, including fractional
+	//   pre-releases such as 2.0.0-dev00002.3, which MinVer makes unique.
+	// * NuGet, Chocolatey and GitHub releases need a commit tagged with exactly the package
+	//   version, and never take fractional pre-releases.
+	// Pushing a tag alone publishes nothing: the tag build has no branch. Run a build of
+	// main after tagging its head.
 	public static bool IsPreRelease => BuildVersion.IsPreRelease;
-	public static bool ShouldPublishToMyGet =>
-		!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel);
-	public static bool ShouldPublishToNuGet =>
-		!IsPreRelease || LABELS_WE_PUBLISH_ON_NUGET.Contains(BuildVersion.PreReleaseLabel);
-	public static bool ShouldPublishToChocolatey =>
-		!IsPreRelease || LABELS_WE_PUBLISH_ON_CHOCOLATEY.Contains(BuildVersion.PreReleaseLabel);
-	public static bool IsProductionRelease =>
-		!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel);
+	public static bool IsFractionalPreRelease => BuildVersion.IsFractionalPreRelease;
+	public static bool IsTaggedRelease => PackageVersion == BranchTag;
+	public static bool ShouldPublishToMyGet => IsMainBranch &&
+		(!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel));
+	public static bool ShouldPublishToNuGet => IsMainBranch && IsTaggedRelease &&
+		(!IsPreRelease || LABELS_WE_PUBLISH_ON_NUGET.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
+	public static bool ShouldPublishToChocolatey => IsMainBranch && IsTaggedRelease &&
+		(!IsPreRelease || LABELS_WE_PUBLISH_ON_CHOCOLATEY.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
+	public static bool IsProductionRelease => IsMainBranch && IsTaggedRelease &&
+		(!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
 
 	private static void ValidateSettings()
 	{
@@ -430,13 +457,17 @@ public static class BuildSettings
 		DisplaySetting("ShouldPublishToNuGet:      ", ShouldPublishToNuGet);
 		DisplaySetting("  NuGetPushUrl:            ", NuGetPushUrl);
 		DisplaySetting("  NuGetApiKey:             ", KeyAvailable(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY));
-		DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToNuGet);
-		DisplaySetting("  ChocolateyPushUrl:       ", NuGetPushUrl);
+		DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToChocolatey);
+		DisplaySetting("  ChocolateyPushUrl:       ", ChocolateyPushUrl);
 		DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY));
 
 		DisplayHeading("\nRELEASING");
 		DisplaySetting("BranchName:             ", BranchName);
+		DisplaySetting("IsMainBranch:           ", IsMainBranch);
 		DisplaySetting("IsReleaseBranch:        ", IsReleaseBranch);
+		DisplaySetting("BranchTag:              ", BranchTag);
+		DisplaySetting("IsTaggedRelease:        ", IsTaggedRelease);
+		DisplaySetting("IsFractionalPreRelease: ", IsFractionalPreRelease);
 		DisplaySetting("IsProductionRelease:    ", IsProductionRelease);
 		DisplaySetting("GitHubAccessToken:      ", KeyAvailable(GITHUB_ACCESS_TOKEN));
 	}
