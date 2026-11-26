@@ -130,7 +130,7 @@ public static class PackageReleaseManager
 			CommandLineOptions.PackageVersion.Exists
 				? CommandLineOptions.PackageVersion.Value
 				: BuildSettings.IsReleaseBranch
-					? BuildSettings.BuildVersion.BranchName.Substring(8)
+					? BuildSettings.BranchName.Substring(8)
 					: localDirectCall && BuildSettings.IsProductionRelease
 						? BuildSettings.PackageVersion : null;
 

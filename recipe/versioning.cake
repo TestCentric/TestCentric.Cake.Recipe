@@ -1,33 +1,18 @@
-using System.Text.RegularExpressions;
+// Versions are calculated by MinVer from the most recent tag reachable from HEAD.
+// For example, after tag 2.0.0-beta.1, the next commit builds as 2.0.0-beta.1.1
+// and the one after as 2.0.0-beta.1.2, so every build gets a new, higher version.
+// After a final release such as 2.0.0, builds are 2.0.1-alpha.0.1, 2.0.1-alpha.0.2, ...
+// which sort below any 2.0.1-alpha.1 tagged later. A build exactly on a tag uses the tag itself.
 
 public class BuildVersion
 {
-    private ICakeContext _context;
-    // TODO: Get GitVersion to work on Linux
-    private GitVersion _gitVersion;
-
-    // NOTE: This is complicated because (1) the user may have specified 
-    // the package version on the command-line and (2) GitVersion may
-    // or may not be available. We'll work on solving (2) by getting
-    // GitVersion to run for us on Linux, but (1) will alwas remain.
-    //
-    // We simplify things a by figuring out the full package version and
-    // then parsing it to provide information that is used in the build.
     public BuildVersion(ICakeContext context)
     {
-         if (context==null)
+        if (context==null)
             throw new ArgumentNullException(nameof(context));
 
-        _context = context;
-        _gitVersion = context.GitVersion(new GitVersionSettings
-        {
-            Verbosity = BuildSettings.GitVersionVerbosity
-        });
-
-        BranchName = _gitVersion.BranchName;
-        IsReleaseBranch = BranchName.StartsWith("release-");
-
-        string packageVersion = CommandLineOptions.PackageVersion.Value ?? CalculatePackageVersion();
+        // If a specific version is requested on the command line, use it. Otherwise get it from MinVer.
+        string packageVersion = CommandLineOptions.PackageVersion.Value ?? context.MinVer().Version;
 
         int dash = packageVersion.IndexOf('-');
         IsPreRelease = dash > 0;
@@ -59,9 +44,6 @@ public class BuildVersion
         AssemblyInformationalVersion = packageVersion;
     }
 
-    public string BranchName { get; }
-    public bool IsReleaseBranch { get; }
-
     public string PackageVersion { get; }
     public string AssemblyVersion { get; }
     public string AssemblyFileVersion { get; }
@@ -72,63 +54,8 @@ public class BuildVersion
     public string PreReleaseLabel { get; }
     public string PreReleaseSuffix { get; }
 
-    private string CalculatePackageVersion()
-    {
-        string label = _gitVersion.PreReleaseLabel;
-
-        // Non pre-release is easy
-        if (string.IsNullOrEmpty(label))
-            return _gitVersion.MajorMinorPatch;
-
-        string branchName = _gitVersion.BranchName;
-
-        // We don't currently use this pattern, but check in case we do later.
-        if (branchName.StartsWith("feature/"))
-            branchName = branchName.Substring(8);
-
-        // Arbitrary branch names are ci builds
-        if (label == branchName)
-            label = "ci";
-
-        string suffix = "-" + label + _gitVersion.CommitsSinceVersionSource.ToString().PadLeft(5, '0');
-
-        if (label == "ci")
-        {
-            branchName = Regex.Replace(branchName, "[^0-9A-Za-z-]+", "-");
-            suffix += "-" + branchName;
-            // Nuget limits "special version part" to 20 chars. Add one for the hyphen.
-            if (suffix.Length > 21)
-                suffix = suffix.Substring(0, 21);
-            return _gitVersion.MajorMinorPatch + suffix;
-        }
-
-        return _gitVersion.MajorMinorPatch + suffix;
-    }
-
-    string ReplaceAttributeString(string source, string attributeName, string value)
-    {
-        var matches = Regex.Matches(source, $@"\[assembly: {Regex.Escape(attributeName)}\(""(?<value>[^""]+)""\)\]");
-        if (matches.Count != 1) throw new InvalidOperationException($"Expected exactly one line similar to:\r\n[assembly: {attributeName}(\"1.2.3-optional\")]");
-
-        var group = matches[0].Groups["value"];
-        return source.Substring(0, group.Index) + value + source.Substring(group.Index + group.Length);
-    }
-
-    void ReplaceFileContents(string filePath, Func<string, string> update)
-    {
-        using (var file = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-        {
-            string source;
-            using (var reader = new StreamReader(file, new UTF8Encoding(false), true, 4096, leaveOpen: true))
-                source = reader.ReadToEnd();
-
-            var newSource = update.Invoke(source);
-            if (newSource == source) return;
-
-            file.Seek(0, SeekOrigin.Begin);
-            using (var writer = new StreamWriter(file, new UTF8Encoding(false), 4096, leaveOpen: true))
-                writer.Write(newSource);
-            file.SetLength(file.Position);
-        }
-    }
+    // A fractional pre-release has more than one dot in its suffix, like
+    // beta.1.3 or alpha.0.2. These are untagged builds, which we never
+    // publish anywhere but MyGet.
+    public bool IsFractionalPreRelease => PreReleaseSuffix.Count(c => c == '.') > 1;
 }
