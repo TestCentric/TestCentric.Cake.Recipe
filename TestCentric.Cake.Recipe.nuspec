@@ -47,8 +47,7 @@
 		<file src="recipe/recipe-package.cake" target="content" />
 		<file src="recipe/recipe.cake" target="content" />
 		<file src="recipe/setup.cake" target="content" />
-		<file src="recipe/task-builders.cake" target="content" />
-		<file src="recipe/task-definitions.cake" target="content" />
+		<file src="recipe/BuildTasks.cake" target="content" />
 		<file src="recipe/test-reports.cake" target="content" />
 		<file src="recipe/test-results.cake" target="content" />
 		<file src="recipe/test-runners.cake" target="content" />

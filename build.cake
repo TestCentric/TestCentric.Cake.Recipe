@@ -31,7 +31,7 @@ BuildSettings.Packages.Add(
 				"help-messages.cake", "extension-specifier.cake", "nuget-package.cake", "package-checks.cake",
 				"package-content.cake", "package-definition.cake", "package-reference.cake",
 				"package-test.cake", "publishing.cake", "recipe-package.cake", "recipe.cake",
-				"setup.cake", "task-builders.cake", "task-definitions.cake", "test-reports.cake",
+				"setup.cake", "BuildTasks.cake", "test-reports.cake",
 				"test-results.cake", "test-runners.cake", "tools.cake", "unit-testing.cake", "versioning.cake" )
         }
 	) );

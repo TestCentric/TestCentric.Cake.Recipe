@@ -1,9 +1,69 @@
-// This file defines what each of the tasks in the recipe actually does.
+// All tasks incorporated in the recipe are defined using CakeTaskBuilders.
+// The actual specification of criteria, dependencies and actions for each
+// task is done separately in task-definitions.cake.
+//
+// This approach provides a level of indirection, permitting the user to
+// modify or completely redefine what a task does in their build.cake file,
+// without changing the definitions in the recipe.
+
+public static class BuildTasks
+{
+	// Our context - set by setup.cake
+	public static ICakeContext Context { get; set; }
+
+	// General
+	public static CakeTaskBuilder CheckScriptTask { get; set; }
+	public static CakeTaskBuilder DumpSettingsTask { get; set; }
+	public static CakeTaskBuilder DefaultTask {get; set; }
+
+	// Help
+	public static CakeTaskBuilder HelpTask { get; set; }
+
+	// Building
+	public static CakeTaskBuilder BuildTask { get; set; }
+	public static CakeTaskBuilder CheckHeadersTask { get; set; }
+	public static CakeTaskBuilder CleanTask { get; set; }
+	public static CakeTaskBuilder CleanAllTask { get; set; }
+	public static CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
+	public static CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
+	public static CakeTaskBuilder RestoreTask { get; set; }
+
+	// Unit Testing
+	public static CakeTaskBuilder UnitTestTask { get; set; }
+
+	// Packaging
+	public static CakeTaskBuilder PackageTask { get; set; }
+	public static CakeTaskBuilder BuildPackagesTask { get; set; }
+	public static CakeTaskBuilder InstallPackagesTask { get; set; }
+	public static CakeTaskBuilder VerifyPackagesTask { get; set; }
+	public static CakeTaskBuilder TestPackagesTask { get; set; }
+
+	// Publishing
+	public static CakeTaskBuilder PublishTask { get; set; }
+	public static CakeTaskBuilder PublishToLocalFeedTask { get; set; }
+	public static CakeTaskBuilder PublishToMyGetTask { get; set; }
+	public static CakeTaskBuilder PublishToNuGetTask { get; set; }
+	public static CakeTaskBuilder PublishToChocolateyTask { get; set; }
+
+	// Releasing
+	public static CakeTaskBuilder CreateDraftReleaseTask { get; set; }
+	public static CakeTaskBuilder DownloadDraftReleaseTask { get; set; }
+	public static CakeTaskBuilder UpdateReleaseNotesTask { get; set; } 
+	public static CakeTaskBuilder CreateProductionReleaseTask { get; set; }
+
+	// Continuous Integration
+	public static CakeTaskBuilder ContinuousIntegrationTask { get; set; }
+}
+
+// The following statements initialize each of the defined tasks as the file
+// is loaded. They define what each of the tasks in the recipe actually does.
 // You should not change these definitions unless you intend to change
 // the behavior of a task for all projects that use the recipe.
 //
-// To make a change for a single project, you should add code to your build.cake
-// or another project-specific cake file. See extending.cake for examples.
+// To make a change for a single project, you should add code to your
+// build.cake file or another project-specific cake file.
+//
+// See extending.cake for examples.
 
 //////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
