@@ -8,8 +8,8 @@ public class PackageTestReport
 	public PackageTest Test;
 	public ActualResult Result;
 	public ITestRunner Runner;
-	public List<string> Errors;
-	public List<string> Warnings;
+	public List<string> Errors = new List<string>();
+	public List<string> Warnings = new List<string>();
 
 	public PackageTestReport(PackageTest test, ActualResult actualResult, ITestRunner runner = null)
 	{
@@ -19,8 +19,6 @@ public class PackageTestReport
 		Test = test;
 		Result = actualResult;
 		Runner = runner;
-		Errors = new List<string>();
-		Warnings = new List<string>();
 
 		var expectedResult = test.ExpectedResult;
 
