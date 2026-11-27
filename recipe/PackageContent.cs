@@ -6,6 +6,9 @@
 public static partial class Program
 {
 
+/// <summary>
+/// Describes the files a package contains: files at its root and in each of its directories.
+/// </summary>
 public class PackageContent
 {
 	private ICakeContext _context;
@@ -134,6 +137,9 @@ public class PackageContent
 	}
 }
 
+/// <summary>
+/// Describes the files in one directory of a package.
+/// </summary>
 public class DirectoryContent
 {
 	private ICakeContext _context;

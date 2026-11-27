@@ -5,6 +5,9 @@
 
 public static partial class Program
 {
+/// <summary>
+/// The command-line options the recipe recognizes, with their aliases and defaults.
+/// </summary>
 public static class CommandLineOptions
 {
 	static private ICakeContext _context;
@@ -57,7 +60,9 @@ public static class CommandLineOptions
 
 	// Nested classes to represent individual options
 
-	// AbstractOption has a name and can tell us if it exists.
+	/// <summary>
+	/// Base class for a single option. It has a name, and can tell us whether it was given.
+	/// </summary>
 	public abstract class AbstractOption
 	{
 		public List<string> Aliases { get; }
@@ -82,8 +87,10 @@ public static class CommandLineOptions
 		}
 	}
 
-	// Simple Option adds an implicit boolean conversion operator.
-	// It throws an exception if you gave it a value on the command-line.
+	/// <summary>
+	/// Simple Option adds an implicit boolean conversion operator.
+	/// It throws an exception if you gave it a value on the command-line.
+	/// </summary>
 	public class SimpleOption : AbstractOption
 	{
 		static public implicit operator bool(SimpleOption o) => o.Exists;
@@ -97,7 +104,9 @@ public static class CommandLineOptions
 		}
 	}
 
-	// Generic ValueOption adds Value as well as a default value
+	/// <summary>
+	/// Generic ValueOption adds Value as well as a default value
+	/// </summary>
 	public class ValueOption<T> : AbstractOption
 	{
 		public T DefaultValue { get; }
@@ -121,7 +130,9 @@ public static class CommandLineOptions
 		}
 	}
 
-    // Generic MultiValueOption adds Values, which returns a collection of values
+    /// <summary>
+    /// Generic MultiValueOption adds Values, which returns a collection of values
+    /// </summary>
     public class MultiValueOption<T> : ValueOption<T>
     {
 	    public MultiValueOption(string aliases, T defaultValue, string description = null)

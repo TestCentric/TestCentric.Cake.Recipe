@@ -5,8 +5,10 @@
 
 public static partial class Program
 {
-// Displays a banner similar to those created by Cake.
-// We use this to display intermediate steps within a task.
+    /// <summary>
+    /// Displays a banner similar to those created by Cake.
+    /// We use this to display intermediate steps within a task.
+    /// </summary>
     public static void DisplayBanner(string message, char barChar='-', int length=0)
     {
         if (length == 0) length = MaxLineLength(message);

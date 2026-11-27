@@ -5,7 +5,9 @@
 
 public static partial class Program
 {
-// Registers the recipe's Setup action. Called by BuildSettings.Initialize.
+/// <summary>
+/// Registers the recipe's Setup action. Called by BuildSettings.Initialize.
+/// </summary>
 static void DefineSetup()
 {
 Setup((context) =>

@@ -5,10 +5,9 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// CHOCOLATEY PACKAGE DEFINITION
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Defines a Chocolatey package to be built, verified and tested.
+/// </summary>
 public class ChocolateyPackage : PackageDefinition
 {
     /// <summary>

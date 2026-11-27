@@ -5,7 +5,9 @@
 
 public static partial class Program
 {
-// A dotnet tool is packaged using nuget but requires a different installation step
+/// <summary>
+/// A dotnet tool is packaged using nuget but requires a different installation step
+/// </summary>
 public class DotNetToolPackage : NuGetPackage
 {
     public DotNetToolPackage(

@@ -5,7 +5,9 @@
 
 public static partial class Program
 {
-// Representation of a package reference, containing everything needed to install it
+/// <summary>
+/// Representation of a package reference, containing everything needed to install it
+/// </summary>
 public class PackageReference
 {
 	private ICakeContext _context;

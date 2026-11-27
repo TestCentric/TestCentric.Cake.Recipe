@@ -8,6 +8,9 @@ public static partial class Program
 // This file contains classes used to interpret the result XML that is
 // produced by test runs of the GUI.
 
+/// <summary>
+/// Counts of test results, shared by expected and actual results.
+/// </summary>
 public abstract class ResultSummary
 {
 	public string OverallResult { get; set; }
@@ -19,6 +22,9 @@ public abstract class ResultSummary
 	public int Skipped { get; set; }
 }
 
+/// <summary>
+/// The result expected from a package test. Counts left at -1 are not checked.
+/// </summary>
 public class ExpectedResult : ResultSummary
 {
 	public ExpectedResult(string overallResult)
@@ -36,6 +42,9 @@ public class ExpectedResult : ResultSummary
 	public ExpectedAssemblyResult[] Assemblies { get; set; } = new ExpectedAssemblyResult[0];
 }
 
+/// <summary>
+/// An assembly expected in a package test's result, optionally with the agent expected to run it.
+/// </summary>
 public class ExpectedAssemblyResult
 {
 	public ExpectedAssemblyResult(string assemblyName, string agentName = null)
@@ -48,6 +57,9 @@ public class ExpectedAssemblyResult
 	public string AgentName { get; }
 }
 
+/// <summary>
+/// The result of a package test, read from its result XML file.
+/// </summary>
 public class ActualResult : ResultSummary
 {
 	public ActualResult(string resultFile)
@@ -93,6 +105,9 @@ public class ActualResult : ResultSummary
 	}
 }
 
+/// <summary>
+/// An assembly found in a package test's result XML.
+/// </summary>
 public class ActualAssemblyResult
 {
 	public ActualAssemblyResult(XmlNode xml)

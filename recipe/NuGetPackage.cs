@@ -5,13 +5,14 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// NUGET PACKAGE DEFINITION
-//////////////////////////////////////////////////////////////////////
-
-// Users may only instantiate the derived classes, which avoids
-// exposing PackageType and makes it impossible to create a
-// PackageDefinition with an unknown package type.
+/// <summary>
+/// Defines a NuGet package to be built, verified and tested.
+/// </summary>
+/// <remarks>
+/// Users may only instantiate the derived classes, which avoids
+/// exposing PackageType and makes it impossible to create a
+/// PackageDefinition with an unknown package type.
+/// </remarks>
 public class NuGetPackage : PackageDefinition
 {
     /// <summary>

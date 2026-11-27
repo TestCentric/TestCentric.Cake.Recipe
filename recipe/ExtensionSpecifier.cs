@@ -5,10 +5,12 @@
 
 public static partial class Program
 {
-// Representation of an extension, for use by PackageTests. Because our
-// extensions usually exist as both nuget and chocolatey packages, each
-// extension may have a nuget id, a chocolatey id or both. A default version
-// is used unless the user overrides it using SetVersion.
+/// <summary>
+/// Representation of an extension, for use by PackageTests. Because our
+/// extensions usually exist as both nuget and chocolatey packages, each
+/// extension may have a nuget id, a chocolatey id or both. A default version
+/// is used unless the user overrides it using SetVersion.
+/// </summary>
 public class ExtensionSpecifier
 {
 	public ExtensionSpecifier(string nugetId, string chocoId, string version)

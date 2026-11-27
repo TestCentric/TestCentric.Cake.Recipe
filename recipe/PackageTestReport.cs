@@ -5,6 +5,9 @@
 
 public static partial class Program
 {
+/// <summary>
+/// The result of one package test, with any errors and warnings found by comparing it with the expected result.
+/// </summary>
 public class PackageTestReport
 {
 	public PackageTest Test;
@@ -143,6 +146,9 @@ public class PackageTestReport
 	}
 }
 
+/// <summary>
+/// Collects the package test reports for a package and displays a summary of them.
+/// </summary>
 public class ResultReporter
 {
 	private string _packageName;

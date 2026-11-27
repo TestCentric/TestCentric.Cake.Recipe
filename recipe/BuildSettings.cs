@@ -5,10 +5,10 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// BUILD SETTINGS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Settings that control the build. A build script sets them by calling Initialize,
+/// and the rest of the recipe reads them.
+/// </summary>
 public static class BuildSettings
 {
 	private static BuildSystem _buildSystem;

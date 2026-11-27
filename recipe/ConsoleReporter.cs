@@ -5,8 +5,10 @@
 
 public static partial class Program
 {
-// Reports on the output of a GUI test run using a format
-// simiar to that of the NUnit console runner.
+/// <summary>
+/// Reports on the output of a GUI test run using a format
+/// similar to that of the NUnit console runner.
+/// </summary>
 public class ConsoleReporter
 {
     ActualResult _result;

@@ -5,12 +5,13 @@
 
 public static partial class Program
 {
-// Versions are calculated by MinVer from the most recent tag reachable from HEAD.
-// For example, after tag 2.0.0-beta.1, the next commit builds as 2.0.0-beta.1.1
-// and the one after as 2.0.0-beta.1.2, so every build gets a new, higher version.
-// After a final release such as 2.0.0, builds are 2.0.1-alpha.0.1, 2.0.1-alpha.0.2, ...
-// which sort below any 2.0.1-alpha.1 tagged later. A build exactly on a tag uses the tag itself.
-
+/// <summary>
+/// Versions are calculated by MinVer from the most recent tag reachable from HEAD.
+/// For example, after tag 2.0.0-beta.1, the next commit builds as 2.0.0-beta.1.1
+/// and the one after as 2.0.0-beta.1.2, so every build gets a new, higher version.
+/// After a final release such as 2.0.0, builds are 2.0.1-alpha.0.1, 2.0.1-alpha.0.2, ...
+/// which sort below any 2.0.1-alpha.1 tagged later. A build exactly on a tag uses the tag itself.
+/// </summary>
 public class BuildVersion
 {
     public BuildVersion(ICakeContext context)

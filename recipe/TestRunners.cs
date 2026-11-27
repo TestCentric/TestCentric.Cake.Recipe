@@ -5,38 +5,30 @@
 
 public static partial class Program
 {
-/////////////////////////////////////////////////////////////////////////////
-// TEST RUNNER INTERFACES
-/////////////////////////////////////////////////////////////////////////////
-
-/// <Summary>
+/// <summary>
 /// Common interface for all test runners
-/// </Summary>
+/// </summary>
 public interface ITestRunner
 {
 	string PackageId { get; }
 	string Version { get; }
 }
 
-/// <Summary>
+/// <summary>
 /// A runner capable of running unit tests
-/// </Summary>
+/// </summary>
 public interface IUnitTestRunner : ITestRunner
 {
 	int RunUnitTest(FilePath testPath);
 }
 
-/// <Summary>
+/// <summary>
 /// A runner capable of running package tests
-/// </Summary>
+/// </summary>
 public interface IPackageTestRunner : ITestRunner
 {
 	int RunPackageTest(string arguments);
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// ABSTRACT TEST RUNNER
-/////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// The TestRunner class is the abstract base for all TestRunners used to run unit-
@@ -78,9 +70,9 @@ public abstract class TestRunner : ITestRunner
     }
 }
 
-/// <Summary>
+/// <summary>
 /// A TestRunner requiring some sort of installation before use.
-/// </Summary>
+/// </summary>
 public abstract class InstallableTestRunner : TestRunner
 {
 	protected InstallableTestRunner(string packageId, string version)
@@ -117,11 +109,9 @@ public abstract class InstallableTestRunner : TestRunner
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// NUNITLITE RUNNER
-/////////////////////////////////////////////////////////////////////////////
-
-// For NUnitLite tests, the test is run directly
+/// <summary>
+/// Runs NUnitLite unit tests. The test assembly is itself the runner, so it is run directly.
+/// </summary>
 public class NUnitLiteRunner : TestRunner, IUnitTestRunner
 {
 	public int RunUnitTest(FilePath testPath)
@@ -137,12 +127,9 @@ public class NUnitLiteRunner : TestRunner, IUnitTestRunner
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// NUNIT CONSOLE RUNNERS
-/////////////////////////////////////////////////////////////////////////////
-
-// NUnitConsoleRunner is used for both unit and package tests. It must be pre-installed
-// in the tools directory by use of a #tools directive.
+/// <summary>
+/// Runs unit and package tests with the NUnit console runner, which is installed in the tools directory before use.
+/// </summary>
 public class NUnitConsoleRunner : InstallableTestRunner, IUnitTestRunner, IPackageTestRunner
 {
 	protected override FilePath ExecutableRelativePath => "tools/nunit3-console.exe";
@@ -156,6 +143,9 @@ public class NUnitConsoleRunner : InstallableTestRunner, IUnitTestRunner, IPacka
 	public int RunPackageTest(string arguments) => RunTest(ExecutablePath, arguments);
 }
 
+/// <summary>
+/// Runs unit and package tests with the .NET Core build of the NUnit console runner.
+/// </summary>
 public class NUnitNetCoreConsoleRunner : InstallableTestRunner, IUnitTestRunner, IPackageTestRunner
 {
 	protected override FilePath ExecutableRelativePath => "tools/net6.0/nunit3-console.exe";
@@ -168,10 +158,6 @@ public class NUnitNetCoreConsoleRunner : InstallableTestRunner, IUnitTestRunner,
 	// Run a package test
 	public int RunPackageTest(string arguments) => RunTest(ExecutablePath, arguments);
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// AGENT RUNNER
-/////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// Class that knows how to run an agent directly.

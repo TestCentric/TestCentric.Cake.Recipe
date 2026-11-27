@@ -5,6 +5,9 @@
 
 public static partial class Program
 {
+/// <summary>
+/// Defines a NuGet package that contains a Cake recipe.
+/// </summary>
 public class RecipePackage : NuGetPackage
 {
     private IEnumerable<FilePath> _recipeFiles;

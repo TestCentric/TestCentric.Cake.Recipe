@@ -5,10 +5,9 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// UNIT TEST RUNNER
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Runs the project's unit tests, using BuildSettings.UnitTestRunner, or NUnitLite if none is set.
+/// </summary>
 public static class UnitTesting
 {
     static ICakeContext _context;

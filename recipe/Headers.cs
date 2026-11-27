@@ -5,10 +5,10 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Checks that every C# file in BuildSettings.HeaderCheckDirectories starts with the
+/// standard header, and fails the build if any header is missing or different.
+/// </summary>
 public static void CheckHeaders()
     {
         var _context = BuildSettings.Context;

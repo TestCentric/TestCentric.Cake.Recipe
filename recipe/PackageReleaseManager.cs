@@ -5,6 +5,10 @@
 
 public static partial class Program
 {
+/// <summary>
+/// Publishes packages to MyGet, NuGet and Chocolatey, and creates GitHub releases,
+/// following the publishing rules in BuildSettings.
+/// </summary>
 public static class PackageReleaseManager
 {
 	private static ICakeContext _context;

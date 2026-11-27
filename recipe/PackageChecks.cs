@@ -5,10 +5,9 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// SYNTAX FOR EXPRESSING CHECKS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Applies the checks to an installed package, and fails the build if any check fails.
+/// </summary>
 public static void ApplyPackageChecks(DirectoryPath testDirPath, IList<PackageCheck> checks)
 	{
 		if (checks == null)
@@ -22,18 +21,32 @@ public static void ApplyPackageChecks(DirectoryPath testDirPath, IList<PackageCh
         if (!allOK) throw new Exception("Verification failed!");
     }
 
+/// <summary>
+/// Checks that a package contains a file.
+/// </summary>
 public static FileCheck HasFile(FilePath file) => HasFiles(new[] { file });
+/// <summary>
+/// Checks that a package contains all of the given files.
+/// </summary>
 public static FileCheck HasFiles(params FilePath[] files) => new FileCheck(files);
 
+/// <summary>
+/// Checks that a package contains a directory. Add WithFiles to check its content.
+/// </summary>
 public static DirectoryCheck HasDirectory(DirectoryPath dir) => new DirectoryCheck(dir);
 
+/// <summary>
+/// Checks that a package depends on another package, optionally of a given version.
+/// </summary>
 public static DependencyCheck HasDependency(string packageId, string packageVersion = null) => new DependencyCheck(packageId, packageVersion);
+/// <summary>
+/// Checks that a package depends on the given package reference.
+/// </summary>
 public static DependencyCheck HasDependency(PackageReference packageReference) => new DependencyCheck(packageReference);
 
-//////////////////////////////////////////////////////////////////////
-// PACKAGECHECK CLASS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Base class for checks made on the content of an installed package.
+/// </summary>
 public abstract class PackageCheck
 {
 	protected ICakeContext _context;
@@ -88,10 +101,9 @@ public abstract class PackageCheck
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
-// FILECHECK CLASS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Checks that a package contains certain files.
+/// </summary>
 public class FileCheck : PackageCheck
 {
 	FilePath[] _files;
@@ -107,10 +119,9 @@ public class FileCheck : PackageCheck
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
-// DIRECTORYCHECK CLASS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Checks that a package contains a directory, optionally with certain files.
+/// </summary>
 public class DirectoryCheck : PackageCheck
 {
 	private DirectoryPath _relDirPath;
@@ -154,10 +165,9 @@ public class DirectoryCheck : PackageCheck
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
-// DEPENDENCYCHECK CLASS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// Checks that a package depends on another package.
+/// </summary>
 public class DependencyCheck : PackageCheck
 {
 	private string _packageId;

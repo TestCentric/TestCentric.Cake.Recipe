@@ -5,16 +5,18 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// PACKAGE DEFINITION ABSTRACT CLASS
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// The kinds of package the recipe can build.
+/// </summary>
 public enum PackageType
 {
 	NuGet,
 	Chocolatey
 }
 
+/// <summary>
+/// Base class for every package the recipe builds, verifies and tests.
+/// </summary>
 public abstract class PackageDefinition
 {
     protected ICakeContext _context;

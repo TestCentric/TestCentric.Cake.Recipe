@@ -5,10 +5,10 @@
 
 public static partial class Program
 {
-//////////////////////////////////////////////////////////////////////
-// EXECUTION
-//////////////////////////////////////////////////////////////////////
-
+/// <summary>
+/// The build to run. A build script calls Build.Run() as its last statement, which
+/// runs the targets given on the command line.
+/// </summary>
 public static Builder Build => new Builder(() => RunTargets(CommandLineOptions.Targets.Values));
 
 static CakeReport RunTargets(ICollection<string> targets)
@@ -43,6 +43,9 @@ private static ICakeTaskInfo GetOrAddTargetsTask(ICollection<string> targets)
     return targetsTask;
 }
 
+/// <summary>
+/// Runs an action when Run is called. Used by Build.
+/// </summary>
 public class Builder
 {
     private Action _action;

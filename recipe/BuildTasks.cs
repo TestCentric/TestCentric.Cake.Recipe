@@ -13,6 +13,11 @@ public static partial class Program
 // modify or completely redefine what a task does in their build.cake file,
 // without changing the definitions in the recipe.
 
+/// <summary>
+/// Holds the CakeTaskBuilder for each task in the recipe. What each task does is
+/// specified separately, in DefineTasks. This indirection lets a build script modify
+/// or completely redefine what a task does without changing the recipe.
+/// </summary>
 public static class BuildTasks
 {
 	// Our context - set by BuildSettings.Initialize
@@ -69,11 +74,14 @@ public static class BuildTasks
 // To make a change for a single project, you should add code to your
 // build.cake file or another project-specific cake file.
 
+/// <summary>
+/// Defines the criteria, dependencies and actions of every task in the recipe.
+/// Change these only to change a task for all projects that use the recipe; to change
+/// it for one project, modify the task in that project's build script.
+/// </summary>
 static void DefineTasks()
 {
-//////////////////////////////////////////////////////////////////////
-// GENERAL TASKS
-//////////////////////////////////////////////////////////////////////
+// General tasks
 
 BuildTasks.CheckScriptTask = Task("CheckScript")
 	.Description("Verify that the script compiles.")
@@ -86,9 +94,7 @@ BuildTasks.DumpSettingsTask = Task("DumpSettings")
 		""")
 	.Does(() => BuildSettings.DumpSettings());
 
-//////////////////////////////////////////////////////////////////////
-// HELP TASK
-//////////////////////////////////////////////////////////////////////
+// Help task
 
 BuildTasks.HelpTask = Task("Help")
 	.Description("""
@@ -104,9 +110,7 @@ BuildTasks.HelpTask = Task("Help")
 			Information(HelpMessages.Usage);
 	});
 
-//////////////////////////////////////////////////////////////////////
-// BUILDING TASKS
-//////////////////////////////////////////////////////////////////////
+// Building tasks
 
 BuildTasks.CheckHeadersTask = Task("CheckHeaders")
 	.Description("""
@@ -187,9 +191,7 @@ BuildTasks.BuildTask = Task("Build")
 			.WithProperty("Version", BuildSettings.PackageVersion));
 	});
 
-//////////////////////////////////////////////////////////////////////
-// UNIT TEST TASK
-//////////////////////////////////////////////////////////////////////
+// Unit test task
 
 BuildTasks.UnitTestTask = Task("Test")
 	.Description("""
@@ -200,9 +202,7 @@ BuildTasks.UnitTestTask = Task("Test")
 	.IsDependentOn("Build")
 	.Does(() => UnitTesting.RunAllTests());
 
-//////////////////////////////////////////////////////////////////////
-// PACKAGING TASKS
-//////////////////////////////////////////////////////////////////////
+// Packaging tasks
 
 BuildTasks.PackageTask = Task("Package")
 	.IsDependentOn("Build")
@@ -272,9 +272,7 @@ BuildTasks.TestPackagesTask = Task("TestPackages")
 		}
 	});
 
-//////////////////////////////////////////////////////////////////////
-// PUBLISHING TASKS
-//////////////////////////////////////////////////////////////////////
+// Publishing tasks
 
 BuildTasks.PublishTask = Task("Publish")
 	.Description("""
@@ -357,9 +355,7 @@ BuildTasks.UpdateReleaseNotesTask = Task("UpdateReleaseNotes")
 	.Description("Create a production GitHub Release")
 	.Does(() => PackageReleaseManager.UpdateReleaseNotes() );
 
-//////////////////////////////////////////////////////////////////////
-// CONTINUOUS INTEGRATION TASK
-//////////////////////////////////////////////////////////////////////
+// Continuous integration task
 
 BuildTasks.ContinuousIntegrationTask = Task("ContinuousIntegration")
 	.Description("""
@@ -380,9 +376,7 @@ BuildTasks.ContinuousIntegrationTask = Task("ContinuousIntegration")
 	.IsDependentOn("CreateDraftRelease")
 	.IsDependentOn("CreateProductionRelease");
 
-//////////////////////////////////////////////////////////////////////
-// DEFAULT TASK
-//////////////////////////////////////////////////////////////////////
+// Default task
 
 BuildTasks.DefaultTask = Task("Default")
 	.Description("""
