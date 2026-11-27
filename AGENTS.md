@@ -11,7 +11,7 @@ CodeRabbit reads this file as review guidance.
 
 ## Building and testing
 
-- `dotnet tool restore`, then `dotnet build.cs -- --target=Build` or `dotnet build.cs -- --target=Test`.
+- `dotnet tool restore`, then `dotnet run --file build.cs -- --target=Build` or `--target=Test`.
   `build.ps1` / `build.cmd` are wrappers around the same thing. Requires the .NET 10 SDK or later.
 
 ## Code

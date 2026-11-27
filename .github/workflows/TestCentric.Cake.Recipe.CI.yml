@@ -52,7 +52,7 @@ jobs:
       run: dotnet tool run dotnet-gitreleasemanager -- showconfig --no-logo
 
     - name: 🍰 Package and Publish Recipe (Cake script decides)
-      run: dotnet build.cs -- --target=ContinuousIntegration --configuration=Release
+      run: dotnet run --file build.cs -- --target=ContinuousIntegration --configuration=Release
 
     - name: 💾 Upload Packages
       if: always()

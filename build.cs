@@ -3,7 +3,7 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-// Cake.Sdk build for the recipe. Run with: dotnet build.cs -- --target=Package
+// Cake.Sdk build for the recipe. Run with: dotnet run --file build.cs -- --target=Package
 // or through the build.cmd, build.ps1 and build.sh wrappers.
 
 #:sdk Cake.Sdk@7.0.0
