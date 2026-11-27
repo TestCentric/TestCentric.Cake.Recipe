@@ -45,6 +45,12 @@ public static partial class Program
     public static DependencyCheck HasDependency(PackageReference packageReference) => new DependencyCheck(packageReference);
 
     /// <summary>
+    /// Checks that a NuGet package has the given README: the file is at the package root
+    /// and the package's nuspec names it in its readme element.
+    /// </summary>
+    public static ReadMeCheck HasReadMe(string fileName) => new ReadMeCheck(fileName);
+
+    /// <summary>
     /// Base class for checks made on the content of an installed package.
     /// </summary>
     public abstract class PackageCheck
@@ -264,6 +270,50 @@ public static partial class Program
                         return null;
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Checks that a NuGet package has a README: the file is at the package root and
+    /// the nuspec inside the installed .nupkg names it in its readme element.
+    /// </summary>
+    public class ReadMeCheck : PackageCheck
+    {
+        private string _fileName;
+
+        public ReadMeCheck(string fileName)
+        {
+            _fileName = fileName;
+        }
+
+        public override bool ApplyTo(DirectoryPath testDirPath)
+        {
+            bool isOK = CheckFileExists(testDirPath.CombineWithFilePath(_fileName));
+
+            // NuGet keeps the .nupkg in the install directory, but not a separate .nuspec
+            var packages = _context.GetFiles(testDirPath.FullPath + "/*.nupkg");
+            if (packages.Count != 1)
+                return DisplayError($"Expected one .nupkg in {testDirPath}, found {packages.Count}.");
+
+            using (var archive = System.IO.Compression.ZipFile.OpenRead(packages.First().FullPath))
+            {
+                var nuspecEntry = archive.Entries.FirstOrDefault(e => !e.FullName.Contains('/') && e.FullName.EndsWith(".nuspec"));
+                if (nuspecEntry == null)
+                    return DisplayError($"No .nuspec found in {packages.First().GetFilename()}.");
+
+                var nuspec = new XmlDocument();
+                using (var stream = nuspecEntry.Open())
+                    nuspec.Load(stream);
+
+                var readme = nuspec.SelectSingleNode("//*[local-name()='metadata']/*[local-name()='readme']");
+                if (readme == null)
+                    return DisplayError($"The nuspec in {packages.First().GetFilename()} has no readme element.");
+
+                if (readme.InnerText != _fileName)
+                    isOK = DisplayError($"The nuspec's readme element is '{readme.InnerText}', expected '{_fileName}'.");
+            }
+
+            return isOK;
         }
     }
 }

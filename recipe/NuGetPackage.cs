@@ -21,7 +21,7 @@ public static partial class Program
         /// <param name="id">A string containing the package ID, used as the root of the PackageName.</param>
         /// <param name="title">Title of the package for use in certain repositories.</param>
         /// <param name="description">A brief description of the package.</param>
-        /// <param name="summary">A brief description of the package.</param>
+        /// <param name="summary">A brief description of the package. Used as the description if none is given. NuGet has deprecated the summary element, so it is not written to the package.</param>
         /// <param name="releaseNotes"></param>
         /// <param name="tags"></param>
         /// <param name="source">A string representing the source used to create the package, e.g. a nuspec file. Either this or packageContent must be provided.</param>
@@ -32,6 +32,7 @@ public static partial class Program
         /// <param name="symbols">An array of PackageChecks to be made on the symbol package, if one is created. Optional. Only supported for nuget packages.</param>
         /// <param name="tests">An array of PackageTests to be run against the package. Optional.</param>
         /// <param name="preLoad">A collection of ExtensionSpecifiers to be preinstalled before running tests. Optional.</param>
+        /// <param name="readme">Path of a Markdown README, relative to the project directory. It is added to the package root and named in the nuspec's readme element, so nuget.org shows it on the package page. Optional.</param>
         public NuGetPackage(
             string id,
             string title = null,
@@ -47,7 +48,8 @@ public static partial class Program
             PackageCheck[] symbols = null,
             IEnumerable<PackageTest> tests = null, 
             PackageReference[] preloadedExtensions = null,
-            PackageContent packageContent = null )
+            PackageContent packageContent = null,
+            string readme = null )
         : base (
             PackageType.NuGet, 
             id, 
@@ -65,7 +67,22 @@ public static partial class Program
             preloadedExtensions: preloadedExtensions,
             packageContent: packageContent )
         {
+            if (readme != null)
+            {
+                ReadMe = readme;
+                PackageChecks = (PackageChecks ?? new PackageCheck[0])
+                    .Append(HasReadMe(ReadMeFileName))
+                    .ToArray();
+            }
         }
+
+        /// <summary>
+        /// Path of the package's README, relative to the project directory, or null if it has none.
+        /// </summary>
+        public string ReadMe { get; }
+
+        // The README's name at the package root
+        private string ReadMeFileName => SIO.Path.GetFileName(ReadMe);
 
         // The file name of this package, including extension
         public override string PackageFileName => $"{PackageId}.{PackageVersion}.nupkg";
@@ -126,6 +143,13 @@ public static partial class Program
 
                     foreach (PackageReference dependency in PackageContent.Dependencies)
                         settings.Dependencies.Add(new NuSpecDependency { Id = dependency.Id, Version = dependency.Version } );
+                }
+
+                if (ReadMe != null)
+                {
+                    // Like the root files, but given relative to the project directory, not BasePath
+                    settings.Files.Add(new NuSpecContent { Source = BuildSettings.ProjectDirectory + ReadMe });
+                    settings.ReadMe = ReadMeFileName;
                 }
 
                 return settings;
