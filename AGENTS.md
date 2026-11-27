@@ -26,5 +26,6 @@ CodeRabbit reads this file as review guidance.
   release's milestone.
 - Every closed issue in a milestone needs one of the labels under `issue-labels-include` or
   `issue-labels-exclude` in `GitReleaseManager.yaml`, or the release notes fail to build.
-  Included labels appear in the release notes; excluded ones, such as Build and Refactor, do not.
+  Included labels appear in the release notes. Refactor is the only excluded label: refactoring
+  stays out of the release notes because only our developers need to know about it.
 - One human review is expected before merging.
