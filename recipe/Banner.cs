@@ -3,11 +3,13 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-// Banner class displays banners similar to those created by Cake
-// We use this to display intermediate steps within a task
-public static class Banner
+public static partial class Program
 {
-    public static void Display(string message, char barChar='-', int length=0)
+    /// <summary>
+    /// Displays a banner similar to those created by Cake.
+    /// We use this to display intermediate steps within a task.
+    /// </summary>
+    public static void DisplayBanner(string message, char barChar='-', int length=0)
     {
         if (length == 0) length = MaxLineLength(message);
         var bar = new string(barChar, length);

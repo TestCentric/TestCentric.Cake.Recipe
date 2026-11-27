@@ -20,13 +20,15 @@ reviews:
       mode: "off"
 
   path_instructions:
-    - path: "**/*.cake"
+    - path: "build.cs"
       instructions: |
-        Cake build scripts. build.cake loads the .cs files in the recipe directory.
-        Cake is a C#-based build automation system and the code may be treated as such.
-        See https://cakebuild.net/ for more information.
+        The recipe's own build script, a Cake.Sdk file-based app run with `dotnet build.cs`.
+        It includes the files in the recipe directory with IncludeAdditionalFiles.
+        See https://cakebuild.net/docs/running-builds/runners/cake-sdk for more information.
     - path: "recipe/**/*.cs"
       instructions: |
-        Recipe files, loaded as Cake script by build.cake. They are not yet ordinary C#
-        source: they may contain Cake directives such as #tool and #addin, and top-level
-        statements such as Task() and Setup(). Converting them to Cake.Sdk is tracked separately.
+        Recipe files, compiled as ordinary C# under Cake.Sdk. Each is wrapped in
+        `public static partial class Program`, so its members and nested types are
+        visible to the build script and to each other, and Cake aliases such as
+        Information() and Task() can be called directly. Watch for names that clash
+        with Cake aliases or with types Cake.Sdk generates, such as Program.Helper.

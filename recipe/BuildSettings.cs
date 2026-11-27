@@ -3,501 +3,511 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-//////////////////////////////////////////////////////////////////////
-// BUILD SETTINGS
-//////////////////////////////////////////////////////////////////////
-
-public static class BuildSettings
+public static partial class Program
 {
-	private static BuildSystem _buildSystem;
-
-	public static void Initialize(
-	 // Required parameters
-		ICakeContext context,
-		string title,
-		string githubRepository,
-     
-	 // Optional Parameters
-		bool suppressHeaderCheck = false,
-		string[] standardHeader = null,
-		string copyright = null,
-		string[] exemptFiles = null,
-		string[] headerCheckDirectories = null, // Relative to the project directory. Defaults to src/
-
-		string solutionFile = null,
-		string[] validConfigurations = null,
-		bool msbuildAllowPreviewVersion = false,
-		string githubOwner = "TestCentric",
-		
-		string unitTests = null, // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
-		IUnitTestRunner unitTestRunner = null, // If not set, NUnitLite is used
-		string unitTestArguments = null,
-
-		string defaultTarget = "Build",
-		
-		// Verbosity
-		Verbosity msbuildVerbosity = Verbosity.Minimal,
-		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
-		bool chocolateyVerbosity = false )
-	{
-		// Required arguments
-		Context = context;
-        Title = title ?? throw new ArgumentNullException(nameof(title));
-        GitHubRepository = githubRepository ?? throw new ArgumentNullException(nameof(githubRepository));
-
-		// NOTE: Order of initialization can be sensitive. Obviously,
-		// we have to set any properties in this method before we
-		// make use of them. Less obviously, some of the classes we
-		// construct here have dependencies on certain properties
-		// being set before the constructor is called. I have
-		// tried to annotate such dependencies below.
-
-		_buildSystem = context.BuildSystem();
-
-		SolutionFile = solutionFile ?? DeduceSolutionFile();
-
-		ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
-
-		UnitTests = unitTests;
-		// NUnitLiteRunner depends indirectly on ValidConfigurations
-		UnitTestRunner = unitTestRunner ?? new NUnitLiteRunner();
-		UnitTestArguments = unitTestArguments;
-
-		RecipeVersion = Recipe.Version;
-		BuildVersion = new BuildVersion(context);
-
-		GitHubOwner = githubOwner;
-
-		// File Header Checks
-		SuppressHeaderCheck = suppressHeaderCheck && !CommandLineOptions.NoBuild;
-		StandardHeader = standardHeader;
-		if (standardHeader == null)
-		{
-			StandardHeader = DEFAULT_STANDARD_HEADER;
-			// We can only replace copyright line in the default header
-			if (copyright != null)
-				StandardHeader[1] = "// " + copyright;
-		}
-		ExemptFiles = exemptFiles ?? new string[0];
-		HeaderCheckDirectories = headerCheckDirectories ?? new[] { SRC_DIR };
-
-        BuildTasks.Context = context;
-		BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
-
-		MSBuildVerbosity = msbuildVerbosity;
-		MSBuildAllowPreviewVersion = msbuildAllowPreviewVersion;
-
-		NuGetVerbosity = nugetVerbosity;
-		ChocolateyVerbosity = chocolateyVerbosity;
-
-		// Skip remaining initialization if help was requested
-		if (CommandLineOptions.Target.Value == "Help")
-			return;
-			
-		ValidateSettings();
-
-		context.Information($"{Title} {Configuration} version {PackageVersion}");
-
-		// Output like this should go after the run title display
-		if (solutionFile == null && SolutionFile != null)
-			context.Warning($"  SolutionFile: '{SolutionFile}'");
-		context.Information($"  PackageTestLevel: {PackageTestLevel}");
-
-        LocalPackagesDirectory = FindLocalPackagesDirectory() ?? ProjectDirectory + $"../{LOCAL_PACKAGES_DIR}";
-        
-		// Keep this last
-        if (IsRunningOnAppVeyor)
-		{
-			var buildNumber = _buildSystem.AppVeyor.Environment.Build.Number;
-			_buildSystem.AppVeyor.UpdateBuildVersion($"{PackageVersion}-{buildNumber}");
-		}
-	}
-
-	// If solution file was not provided, uses TITLE.sln if it exists or 
-    // the solution found in the root directory provided there is only one. 
-	private static string DeduceSolutionFile()			
-	{
-		if (SIO.File.Exists(Title + ".sln"))
-			return Title + ".sln";
-
-		var files = SIO.Directory.GetFiles(ProjectDirectory, "*.sln");
-		if (files.Length == 1 && SIO.File.Exists(files[0]))
-			return files[0];
-
-		return null;
-	}
-
-    private static string FindLocalPackagesDirectory()
+    /// <summary>
+    /// Settings that control the build. A build script sets them by calling Initialize,
+    /// and the rest of the recipe reads them.
+    /// </summary>
+    public static class BuildSettings
     {
-        for (var dir = new DirectoryInfo(ProjectDirectory); dir != null; dir = dir.Parent)
+        private static BuildSystem _buildSystem;
+
+        public static void Initialize(
+         // Required parameters
+            ICakeContext context,
+            string title,
+            string githubRepository,
+
+         // Optional Parameters
+            bool suppressHeaderCheck = false,
+            string[] standardHeader = null,
+            string copyright = null,
+            string[] exemptFiles = null,
+            string[] headerCheckDirectories = null, // Relative to the project directory. Defaults to src/
+
+            string solutionFile = null,
+            string[] validConfigurations = null,
+            bool msbuildAllowPreviewVersion = false,
+            string githubOwner = "TestCentric",
+
+            string unitTests = null, // Defaults to "**/*.tests.dll|**/*.tests.exe" (case insensitive)
+            IUnitTestRunner unitTestRunner = null, // If not set, NUnitLite is used
+            string unitTestArguments = null,
+
+            string defaultTarget = "Build",
+
+            // Verbosity
+            Verbosity msbuildVerbosity = Verbosity.Minimal,
+            NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
+            bool chocolateyVerbosity = false )
         {
-            string candidate = SIO.Path.Combine(dir.FullName, "LocalPackages");
-            if (SIO.Directory.Exists(candidate))
-                return candidate;
+            // Under Cake script these ran as the recipe files were loaded. Under Cake.Sdk
+            // they are methods, so we call them first: tools are needed to calculate the
+            // version, and tasks must exist before the default target is set below.
+            InstallRecipeTools();
+            DefineTasks();
+            DefineSetup();
+
+            // Required arguments
+            Context = context;
+            Title = title ?? throw new ArgumentNullException(nameof(title));
+            GitHubRepository = githubRepository ?? throw new ArgumentNullException(nameof(githubRepository));
+
+            // NOTE: Order of initialization can be sensitive. Obviously,
+            // we have to set any properties in this method before we
+            // make use of them. Less obviously, some of the classes we
+            // construct here have dependencies on certain properties
+            // being set before the constructor is called. I have
+            // tried to annotate such dependencies below.
+
+            _buildSystem = context.BuildSystem();
+
+            SolutionFile = solutionFile ?? DeduceSolutionFile();
+
+            ValidConfigurations = validConfigurations ?? DEFAULT_VALID_CONFIGS;
+
+            UnitTests = unitTests;
+            // NUnitLiteRunner depends indirectly on ValidConfigurations
+            UnitTestRunner = unitTestRunner ?? new NUnitLiteRunner();
+            UnitTestArguments = unitTestArguments;
+
+            RecipeVersion = RECIPE_VERSION;
+            BuildVersion = new BuildVersion(context);
+
+            GitHubOwner = githubOwner;
+
+            // File Header Checks
+            SuppressHeaderCheck = suppressHeaderCheck && !CommandLineOptions.NoBuild;
+            StandardHeader = standardHeader;
+            if (standardHeader == null)
+            {
+                StandardHeader = DEFAULT_STANDARD_HEADER;
+                // We can only replace copyright line in the default header
+                if (copyright != null)
+                    StandardHeader[1] = "// " + copyright;
+            }
+            ExemptFiles = exemptFiles ?? new string[0];
+            HeaderCheckDirectories = headerCheckDirectories ?? new[] { SRC_DIR };
+
+            BuildTasks.Context = context;
+            BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
+
+            MSBuildVerbosity = msbuildVerbosity;
+            MSBuildAllowPreviewVersion = msbuildAllowPreviewVersion;
+
+            NuGetVerbosity = nugetVerbosity;
+            ChocolateyVerbosity = chocolateyVerbosity;
+
+            // Skip remaining initialization if help was requested
+            if (CommandLineOptions.Target.Value == "Help")
+                return;
+
+            ValidateSettings();
+
+            context.Information($"{Title} {Configuration} version {PackageVersion}");
+
+            // Output like this should go after the run title display
+            if (solutionFile == null && SolutionFile != null)
+                context.Warning($"  SolutionFile: '{SolutionFile}'");
+            context.Information($"  PackageTestLevel: {PackageTestLevel}");
+
+            LocalPackagesDirectory = FindLocalPackagesDirectory() ?? ProjectDirectory + $"../{LOCAL_PACKAGES_DIR}";
+
+            // Keep this last
+            if (IsRunningOnAppVeyor)
+            {
+                var buildNumber = _buildSystem.AppVeyor.Environment.Build.Number;
+                _buildSystem.AppVeyor.UpdateBuildVersion($"{PackageVersion}-{buildNumber}");
+            }
         }
 
-        return null;
-    }
-
-    private static int CalcPackageTestLevel()
-	{
-		if (!BuildVersion.IsPreRelease)
-			return 3;
-
-		// The version label doesn't show whether this is a pull request, so ask the CI system.
-		if (IsRunningOnAppVeyor && _buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest)
-			return 2;
-		if (IsRunningOnGitHubActions && _buildSystem.GitHubActions.Environment.PullRequest.IsPullRequest)
-			return 2;
-		
-		switch (BuildVersion.PreReleaseLabel)
-		{
-			case "pre":
-			case "rc":
-			case "alpha":
-			case "beta":
-				return 3;
-
-			case "dev":
-			case "pr":
-				return 2;
-
-			case "ci":
-			default:
-				return 1;
-		}
-	}
-
-	// Cake Context
-	public static ICakeContext Context { get; private set; }
-
-    // NOTE: These are set in Setup.cs
-	public static string Target { get; set; }
-	public static IEnumerable<string> TasksToExecute { get; set; }
-
-	// Arguments
-	public static string Configuration
-	{
-		get
-		{
-			// Correct casing on user-provided config if necessary
-			foreach (string config in ValidConfigurations)
-				if (string.Equals(config, CommandLineOptions.Configuration.Value, StringComparison.OrdinalIgnoreCase))
-					return config;
-
-			// Return the (invalid) user-provided config
-			return CommandLineOptions.Configuration.Value;
-		}
-	}
-
-	// Build Environment
-	public static bool IsLocalBuild => _buildSystem.IsLocalBuild;
-	public static bool IsRunningOnUnix => Context.IsRunningOnUnix();
-	public static bool IsRunningOnWindows => Context.IsRunningOnWindows();
-	public static bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
-	public static bool IsRunningOnGitHubActions => _buildSystem.GitHubActions.IsRunningOnGitHubActions;
-
-    // Versioning
-    public static string RecipeVersion { get; private set; }
-    public static BuildVersion BuildVersion { get; private set; }
-	// BranchName is "(no branch)" when HEAD is detached, as in pull request and tag builds on CI.
-	public static string BranchName => Context.GitBranchCurrent(ProjectDirectory).FriendlyName;
-	public static bool IsMainBranch => BranchName == "main";
-	public static bool IsReleaseBranch => BranchName.StartsWith("release-");
-	// The exact tag on HEAD, or a "describe" string like 2.0.0-beta.1-3-gabc1234 if HEAD isn't tagged
-	public static string BranchTag => Context.GitDescribe(ProjectDirectory, GitDescribeStrategy.Tags);
-	public static string PackageVersion => BuildVersion.PackageVersion;
-	public static string AssemblyVersion => BuildVersion.AssemblyVersion;
-	public static string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
-	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
-
-    // Chocolatey.org does not yet support semver 2.0, so we have to use a legacy format
-    private static string _chocolateyPackageVersion;
-    public static string ChocolateyPackageVersion
-    {
-        get
+        // If solution file was not provided, uses TITLE.sln if it exists or 
+        // the solution found in the root directory provided there is only one. 
+        private static string DeduceSolutionFile()			
         {
-            if (!IsPreRelease)
-                return PackageVersion;
+            if (SIO.File.Exists(Title + ".sln"))
+                return Title + ".sln";
 
-            if (_chocolateyPackageVersion == null)
+            var files = SIO.Directory.GetFiles(ProjectDirectory, "*.sln");
+            if (files.Length == 1 && SIO.File.Exists(files[0]))
+                return files[0];
+
+            return null;
+        }
+
+        private static string FindLocalPackagesDirectory()
+        {
+            for (var dir = new DirectoryInfo(ProjectDirectory); dir != null; dir = dir.Parent)
             {
-                // Use PackageVersion as default
-                _chocolateyPackageVersion = PackageVersion;
-
-                var semver = BuildVersion.SemVer;
-                var label = BuildVersion.PreReleaseLabel;
-                var suffix = BuildVersion.PreReleaseSuffix;
-                int num1, num2;
-
-                // Our standard pre-releases are in the form <label> "." <num1> ["." <num2>]
-                // If anything else comes up, we just use the default PackageVersion
-                if (!suffix.StartsWith(label + "."))
-                    return _chocolateyPackageVersion;
-
-                suffix = suffix.Substring(label.Length + 1);
-                int dot2 = suffix.IndexOf('.');
-                if (dot2 > 0) // another dot?
-                {
-                    if (int.TryParse(suffix.Substring(0, dot2), out num1) && int.TryParse(suffix.Substring(dot2 + 1), out num2))
-                        _chocolateyPackageVersion = $"{semver}-{label}{num1:000}-{num2:000}";
-                }
-                else // just one dot
-                {
-                    if (int.TryParse(suffix, out num1))
-                        _chocolateyPackageVersion = $"{semver}-{label}{num1:000}";
-                }
+                string candidate = SIO.Path.Combine(dir.FullName, "LocalPackages");
+                if (SIO.Directory.Exists(candidate))
+                    return candidate;
             }
 
-            return _chocolateyPackageVersion;
+            return null;
+        }
+
+        private static int CalcPackageTestLevel()
+        {
+            if (!BuildVersion.IsPreRelease)
+                return 3;
+
+            // The version label doesn't show whether this is a pull request, so ask the CI system.
+            if (IsRunningOnAppVeyor && _buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest)
+                return 2;
+            if (IsRunningOnGitHubActions && _buildSystem.GitHubActions.Environment.PullRequest.IsPullRequest)
+                return 2;
+
+            switch (BuildVersion.PreReleaseLabel)
+            {
+                case "pre":
+                case "rc":
+                case "alpha":
+                case "beta":
+                    return 3;
+
+                case "dev":
+                case "pr":
+                    return 2;
+
+                case "ci":
+                default:
+                    return 1;
+            }
+        }
+
+        // Cake Context
+        public static ICakeContext Context { get; private set; }
+
+        // NOTE: These are set in Setup.cs
+        public static string Target { get; set; }
+        public static IEnumerable<string> TasksToExecute { get; set; }
+
+        // Arguments
+        public static string Configuration
+        {
+            get
+            {
+                // Correct casing on user-provided config if necessary
+                foreach (string config in ValidConfigurations)
+                    if (string.Equals(config, CommandLineOptions.Configuration.Value, StringComparison.OrdinalIgnoreCase))
+                        return config;
+
+                // Return the (invalid) user-provided config
+                return CommandLineOptions.Configuration.Value;
+            }
+        }
+
+        // Build Environment
+        public static bool IsLocalBuild => _buildSystem.IsLocalBuild;
+        public static bool IsRunningOnUnix => Context.IsRunningOnUnix();
+        public static bool IsRunningOnWindows => Context.IsRunningOnWindows();
+        public static bool IsRunningOnAppVeyor => _buildSystem.AppVeyor.IsRunningOnAppVeyor;
+        public static bool IsRunningOnGitHubActions => _buildSystem.GitHubActions.IsRunningOnGitHubActions;
+
+        // Versioning
+        public static string RecipeVersion { get; private set; }
+        public static BuildVersion BuildVersion { get; private set; }
+        // BranchName is "(no branch)" when HEAD is detached, as in pull request and tag builds on CI.
+        public static string BranchName => Context.GitBranchCurrent(ProjectDirectory).FriendlyName;
+        public static bool IsMainBranch => BranchName == "main";
+        public static bool IsReleaseBranch => BranchName.StartsWith("release-");
+        // The exact tag on HEAD, or a "describe" string like 2.0.0-beta.1-3-gabc1234 if HEAD isn't tagged
+        public static string BranchTag => Context.GitDescribe(ProjectDirectory, GitDescribeStrategy.Tags);
+        public static string PackageVersion => BuildVersion.PackageVersion;
+        public static string AssemblyVersion => BuildVersion.AssemblyVersion;
+        public static string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
+        public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
+
+        // Chocolatey.org does not yet support semver 2.0, so we have to use a legacy format
+        private static string _chocolateyPackageVersion;
+        public static string ChocolateyPackageVersion
+        {
+            get
+            {
+                if (!IsPreRelease)
+                    return PackageVersion;
+
+                if (_chocolateyPackageVersion == null)
+                {
+                    // Use PackageVersion as default
+                    _chocolateyPackageVersion = PackageVersion;
+
+                    var semver = BuildVersion.SemVer;
+                    var label = BuildVersion.PreReleaseLabel;
+                    var suffix = BuildVersion.PreReleaseSuffix;
+                    int num1, num2;
+
+                    // Our standard pre-releases are in the form <label> "." <num1> ["." <num2>]
+                    // If anything else comes up, we just use the default PackageVersion
+                    if (!suffix.StartsWith(label + "."))
+                        return _chocolateyPackageVersion;
+
+                    suffix = suffix.Substring(label.Length + 1);
+                    int dot2 = suffix.IndexOf('.');
+                    if (dot2 > 0) // another dot?
+                    {
+                        if (int.TryParse(suffix.Substring(0, dot2), out num1) && int.TryParse(suffix.Substring(dot2 + 1), out num2))
+                            _chocolateyPackageVersion = $"{semver}-{label}{num1:000}-{num2:000}";
+                    }
+                    else // just one dot
+                    {
+                        if (int.TryParse(suffix, out num1))
+                            _chocolateyPackageVersion = $"{semver}-{label}{num1:000}";
+                    }
+                }
+
+                return _chocolateyPackageVersion;
+            }
+        }
+
+        // Standard Directory Structure - not changeable by user
+        public static string ProjectDirectory => Context.Environment.WorkingDirectory.FullPath + "/";
+        public static string SourceDirectory                => ProjectDirectory + SRC_DIR;
+        public static string OutputDirectory                => ProjectDirectory + BIN_DIR + Configuration + "/";
+        public static string NuGetDirectory                 => ProjectDirectory + NUGET_DIR;
+        public static string ChocolateyDirectory            => ProjectDirectory + CHOCO_DIR;
+        public static string PackageDirectory               => ProjectDirectory + PACKAGE_DIR;
+        public static string PackageTestDirectory           => ProjectDirectory + PKG_TEST_DIR;
+        public static string ToolsDirectory                 => ProjectDirectory + TOOLS_DIR;
+        public static string LocalPackagesDirectory {  get; private set; }
+
+        // Files
+        public static string SolutionFile { get; set; }
+
+        // Building
+        public static string[] ValidConfigurations { get; set; }
+        public static bool MSBuildAllowPreviewVersion { get; set; }
+        public static Verbosity MSBuildVerbosity { get; set; }
+        public static MSBuildSettings MSBuildSettings => new MSBuildSettings {
+            Verbosity = MSBuildVerbosity,
+            Configuration = Configuration,
+            PlatformTarget = PlatformTarget.MSIL,
+            AllowPreviewVersion = MSBuildAllowPreviewVersion
+        };
+
+        public static DotNetBuildSettings DotNetBuildSettings => new DotNetBuildSettings
+        {
+            Configuration = Configuration,
+            NoRestore = true,
+            Verbosity = DotNetVerbosity.Minimal,
+            MSBuildSettings = new DotNetMSBuildSettings
+            {
+                BinaryLogger = new MSBuildBinaryLoggerSettings
+                {
+                    Enabled = true,
+                    FileName = "build-results/NUnitConsole.binlog",
+                    Imports = MSBuildBinaryLoggerImports.Embed
+                }
+            }
+            .WithProperty("Version", PackageVersion)
+            .WithProperty("GenerateResourceUsePreserializedResources", "true")
+        };
+
+        public static bool ShouldAddToLocalFeed =>
+            IsLocalBuild && SIO.Directory.Exists(LocalPackagesDirectory)
+                ? !IsPreRelease || LABELS_WE_ADD_TO_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel)
+                : false;
+
+        public static NuGetVerbosity NuGetVerbosity{ get; set; }
+        // The chocolatey Setting is actually bool Verbose, but we use verbosity 
+        // so it lines up with the settings for NuGet
+        public static bool ChocolateyVerbosity { get; set; }
+
+        //Testing
+        public static string UnitTests { get; set; }
+        public static IUnitTestRunner UnitTestRunner { get; private set; }
+        public static string UnitTestArguments { get; private set; }
+
+        // Checking 
+        public static bool SuppressHeaderCheck { get; private set; }
+        public static string[] StandardHeader { get; private set; }
+        public static string[] ExemptFiles { get; private set; }
+        public static string[] HeaderCheckDirectories { get; private set; }
+
+        // Packaging
+        public static string Title { get; private set; }
+        public static List<PackageDefinition> Packages { get; } = new List<PackageDefinition>();
+
+        // Package Testing
+        public static int PackageTestLevel =>
+            CommandLineOptions.TestLevel.Value > 0
+                ? CommandLineOptions.TestLevel.Value
+                : CalcPackageTestLevel();
+
+        // Publishing - MyGet
+        public static string MyGetPushUrl => MYGET_PUSH_URL;
+        public static string MyGetApiKey => GetApiKey(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY);
+
+        // Publishing - NuGet
+        public static string NuGetPushUrl => NUGET_PUSH_URL;
+        public static string NuGetApiKey => GetApiKey(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY);
+
+        // Publishing - Chocolatey
+        public static string ChocolateyPushUrl => CHOCO_PUSH_URL;
+        public static string ChocolateyApiKey => GetApiKey(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY);
+
+        // Publishing - GitHub
+        public static string GitHubOwner { get; set; }
+        public static string GitHubRepository { get; set; }
+        public static string GitHubAccessToken => GetApiKey(GITHUB_ACCESS_TOKEN);
+
+        // Publishing policy
+        // * Only builds of main publish anything.
+        // * MyGet takes every main build with a label we publish there, including fractional
+        //   pre-releases such as 2.0.0-dev00002.3, which MinVer makes unique.
+        // * NuGet, Chocolatey and GitHub releases need a commit tagged with exactly the package
+        //   version, and never take fractional pre-releases.
+        // Pushing a tag alone publishes nothing: the tag build has no branch. Run a build of
+        // main after tagging its head.
+        public static bool IsPreRelease => BuildVersion.IsPreRelease;
+        public static bool IsFractionalPreRelease => BuildVersion.IsFractionalPreRelease;
+        public static bool IsTaggedRelease => PackageVersion == BranchTag;
+        public static bool ShouldPublishToMyGet => IsMainBranch &&
+            (!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel));
+        public static bool ShouldPublishToNuGet => IsMainBranch && IsTaggedRelease &&
+            (!IsPreRelease || LABELS_WE_PUBLISH_ON_NUGET.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
+        public static bool ShouldPublishToChocolatey => IsMainBranch && IsTaggedRelease &&
+            (!IsPreRelease || LABELS_WE_PUBLISH_ON_CHOCOLATEY.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
+        public static bool IsProductionRelease => IsMainBranch && IsTaggedRelease &&
+            (!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
+
+        private static void ValidateSettings()
+        {
+            var validationErrors = new List<string>();
+
+            if (!ValidConfigurations.Contains(Configuration))
+                validationErrors.Add($"Invalid configuration: {Configuration}");
+
+            if (validationErrors.Count > 0)
+            {
+                DumpSettings();
+
+                var msg = new StringBuilder("Parameter validation failed! See settings above.\r\n\nErrors found:\r\n");
+                foreach (var error in validationErrors)
+                    msg.AppendLine("  " + error);
+
+                throw new InvalidOperationException(msg.ToString());
+            }
+        }
+
+        public static void DumpSettings()
+        {
+            DisplayHeading("TASKS");
+            DisplaySetting("Target:                       ", Target ?? "NOT SET");
+            DisplaySetting("TasksToExecute:               ", TasksToExecute != null
+                ? string.Join(", ", TasksToExecute)
+                : "NOT SET");
+
+            DisplayHeading("ENVIRONMENT");
+            DisplaySetting("IsLocalBuild:                 ", IsLocalBuild);
+            DisplaySetting("IsRunningOnWindows:           ", IsRunningOnWindows);
+            DisplaySetting("IsRunningOnUnix:              ", IsRunningOnUnix);
+            DisplaySetting("IsRunningOnAppVeyor:          ", IsRunningOnAppVeyor);
+            DisplaySetting("IsRunningOnGitHubActions:     ", IsRunningOnGitHubActions);
+
+            DisplayHeading("COMMAND-LINE OPTIONS");
+            DisplaySetting("Target:           ", CommandLineOptions.Target.Value);
+            DisplaySetting("Configuration:    ", CommandLineOptions.Configuration.Value);
+            DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion.Value);
+            DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel.Value);
+            DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel.Value);
+            DisplaySetting("NoBuild:          ", CommandLineOptions.NoBuild ? "True" : "NOT SET");
+            DisplaySetting("NoPush:           ", CommandLineOptions.NoPush ? "True" : "NOT SET");
+
+            DisplayHeading("VERSIONING");
+            DisplaySetting("RecipeVersion                 ", RecipeVersion);
+            DisplaySetting("PackageVersion:               ", PackageVersion);
+            DisplaySetting("AssemblyVersion:              ", AssemblyVersion);
+            DisplaySetting("AssemblyFileVersion:          ", AssemblyFileVersion);
+            DisplaySetting("AssemblyInformationalVersion: ", AssemblyInformationalVersion);
+            DisplaySetting("SemVer:                       ", BuildVersion.SemVer);
+            DisplaySetting("IsPreRelease:                 ", BuildVersion.IsPreRelease);
+            DisplaySetting("PreReleaseLabel:              ", BuildVersion.PreReleaseLabel);
+            DisplaySetting("PreReleaseSuffix:             ", BuildVersion.PreReleaseSuffix);
+
+            DisplayHeading("DIRECTORIES");
+            DisplaySetting("Project:          ", ProjectDirectory);
+            DisplaySetting("Output:           ", OutputDirectory);
+            DisplaySetting("Source:           ", SourceDirectory);
+            DisplaySetting("NuGet:            ", NuGetDirectory);
+            DisplaySetting("Chocolatey:       ", ChocolateyDirectory);
+            DisplaySetting("Package:          ", PackageDirectory);
+            DisplaySetting("LocalPackages:    ", LocalPackagesDirectory);
+
+            DisplayHeading("BUILD");
+            DisplaySetting("Title:            ", Title);
+            DisplaySetting("SolutionFile:     ", SolutionFile);
+            Context.Information("StandardHeader:");
+            foreach (var line in StandardHeader)
+                Context.Information(line);
+            DisplaySetting("HeaderCheckDirectories: ", string.Join(", ", HeaderCheckDirectories));
+
+            DisplayHeading("TESTING");
+            DisplaySetting("UnitTests:        ", UnitTests, "DEFAULT");
+            DisplaySetting("UnitTestRunner:   ", UnitTestRunner, "NUNITLITE");
+
+            DisplayHeading("PACKAGES");
+            if (Packages == null)
+                Context.Error("NULL");
+            else if (Packages.Count == 0)
+                Context.Information("NONE");
+            else
+                foreach (PackageDefinition package in Packages)
+                {
+                    DisplaySetting("", package?.PackageId);
+                    DisplaySetting($"  PackageSource:  ", package?.PackageSource);
+                    DisplaySetting($"  FileName:       ", package?.PackageFileName);
+                    DisplaySetting($"  FilePath:       ", package?.PackageFilePath);
+                }
+
+            DisplayHeading("PUBLISHING");
+            DisplaySetting("ShouldPublishToMyGet:      ", ShouldPublishToMyGet);
+            DisplaySetting("  MyGetPushUrl:            ", MyGetPushUrl);
+            DisplaySetting("  MyGetApiKey:             ", KeyAvailable(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY));
+            DisplaySetting("ShouldPublishToNuGet:      ", ShouldPublishToNuGet);
+            DisplaySetting("  NuGetPushUrl:            ", NuGetPushUrl);
+            DisplaySetting("  NuGetApiKey:             ", KeyAvailable(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY));
+            DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToChocolatey);
+            DisplaySetting("  ChocolateyPushUrl:       ", ChocolateyPushUrl);
+            DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY));
+
+            DisplayHeading("\nRELEASING");
+            DisplaySetting("BranchName:             ", BranchName);
+            DisplaySetting("IsMainBranch:           ", IsMainBranch);
+            DisplaySetting("IsReleaseBranch:        ", IsReleaseBranch);
+            DisplaySetting("BranchTag:              ", BranchTag);
+            DisplaySetting("IsTaggedRelease:        ", IsTaggedRelease);
+            DisplaySetting("IsFractionalPreRelease: ", IsFractionalPreRelease);
+            DisplaySetting("IsProductionRelease:    ", IsProductionRelease);
+            DisplaySetting("GitHubAccessToken:      ", KeyAvailable(GITHUB_ACCESS_TOKEN));
+        }
+
+        private static void DisplayHeading(string heading)
+        {
+            Context.Information($"\n{heading}");
+        }
+
+        private static void DisplaySetting<T>(string label, T setting, string notset="NOT SET")
+        {
+            var fmtSetting = setting == null ? notset : setting.ToString(); 
+            Context.Information(label + fmtSetting);
+        }
+
+        private static string GetApiKey(string name, string fallback=null)
+        {
+            var apikey = Context.EnvironmentVariable(name);
+
+            if (string.IsNullOrEmpty(apikey) && fallback != null)
+                apikey = Context.EnvironmentVariable(fallback);
+
+            return apikey;
+        }
+
+        private static string KeyAvailable(string name, string fallback=null)
+        {
+            return !string.IsNullOrEmpty(GetApiKey(name, fallback)) ? "AVAILABLE" : "NOT AVAILABLE";
         }
     }
-
-    // Standard Directory Structure - not changeable by user
-    public static string ProjectDirectory => Context.Environment.WorkingDirectory.FullPath + "/";
-	public static string SourceDirectory                => ProjectDirectory + SRC_DIR;
-	public static string OutputDirectory                => ProjectDirectory + BIN_DIR + Configuration + "/";
-	public static string NuGetDirectory                 => ProjectDirectory + NUGET_DIR;
-	public static string ChocolateyDirectory            => ProjectDirectory + CHOCO_DIR;
-	public static string PackageDirectory               => ProjectDirectory + PACKAGE_DIR;
-	public static string PackageTestDirectory           => ProjectDirectory + PKG_TEST_DIR;
-	public static string ToolsDirectory                 => ProjectDirectory + TOOLS_DIR;
-	public static string LocalPackagesDirectory {  get; private set; }
-
-	// Files
-	public static string SolutionFile { get; set; }
-
-	// Building
-	public static string[] ValidConfigurations { get; set; }
-	public static bool MSBuildAllowPreviewVersion { get; set; }
-	public static Verbosity MSBuildVerbosity { get; set; }
-	public static MSBuildSettings MSBuildSettings => new MSBuildSettings {
-		Verbosity = MSBuildVerbosity,
-		Configuration = Configuration,
-		PlatformTarget = PlatformTarget.MSIL,
-		AllowPreviewVersion = MSBuildAllowPreviewVersion
-	};
-
-	public static DotNetBuildSettings DotNetBuildSettings => new DotNetBuildSettings
-	{
-		Configuration = Configuration,
-		NoRestore = true,
-		Verbosity = DotNetVerbosity.Minimal,
-		MSBuildSettings = new DotNetMSBuildSettings
-		{
-			BinaryLogger = new MSBuildBinaryLoggerSettings
-			{
-				Enabled = true,
-				FileName = "build-results/NUnitConsole.binlog",
-				Imports = MSBuildBinaryLoggerImports.Embed
-			}
-		}
-		.WithProperty("Version", PackageVersion)
-		.WithProperty("GenerateResourceUsePreserializedResources", "true")
-	};
-
-	public static bool ShouldAddToLocalFeed =>
-		IsLocalBuild && SIO.Directory.Exists(LocalPackagesDirectory)
-			? !IsPreRelease || LABELS_WE_ADD_TO_LOCAL_FEED.Contains(BuildVersion.PreReleaseLabel)
-			: false;
-
-	public static NuGetVerbosity NuGetVerbosity{ get; set; }
-	// The chocolatey Setting is actually bool Verbose, but we use verbosity 
-	// so it lines up with the settings for NuGet
-	public static bool ChocolateyVerbosity { get; set; }
-
-	//Testing
-	public static string UnitTests { get; set; }
-	public static IUnitTestRunner UnitTestRunner { get; private set; }
-	public static string UnitTestArguments { get; private set; }
-
-	// Checking 
-	public static bool SuppressHeaderCheck { get; private set; }
-	public static string[] StandardHeader { get; private set; }
-	public static string[] ExemptFiles { get; private set; }
-	public static string[] HeaderCheckDirectories { get; private set; }
-
-	// Packaging
-	public static string Title { get; private set; }
-    public static List<PackageDefinition> Packages { get; } = new List<PackageDefinition>();
-
-	// Package Testing
-	public static int PackageTestLevel =>
-		CommandLineOptions.TestLevel.Value > 0
-			? CommandLineOptions.TestLevel.Value
-			: CalcPackageTestLevel();
-
-	// Publishing - MyGet
-	public static string MyGetPushUrl => MYGET_PUSH_URL;
-	public static string MyGetApiKey => GetApiKey(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY);
-
-	// Publishing - NuGet
-	public static string NuGetPushUrl => NUGET_PUSH_URL;
-	public static string NuGetApiKey => GetApiKey(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY);
-
-	// Publishing - Chocolatey
-	public static string ChocolateyPushUrl => CHOCO_PUSH_URL;
-	public static string ChocolateyApiKey => GetApiKey(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY);
-
-	// Publishing - GitHub
-	public static string GitHubOwner { get; set; }
-	public static string GitHubRepository { get; set; }
-	public static string GitHubAccessToken => GetApiKey(GITHUB_ACCESS_TOKEN);
-
-	// Publishing policy
-	// * Only builds of main publish anything.
-	// * MyGet takes every main build with a label we publish there, including fractional
-	//   pre-releases such as 2.0.0-dev00002.3, which MinVer makes unique.
-	// * NuGet, Chocolatey and GitHub releases need a commit tagged with exactly the package
-	//   version, and never take fractional pre-releases.
-	// Pushing a tag alone publishes nothing: the tag build has no branch. Run a build of
-	// main after tagging its head.
-	public static bool IsPreRelease => BuildVersion.IsPreRelease;
-	public static bool IsFractionalPreRelease => BuildVersion.IsFractionalPreRelease;
-	public static bool IsTaggedRelease => PackageVersion == BranchTag;
-	public static bool ShouldPublishToMyGet => IsMainBranch &&
-		(!IsPreRelease || LABELS_WE_PUBLISH_ON_MYGET.Contains(BuildVersion.PreReleaseLabel));
-	public static bool ShouldPublishToNuGet => IsMainBranch && IsTaggedRelease &&
-		(!IsPreRelease || LABELS_WE_PUBLISH_ON_NUGET.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
-	public static bool ShouldPublishToChocolatey => IsMainBranch && IsTaggedRelease &&
-		(!IsPreRelease || LABELS_WE_PUBLISH_ON_CHOCOLATEY.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
-	public static bool IsProductionRelease => IsMainBranch && IsTaggedRelease &&
-		(!IsPreRelease || LABELS_WE_RELEASE_ON_GITHUB.Contains(BuildVersion.PreReleaseLabel) && !IsFractionalPreRelease);
-
-	private static void ValidateSettings()
-	{
-		var validationErrors = new List<string>();
-		
-		if (!ValidConfigurations.Contains(Configuration))
-			validationErrors.Add($"Invalid configuration: {Configuration}");
-
-		if (validationErrors.Count > 0)
-		{
-			DumpSettings();
-
-			var msg = new StringBuilder("Parameter validation failed! See settings above.\r\n\nErrors found:\r\n");
-			foreach (var error in validationErrors)
-				msg.AppendLine("  " + error);
-
-			throw new InvalidOperationException(msg.ToString());
-		}
-	}
-
-	public static void DumpSettings()
-    {
-		DisplayHeading("TASKS");
-		DisplaySetting("Target:                       ", Target ?? "NOT SET");
-		DisplaySetting("TasksToExecute:               ", TasksToExecute != null
-			? string.Join(", ", TasksToExecute)
-			: "NOT SET");
-
-		DisplayHeading("ENVIRONMENT");
-		DisplaySetting("IsLocalBuild:                 ", IsLocalBuild);
-		DisplaySetting("IsRunningOnWindows:           ", IsRunningOnWindows);
-		DisplaySetting("IsRunningOnUnix:              ", IsRunningOnUnix);
-		DisplaySetting("IsRunningOnAppVeyor:          ", IsRunningOnAppVeyor);
-		DisplaySetting("IsRunningOnGitHubActions:     ", IsRunningOnGitHubActions);
-
-		DisplayHeading("COMMAND-LINE OPTIONS");
-		DisplaySetting("Target:           ", CommandLineOptions.Target.Value);
-		DisplaySetting("Configuration:    ", CommandLineOptions.Configuration.Value);
-		DisplaySetting("PackageVersion:   ", CommandLineOptions.PackageVersion.Value);
-		DisplaySetting("TestLevel:        ", CommandLineOptions.TestLevel.Value);
-		DisplaySetting("TraceLevel:       ", CommandLineOptions.TraceLevel.Value);
-		DisplaySetting("NoBuild:          ", CommandLineOptions.NoBuild ? "True" : "NOT SET");
-		DisplaySetting("NoPush:           ", CommandLineOptions.NoPush ? "True" : "NOT SET");
-
-		DisplayHeading("VERSIONING");
-        DisplaySetting("RecipeVersion                 ", RecipeVersion);
-        DisplaySetting("PackageVersion:               ", PackageVersion);
-		DisplaySetting("AssemblyVersion:              ", AssemblyVersion);
-		DisplaySetting("AssemblyFileVersion:          ", AssemblyFileVersion);
-		DisplaySetting("AssemblyInformationalVersion: ", AssemblyInformationalVersion);
-		DisplaySetting("SemVer:                       ", BuildVersion.SemVer);
-		DisplaySetting("IsPreRelease:                 ", BuildVersion.IsPreRelease);
-		DisplaySetting("PreReleaseLabel:              ", BuildVersion.PreReleaseLabel);
-		DisplaySetting("PreReleaseSuffix:             ", BuildVersion.PreReleaseSuffix);
-
-		DisplayHeading("DIRECTORIES");
-		DisplaySetting("Project:          ", ProjectDirectory);
-		DisplaySetting("Output:           ", OutputDirectory);
-		DisplaySetting("Source:           ", SourceDirectory);
-		DisplaySetting("NuGet:            ", NuGetDirectory);
-		DisplaySetting("Chocolatey:       ", ChocolateyDirectory);
-		DisplaySetting("Package:          ", PackageDirectory);
-		DisplaySetting("LocalPackages:    ", LocalPackagesDirectory);
-
-		DisplayHeading("BUILD");
-		DisplaySetting("Title:            ", Title);
-		DisplaySetting("SolutionFile:     ", SolutionFile);
-		Context.Information("StandardHeader:");
-		foreach (var line in StandardHeader)
-			Context.Information(line);
-		DisplaySetting("HeaderCheckDirectories: ", string.Join(", ", HeaderCheckDirectories));
-
-		DisplayHeading("TESTING");
-		DisplaySetting("UnitTests:        ", UnitTests, "DEFAULT");
-		DisplaySetting("UnitTestRunner:   ", UnitTestRunner, "NUNITLITE");
-
-		DisplayHeading("PACKAGES");
-		if (Packages == null)
-			Context.Error("NULL");
-		else if (Packages.Count == 0)
-			Context.Information("NONE");
-		else
-			foreach (PackageDefinition package in Packages)
-			{
-				DisplaySetting("", package?.PackageId);
-				DisplaySetting($"  PackageSource:  ", package?.PackageSource);
-				DisplaySetting($"  FileName:       ", package?.PackageFileName);
-				DisplaySetting($"  FilePath:       ", package?.PackageFilePath);
-			}
-
-		DisplayHeading("PUBLISHING");
-		DisplaySetting("ShouldPublishToMyGet:      ", ShouldPublishToMyGet);
-		DisplaySetting("  MyGetPushUrl:            ", MyGetPushUrl);
-		DisplaySetting("  MyGetApiKey:             ", KeyAvailable(TESTCENTRIC_MYGET_API_KEY, MYGET_API_KEY));
-		DisplaySetting("ShouldPublishToNuGet:      ", ShouldPublishToNuGet);
-		DisplaySetting("  NuGetPushUrl:            ", NuGetPushUrl);
-		DisplaySetting("  NuGetApiKey:             ", KeyAvailable(TESTCENTRIC_NUGET_API_KEY, NUGET_API_KEY));
-		DisplaySetting("ShouldPublishToChocolatey: ", ShouldPublishToChocolatey);
-		DisplaySetting("  ChocolateyPushUrl:       ", ChocolateyPushUrl);
-		DisplaySetting("  ChocolateyApiKey:        ", KeyAvailable(TESTCENTRIC_CHOCO_API_KEY, CHOCO_API_KEY));
-
-		DisplayHeading("\nRELEASING");
-		DisplaySetting("BranchName:             ", BranchName);
-		DisplaySetting("IsMainBranch:           ", IsMainBranch);
-		DisplaySetting("IsReleaseBranch:        ", IsReleaseBranch);
-		DisplaySetting("BranchTag:              ", BranchTag);
-		DisplaySetting("IsTaggedRelease:        ", IsTaggedRelease);
-		DisplaySetting("IsFractionalPreRelease: ", IsFractionalPreRelease);
-		DisplaySetting("IsProductionRelease:    ", IsProductionRelease);
-		DisplaySetting("GitHubAccessToken:      ", KeyAvailable(GITHUB_ACCESS_TOKEN));
-	}
-
-	private static void DisplayHeading(string heading)
-	{
-		Context.Information($"\n{heading}");
-	}
-
-	private static void DisplaySetting<T>(string label, T setting, string notset="NOT SET")
-	{
-		var fmtSetting = setting == null ? notset : setting.ToString(); 
-		Context.Information(label + fmtSetting);
-	}
-
-    private static string GetApiKey(string name, string fallback=null)
-    {
-        var apikey = Context.EnvironmentVariable(name);
-
-        if (string.IsNullOrEmpty(apikey) && fallback != null)
-            apikey = Context.EnvironmentVariable(fallback);
-
-        return apikey;
-    }
-
-	private static string KeyAvailable(string name, string fallback=null)
-	{
-		return !string.IsNullOrEmpty(GetApiKey(name, fallback)) ? "AVAILABLE" : "NOT AVAILABLE";
-	}
 }

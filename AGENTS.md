@@ -7,12 +7,12 @@ CodeRabbit reads this file as review guidance.
 
 - `recipe` -- code for the shared Cake build package, used by other TestCentric projects.
   This project uses it directly in order to build and test itself.
-- `build.cake` our own Cake build script, which loads  the recipe.
+- `build.cs` our own Cake.Sdk build script, which includes the recipe files.
 
 ## Building and testing
 
-- `dotnet tool restore`, then `dotnet cake --target=Build` or `dotnet cake --target=Test`.
-  `build.ps1` / `build.cmd` are wrappers around the same thing.
+- `dotnet tool restore`, then `dotnet run --file build.cs -- --target=Build` or `--target=Test`.
+  `build.ps1` / `build.cmd` are wrappers around the same thing. Requires the .NET 10 SDK or later.
 
 ## Code
 

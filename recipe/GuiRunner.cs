@@ -3,36 +3,39 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-/// <summary>
-/// Class that knows how to install and run the TestCentric GUI,
-/// using either the NuGet or the Chocolatey package.
-/// </summary>
-public class GuiRunner : InstallableTestRunner
+public static partial class Program
 {
-	public const string NuGetId = "TestCentric.GuiRunner";
-	public const string ChocoId = "testcentric-gui";
+    /// <summary>
+    /// Class that knows how to install and run the TestCentric GUI,
+    /// using either the NuGet or the Chocolatey package.
+    /// </summary>
+    public class GuiRunner : InstallableTestRunner
+    {
+        public const string NuGetId = "TestCentric.GuiRunner";
+        public const string ChocoId = "testcentric-gui";
 
-	public GuiRunner(string packageId, string version)
-		: base(packageId, version)
-	{
-		if (packageId != NuGetId && packageId != ChocoId)
-			throw new ArgumentException($"Package Id invalid: {packageId}", nameof(packageId));
-	}
+        public GuiRunner(string packageId, string version)
+            : base(packageId, version)
+        {
+            if (packageId != NuGetId && packageId != ChocoId)
+                throw new ArgumentException($"Package Id invalid: {packageId}", nameof(packageId));
+        }
 
-	protected override FilePath ExecutableRelativePath => "tools/testcentric.exe";
+        protected override FilePath ExecutableRelativePath => "tools/testcentric.exe";
 
-	public string BuiltInAgentUnderTest { get; set; }
+        public string BuiltInAgentUnderTest { get; set; }
 
-	public int Run(string arguments)
-	{
-		if (string.IsNullOrEmpty(arguments))
-			throw new ArgumentException("No run arguments supplied");
+        public int Run(string arguments)
+        {
+            if (string.IsNullOrEmpty(arguments))
+                throw new ArgumentException("No run arguments supplied");
 
-		if (!arguments.Contains(" --run"))
-			arguments += " --run";
-		if (!arguments.Contains(" --unattended"))
-			arguments += " --unattended";
+            if (!arguments.Contains(" --run"))
+                arguments += " --run";
+            if (!arguments.Contains(" --unattended"))
+                arguments += " --unattended";
 
-		return RunTest(ExecutablePath, arguments);
-	}
+            return RunTest(ExecutablePath, arguments);
+        }
+    }
 }
