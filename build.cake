@@ -25,7 +25,7 @@ BuildSettings.Packages.Add(
 		{
 			HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
 			HasDirectory("content").WithFiles(
-				"agent-factory.cake", "banner.cake", "build-settings.cake", "builder.cake",
+				"banner.cake", "build-settings.cake", "builder.cake",
 				"chocolatey-package.cake", "command-line-options.cake", "console-reporter.cake",
 				"constants.cake", "dotnet-tool-package.cake", "gui-runner.cake", "headers.cake",
 				"help-messages.cake", "extension-specifier.cake", "nuget-package.cake", "package-checks.cake",

@@ -28,16 +28,6 @@
                 suffix. If provided, this version is used directly in place of
                 the default version calculated by the script.
 
-            --where, -w=SELECTION
-                Specifies a selction expression used to choose which packages
-                to build and test, for use in debugging. Consists of one or
-                more specifications, separated by '|' and '&'. Each specification
-                is of the form "prop=value", where prop may be either id or type.
-                Examples:
-                    --where type=nuget
-                    --where id=NUnit.Engine.Api
-                    --where "type=nuget|type=choco"
-
             --level, --lev, -l=LEVEL
                 Specifies the level of package testing, 1, 2 or 3. Defaults are
                   1 = for normal CI tests run every time you build a package

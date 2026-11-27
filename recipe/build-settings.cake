@@ -203,7 +203,6 @@ public static class BuildSettings
 	public static string AssemblyVersion => BuildVersion.AssemblyVersion;
 	public static string AssemblyFileVersion => BuildVersion.AssemblyFileVersion;
 	public static string AssemblyInformationalVersion => BuildVersion.AssemblyInformationalVersion;
-	public static bool IsDevelopmentRelease => PackageVersion.Contains("-dev");
 
     // Chocolatey.org does not yet support semver 2.0, so we have to use a legacy format
     private static string _chocolateyPackageVersion;
@@ -296,11 +295,6 @@ public static class BuildSettings
 			: false;
 
 	public static NuGetVerbosity NuGetVerbosity{ get; set; }
-	public static NuGetRestoreSettings RestoreSettings => new NuGetRestoreSettings
-	{
-		Verbosity = NuGetVerbosity
-	};
-
 	// The chocolatey Setting is actually bool Verbose, but we use verbosity 
 	// so it lines up with the settings for NuGet
 	public static bool ChocolateyVerbosity { get; set; }

@@ -19,8 +19,6 @@ static readonly string[] DEFAULT_STANDARD_HEADER = new[] {
 	"// ***********************************************************************"
 };
 
-const string DEFAULT_TEST_RESULT_FILE = "TestResult.xml";
-
 // Standardized project directory structure - not changeable by user
 const string SRC_DIR			= "src/";
 const string BIN_DIR			= "bin/";

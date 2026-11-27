@@ -7,26 +7,3 @@
 
 using Cake.Git;
 using Cake.MinVer;
-
-public static class Tools
-{
-	public static DirectoryPath FindInstalledTool(string packageId)
-	{
-		if (SIO.Directory.Exists(BuildSettings.ToolsDirectory + packageId))
-			return BuildSettings.ToolsDirectory + packageId;
-
-		foreach(var dir in BuildSettings.Context.GetDirectories(BuildSettings.ToolsDirectory + $"{packageId}.*"))
-			return dir; // Use first one found
-
-		return null;
-	}
-
-	public static DirectoryPath FindInstalledTool(string packageId, string version)
-	{
-		if (version == null)
-			throw new ArgumentNullException(nameof(version));
-
-		var toolPath = BuildSettings.ToolsDirectory + $"{packageId}.{version}";
-		return BuildSettings.ToolsDirectory + $"{packageId}.{version}";
-	}
-}

@@ -24,7 +24,6 @@ public static class BuildTasks
 	public static CakeTaskBuilder CheckHeadersTask { get; set; }
 	public static CakeTaskBuilder CleanTask { get; set; }
 	public static CakeTaskBuilder CleanAllTask { get; set; }
-	public static CakeTaskBuilder CleanOutputDirectoriesTask { get; set; }
 	public static CakeTaskBuilder CleanPackageDirectoryTask { get; set; }
 	public static CakeTaskBuilder RestoreTask { get; set; }
 
