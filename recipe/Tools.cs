@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // Load all tools used by the recipe
 #tool NuGet.CommandLine&version=7.0.1
 #tool dotnet:?package=minver-cli&version=8.0.0

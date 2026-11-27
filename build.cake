@@ -1,6 +1,6 @@
 // We use some recipe files for testing. In addition, loading the
 // entire recipe gives us an error if any references are missing.
-#load recipe/*.cake
+#load recipe/*.cs
 
 //////////////////////////////////////////////////////////////////////
 // INITIALIZE BUILD SETTINGS
@@ -10,6 +10,7 @@ BuildSettings.Initialize(
 	context: Context,
 	title: "TestCentric Cake Recipe",
 	githubRepository: "TestCentric.Cake.Recipe",
+	headerCheckDirectories: new[] { "recipe/" },
 	defaultTarget: "Package");
 
 //////////////////////////////////////////////////////////////////////
@@ -25,14 +26,13 @@ BuildSettings.Packages.Add(
 		{
 			HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
 			HasDirectory("content").WithFiles(
-				"banner.cake", "build-settings.cake", "builder.cake",
-				"chocolatey-package.cake", "command-line-options.cake", "console-reporter.cake",
-				"constants.cake", "dotnet-tool-package.cake", "gui-runner.cake", "headers.cake",
-				"help-messages.cake", "extension-specifier.cake", "nuget-package.cake", "package-checks.cake",
-				"package-content.cake", "package-definition.cake", "package-reference.cake",
-				"package-test.cake", "publishing.cake", "recipe-package.cake", "recipe.cake",
-				"setup.cake", "BuildTasks.cake", "test-reports.cake",
-				"test-results.cake", "test-runners.cake", "tools.cake", "unit-testing.cake", "versioning.cake" )
+				"Banner.cs", "BuildSettings.cs", "BuildTasks.cs", "BuildVersion.cs", "Builder.cs",
+				"ChocolateyPackage.cs", "CommandLineOptions.cs", "ConsoleReporter.cs", "Constants.cs",
+				"DotNetToolPackage.cs", "ExtensionSpecifier.cs", "GuiRunner.cs", "Headers.cs",
+				"HelpMessages.cs", "NuGetPackage.cs", "PackageChecks.cs", "PackageContent.cs",
+				"PackageDefinition.cs", "PackageReference.cs", "PackageReleaseManager.cs", "PackageTest.cs",
+				"PackageTestReport.cs", "Recipe.cs", "RecipePackage.cs", "Setup.cs",
+				"TestResults.cs", "TestRunners.cs", "Tools.cs", "UnitTesting.cs" )
         }
 	) );
 

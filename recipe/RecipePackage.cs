@@ -1,6 +1,11 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 public class RecipePackage : NuGetPackage
 {
-    private IEnumerable<FilePath> _cakeFiles;
+    private IEnumerable<FilePath> _recipeFiles;
     private bool _hasNuSpec = false;
 
     /// <summary>
@@ -35,9 +40,11 @@ public class RecipePackage : NuGetPackage
         if (source != null && source.EndsWith(".nuspec"))
             _hasNuSpec = true;
 
-        // Create or rewrite recipe.cake so it has the version we are building
-        using (var writer = new StreamWriter("./recipe/recipe.cake"))
+        // Create or rewrite Recipe.cs so it has the version we are building
+        using (var writer = new StreamWriter("./recipe/Recipe.cs"))
             writer.Write($$"""
+                {{string.Join(Environment.NewLine, DEFAULT_STANDARD_HEADER)}}
+
                 public static class Recipe
                 {
                     public static string Version => "{{PackageVersion}}";
@@ -46,12 +53,12 @@ public class RecipePackage : NuGetPackage
 
         if (!_hasNuSpec)
         {
-            if (content == null) content = "recipe/*.cake";
-            _cakeFiles = _context.GetFiles(content).Select(f => f.GetFilename());
+            if (content == null) content = "recipe/*.cs";
+            _recipeFiles = _context.GetFiles(content).Select(f => f.GetFilename());
 
             PackageChecks = new PackageCheck[] {
                 HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
-                HasDirectory("content").WithFiles(_cakeFiles.ToArray())
+                HasDirectory("content").WithFiles(_recipeFiles.ToArray())
             };
         }
     }
@@ -67,7 +74,7 @@ public class RecipePackage : NuGetPackage
                 settings.Files.Add(new NuSpecContent() { Source = "LICENSE.txt" });
                 settings.Files.Add(new NuSpecContent() { Source = "README.md" });
                 settings.Files.Add(new NuSpecContent() { Source = "testcentric.png" });
-                foreach (FilePath filePath in _cakeFiles)
+                foreach (FilePath filePath in _recipeFiles)
                     settings.Files.Add(new NuSpecContent() { Source = $"recipe/{filePath}", Target = "content" });
             }
 

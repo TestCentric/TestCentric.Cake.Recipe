@@ -1,6 +1,11 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // All tasks incorporated in the recipe are defined using CakeTaskBuilders.
 // The actual specification of criteria, dependencies and actions for each
-// task is done separately in task-definitions.cake.
+// task is done separately, later in this file.
 //
 // This approach provides a level of indirection, permitting the user to
 // modify or completely redefine what a task does in their build.cake file,
@@ -8,7 +13,7 @@
 
 public static class BuildTasks
 {
-	// Our context - set by setup.cake
+	// Our context - set by BuildSettings.Initialize
 	public static ICakeContext Context { get; set; }
 
 	// General
@@ -61,8 +66,6 @@ public static class BuildTasks
 //
 // To make a change for a single project, you should add code to your
 // build.cake file or another project-specific cake file.
-//
-// See extending.cake for examples.
 
 //////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
@@ -168,7 +171,16 @@ BuildTasks.BuildTask = Task("Build")
         """)
 	.Does(() =>
 	{
-        DotNetBuild(BuildSettings.SolutionFile, BuildSettings.DotNetBuildSettings);
+		// TODO: Change back to DotNetBuild once TestCentric-Gui can use it, i.e.
+		//   DotNetBuild(BuildSettings.SolutionFile, BuildSettings.DotNetBuildSettings);
+		// DotNetBuildSettings sets GenerateResourceUsePreserializedResources, so each
+		// .NET Framework project with non-string resources then needs a reference to
+		// System.Resources.Extensions, and the GUI packages must ship that DLL and its
+		// dependencies (System.Memory, System.Buffers, System.Numerics.Vectors and
+		// System.Runtime.CompilerServices.Unsafe). Without them the GUI build fails
+		// with MSB3822, or the packaged GUI fails at startup.
+		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings
+			.WithProperty("Version", BuildSettings.PackageVersion));
 	});
 
 //////////////////////////////////////////////////////////////////////

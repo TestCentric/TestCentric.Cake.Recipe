@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // Representation of a single test to be run against a pre-built package.
 // Each test has a Level, with the following values defined...
 //  0 Do not run - used for temporarily disabling a test

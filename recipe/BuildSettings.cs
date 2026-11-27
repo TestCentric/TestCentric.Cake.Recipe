@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 //////////////////////////////////////////////////////////////////////
 // BUILD SETTINGS
 //////////////////////////////////////////////////////////////////////
@@ -17,6 +22,7 @@ public static class BuildSettings
 		string[] standardHeader = null,
 		string copyright = null,
 		string[] exemptFiles = null,
+		string[] headerCheckDirectories = null, // Relative to the project directory. Defaults to src/
 
 		string solutionFile = null,
 		string[] validConfigurations = null,
@@ -73,6 +79,7 @@ public static class BuildSettings
 				StandardHeader[1] = "// " + copyright;
 		}
 		ExemptFiles = exemptFiles ?? new string[0];
+		HeaderCheckDirectories = headerCheckDirectories ?? new[] { SRC_DIR };
 
         BuildTasks.Context = context;
 		BuildTasks.DefaultTask.IsDependentOn(defaultTarget);
@@ -164,7 +171,7 @@ public static class BuildSettings
 	// Cake Context
 	public static ICakeContext Context { get; private set; }
 
-    // NOTE: These are set in setup.cake
+    // NOTE: These are set in Setup.cs
 	public static string Target { get; set; }
 	public static IEnumerable<string> TasksToExecute { get; set; }
 
@@ -308,6 +315,7 @@ public static class BuildSettings
 	public static bool SuppressHeaderCheck { get; private set; }
 	public static string[] StandardHeader { get; private set; }
 	public static string[] ExemptFiles { get; private set; }
+	public static string[] HeaderCheckDirectories { get; private set; }
 
 	// Packaging
 	public static string Title { get; private set; }
@@ -425,6 +433,7 @@ public static class BuildSettings
 		Context.Information("StandardHeader:");
 		foreach (var line in StandardHeader)
 			Context.Information(line);
+		DisplaySetting("HeaderCheckDirectories: ", string.Join(", ", HeaderCheckDirectories));
 
 		DisplayHeading("TESTING");
 		DisplaySetting("UnitTests:        ", UnitTests, "DEFAULT");

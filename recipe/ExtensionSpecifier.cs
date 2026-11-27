@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // Representation of an extension, for use by PackageTests. Because our
 // extensions usually exist as both nuget and chocolatey packages, each
 // extension may have a nuget id, a chocolatey id or both. A default version
