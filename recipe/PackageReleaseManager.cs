@@ -5,270 +5,270 @@
 
 public static partial class Program
 {
-/// <summary>
-/// Publishes packages to MyGet, NuGet and Chocolatey, and creates GitHub releases,
-/// following the publishing rules in BuildSettings.
-/// </summary>
-public static class PackageReleaseManager
-{
-	private static ICakeContext _context;
+    /// <summary>
+    /// Publishes packages to MyGet, NuGet and Chocolatey, and creates GitHub releases,
+    /// following the publishing rules in BuildSettings.
+    /// </summary>
+    public static class PackageReleaseManager
+    {
+        private static ICakeContext _context;
 
-	static PackageReleaseManager()
-	{
-		_context = BuildSettings.Context;
-	}
+        static PackageReleaseManager()
+        {
+            _context = BuildSettings.Context;
+        }
 
-	private static bool _hadErrors = false;
+        private static bool _hadErrors = false;
 
-	public static void Publish()
-	{
-		_hadErrors = false;
+        public static void Publish()
+        {
+            _hadErrors = false;
 
-		PublishToMyGet();
-		PublishToNuGet();
-		PublishToChocolatey();
+            PublishToMyGet();
+            PublishToNuGet();
+            PublishToChocolatey();
 
-		if (_hadErrors)
-			throw new Exception("One of the publishing steps failed.");
-	}
+            if (_hadErrors)
+                throw new Exception("One of the publishing steps failed.");
+        }
 
-	public static void PublishToMyGet()
-	{
-		if (!BuildSettings.ShouldPublishToMyGet)
-			_context.Information("Nothing to publish to MyGet from this run.");
-		else if (CommandLineOptions.NoPush)
-			_context.Information("NoPush option suppressing publication to MyGet");
-		else
-			foreach (var package in BuildSettings.Packages)
-			{
-				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackageDirectory + packageName;
-				try
-				{
-					if (package.PackageType == PackageType.NuGet)
-						PushNuGetPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
-					else if (package.PackageType == PackageType.Chocolatey)
-						PushChocolateyPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
-				}
-				catch (Exception ex)
-				{
-					_context.Error(ex.Message);
-					_hadErrors = true;
-				}
-			}
-	}
+        public static void PublishToMyGet()
+        {
+            if (!BuildSettings.ShouldPublishToMyGet)
+                _context.Information("Nothing to publish to MyGet from this run.");
+            else if (CommandLineOptions.NoPush)
+                _context.Information("NoPush option suppressing publication to MyGet");
+            else
+                foreach (var package in BuildSettings.Packages)
+                {
+                    var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+                    var packagePath = BuildSettings.PackageDirectory + packageName;
+                    try
+                    {
+                        if (package.PackageType == PackageType.NuGet)
+                            PushNuGetPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
+                        else if (package.PackageType == PackageType.Chocolatey)
+                            PushChocolateyPackage(packagePath, BuildSettings.MyGetApiKey, BuildSettings.MyGetPushUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        _context.Error(ex.Message);
+                        _hadErrors = true;
+                    }
+                }
+        }
 
-	public static void PublishToNuGet()
-	{
-		if (!BuildSettings.ShouldPublishToNuGet)
-			_context.Information("Nothing to publish to NuGet from this run.");
-		else if (CommandLineOptions.NoPush)
-			_context.Information("NoPush option suppressing publication to NuGet");
-		else
-			foreach (var package in BuildSettings.Packages)
-			{
-				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackageDirectory + packageName;
-				try
-				{
-					if (package.PackageType == PackageType.NuGet)
-						PushNuGetPackage(packagePath, BuildSettings.NuGetApiKey, BuildSettings.NuGetPushUrl);
-				}
-				catch (Exception ex)
-				{
-					_context.Error(ex.Message);
-					_hadErrors = true;
-				}
-			}
-	}
+        public static void PublishToNuGet()
+        {
+            if (!BuildSettings.ShouldPublishToNuGet)
+                _context.Information("Nothing to publish to NuGet from this run.");
+            else if (CommandLineOptions.NoPush)
+                _context.Information("NoPush option suppressing publication to NuGet");
+            else
+                foreach (var package in BuildSettings.Packages)
+                {
+                    var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+                    var packagePath = BuildSettings.PackageDirectory + packageName;
+                    try
+                    {
+                        if (package.PackageType == PackageType.NuGet)
+                            PushNuGetPackage(packagePath, BuildSettings.NuGetApiKey, BuildSettings.NuGetPushUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        _context.Error(ex.Message);
+                        _hadErrors = true;
+                    }
+                }
+        }
 
-	public static void PublishToChocolatey()
-	{
-		if (!BuildSettings.ShouldPublishToChocolatey)
-			_context.Information("Nothing to publish to Chocolatey from this run.");
-		else if (CommandLineOptions.NoPush)
-			_context.Information("NoPush option suppressing publication to Chocolatey");
-		else
-			foreach (var package in BuildSettings.Packages)
-			{
-				var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
-				var packagePath = BuildSettings.PackageDirectory + packageName;
-				try
-				{
-					if (package.PackageType == PackageType.Chocolatey)
-						PushChocolateyPackage(packagePath, BuildSettings.ChocolateyApiKey, BuildSettings.ChocolateyPushUrl);
-				}
-				catch (Exception ex)
-				{
-					_context.Error(ex.Message);
-					_hadErrors = true;
-				}
-			}
-	}
+        public static void PublishToChocolatey()
+        {
+            if (!BuildSettings.ShouldPublishToChocolatey)
+                _context.Information("Nothing to publish to Chocolatey from this run.");
+            else if (CommandLineOptions.NoPush)
+                _context.Information("NoPush option suppressing publication to Chocolatey");
+            else
+                foreach (var package in BuildSettings.Packages)
+                {
+                    var packageName = $"{package.PackageId}.{BuildSettings.PackageVersion}.nupkg";
+                    var packagePath = BuildSettings.PackageDirectory + packageName;
+                    try
+                    {
+                        if (package.PackageType == PackageType.Chocolatey)
+                            PushChocolateyPackage(packagePath, BuildSettings.ChocolateyApiKey, BuildSettings.ChocolateyPushUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        _context.Error(ex.Message);
+                        _hadErrors = true;
+                    }
+                }
+        }
 
-	private static void PushNuGetPackage(FilePath package, string apiKey, string url)
-	{
-		CheckPackageExists(package);
-		_context.NuGetPush(package, new NuGetPushSettings() { ApiKey = apiKey, Source = url });
-	}
+        private static void PushNuGetPackage(FilePath package, string apiKey, string url)
+        {
+            CheckPackageExists(package);
+            _context.NuGetPush(package, new NuGetPushSettings() { ApiKey = apiKey, Source = url });
+        }
 
-	private static void PushChocolateyPackage(FilePath package, string apiKey, string url)
-	{
-		CheckPackageExists(package);
-		_context.ChocolateyPush(package, new ChocolateyPushSettings() { ApiKey = apiKey, Source = url });
-	}
+        private static void PushChocolateyPackage(FilePath package, string apiKey, string url)
+        {
+            CheckPackageExists(package);
+            _context.ChocolateyPush(package, new ChocolateyPushSettings() { ApiKey = apiKey, Source = url });
+        }
 
-	private static void CheckPackageExists(FilePath package)
-	{
-		if (!_context.FileExists(package))
-			throw new InvalidOperationException(
-				$"Package not found: {package.GetFilename()}.\nCode may have changed since package was last built.");
-	}
+        private static void CheckPackageExists(FilePath package)
+        {
+            if (!_context.FileExists(package))
+                throw new InvalidOperationException(
+                    $"Package not found: {package.GetFilename()}.\nCode may have changed since package was last built.");
+        }
 
-	private const string DRAFT_RELEASE_ERROR =
-		"A direct call to CreateDraftRelease is permitted only:\r\n" +
-		"  * On a release branch (release-x.x.x)\r\n" +
-		"  * Using option --packageVersion to specify a release version";
+        private const string DRAFT_RELEASE_ERROR =
+            "A direct call to CreateDraftRelease is permitted only:\r\n" +
+            "  * On a release branch (release-x.x.x)\r\n" +
+            "  * Using option --packageVersion to specify a release version";
 
-	public static void CreateDraftRelease()
-	{
-		// If we are called for a production release, we only create a draft release if
-		// the target was called directly on a local system. Otherwise, we risk either
-		// an exception or possibly modifying a user-edited draft release.
-		bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
+        public static void CreateDraftRelease()
+        {
+            // If we are called for a production release, we only create a draft release if
+            // the target was called directly on a local system. Otherwise, we risk either
+            // an exception or possibly modifying a user-edited draft release.
+            bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
 
-		string releaseVersion =
-			CommandLineOptions.PackageVersion.Exists
-				? CommandLineOptions.PackageVersion.Value
-				: BuildSettings.IsReleaseBranch
-					? BuildSettings.BranchName.Substring(8)
-					: localDirectCall && BuildSettings.IsProductionRelease
-						? BuildSettings.PackageVersion : null;
+            string releaseVersion =
+                CommandLineOptions.PackageVersion.Exists
+                    ? CommandLineOptions.PackageVersion.Value
+                    : BuildSettings.IsReleaseBranch
+                        ? BuildSettings.BranchName.Substring(8)
+                        : localDirectCall && BuildSettings.IsProductionRelease
+                            ? BuildSettings.PackageVersion : null;
 
-		if (releaseVersion != null)
-		{
-			string releaseName = $"{BuildSettings.Title} {releaseVersion}";
-			_context.Information($"Creating draft release for {releaseName}");
+            if (releaseVersion != null)
+            {
+                string releaseName = $"{BuildSettings.Title} {releaseVersion}";
+                _context.Information($"Creating draft release for {releaseName}");
 
-			try
-			{
+                try
+                {
+                    GRM.Create(releaseName, releaseVersion);
+                }
+                catch
+                {
+                    _context.Error($"Unable to create draft release for {releaseName}.");
+                    _context.Error($"Check that there is a {releaseVersion} milestone with at least one closed issue.");
+                    _context.Error("");
+                    throw;
+                }
+            }
+            else
+            {
+                if (localDirectCall)
+                    throw new InvalidOperationException(DRAFT_RELEASE_ERROR);
+                else
+                    _context.Information("Skipping creation of draft release because this is not a release branch");
+            }
+        }
+
+        private const string UPDATE_RELEASE_ERROR =
+            "A direct call to UpdateReleaseNotes is permitted only:\r\n" +
+            "  * On the main branch tagged for a production release\r\n" +
+            "  * Using option --packageVersion to specify a release version";
+
+        public static void UpdateReleaseNotes()
+        {
+            string releaseVersion = CommandLineOptions.PackageVersion.Exists
+                ? CommandLineOptions.PackageVersion.Value
+                : BuildSettings.IsProductionRelease
+                    ? BuildSettings.PackageVersion : null;
+
+            if (releaseVersion == null)
+                throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
+
+            string releaseName = $"{BuildSettings.Title} {releaseVersion}";
+            _context.Information($"Updating release notes for {releaseName}");
+
+            try
+            {
                 GRM.Create(releaseName, releaseVersion);
-			}
-			catch
-			{
-				_context.Error($"Unable to create draft release for {releaseName}.");
-				_context.Error($"Check that there is a {releaseVersion} milestone with at least one closed issue.");
-				_context.Error("");
-				throw;
-			}
-		}
-		else
-		{
-			if (localDirectCall)
-				throw new InvalidOperationException(DRAFT_RELEASE_ERROR);
-			else
-				_context.Information("Skipping creation of draft release because this is not a release branch");
-		}
-	}
+            }
+            catch
+            {
+                _context.Error($"Unable to update release notes for {releaseName}.");
+                _context.Error($"Check that there is a {releaseVersion} milestone with a matching release.");
+                _context.Error("");
+                throw;
+            }
 
-	private const string UPDATE_RELEASE_ERROR =
-		"A direct call to UpdateReleaseNotes is permitted only:\r\n" +
-		"  * On the main branch tagged for a production release\r\n" +
-		"  * Using option --packageVersion to specify a release version";
+        }
 
-	public static void UpdateReleaseNotes()
-	{
-		string releaseVersion = CommandLineOptions.PackageVersion.Exists
-			? CommandLineOptions.PackageVersion.Value
-			: BuildSettings.IsProductionRelease
-				? BuildSettings.PackageVersion : null;
+        public static void DownloadDraftRelease()
+        {
+            if (!BuildSettings.IsReleaseBranch)
+                throw new Exception("DownloadDraftRelease requires a release branch!");
 
-		if (releaseVersion == null)
-			throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
+            string milestone = BuildSettings.BranchName.Substring(8);
 
-		string releaseName = $"{BuildSettings.Title} {releaseVersion}";
-		_context.Information($"Updating release notes for {releaseName}");
+            GRM.Export("DraftRelease.md", milestone);
+        }
 
-		try
-		{
-			GRM.Create(releaseName, releaseVersion);
-		}
-		catch
-		{
-			_context.Error($"Unable to update release notes for {releaseName}.");
-			_context.Error($"Check that there is a {releaseVersion} milestone with a matching release.");
-			_context.Error("");
-			throw;
-		}
+        public static void CreateProductionRelease()
+        {
+            if (!BuildSettings.IsProductionRelease)
+            {
+                _context.Information("Skipping CreateProductionRelease because this is not a production release");
+            }
+            else
+            {
+                string token = BuildSettings.GitHubAccessToken;
+                string owner = BuildSettings.GitHubOwner;
+                string repository = BuildSettings.GitHubRepository;
+                string tagName = BuildSettings.PackageVersion;
+                string assets = string.Join<string>(',', BuildSettings.Packages.Select(p => p.PackageFilePath));
 
-	}
+                _context.Information($"Publishing release {tagName} to GitHub");
+                _context.Information($"  Assets: {assets}");
 
-	public static void DownloadDraftRelease()
-	{
-		if (!BuildSettings.IsReleaseBranch)
-			throw new Exception("DownloadDraftRelease requires a release branch!");
+                GRM.AddAssets(tagName, assets);
+                GRM.Close(tagName);
+            }
+        }
 
-		string milestone = BuildSettings.BranchName.Substring(8);
+        private static class GRM
+        {
+            private static readonly string CREDENTIALS =
+                    $"--token {BuildSettings.GitHubAccessToken}" + $" -o {BuildSettings.GitHubOwner} -r {BuildSettings.GitHubRepository}";
 
-		GRM.Export("DraftRelease.md", milestone);
-	}
+            public static void Create(string name, string milestone)
+            {
+                Execute($"create -n \"{name}\" -m {milestone}");
+            }
 
-	public static void CreateProductionRelease()
-	{
-		if (!BuildSettings.IsProductionRelease)
-		{
-			_context.Information("Skipping CreateProductionRelease because this is not a production release");
-		}
-		else
-		{
-			string token = BuildSettings.GitHubAccessToken;
-			string owner = BuildSettings.GitHubOwner;
-			string repository = BuildSettings.GitHubRepository;
-			string tagName = BuildSettings.PackageVersion;
-			string assets = string.Join<string>(',', BuildSettings.Packages.Select(p => p.PackageFilePath));
+            public static void Export(string filename, string milestone)
+            {
+                Execute($"export -f \"{filename}\" -m {milestone}");
+            }
 
-			_context.Information($"Publishing release {tagName} to GitHub");
-			_context.Information($"  Assets: {assets}");
+            public static void AddAssets(string tagname, string assets)
+            {
+                Execute($"addasset -t {tagname} -a \"{assets}\"");
+            }
 
-			GRM.AddAssets(tagName, assets);
-			GRM.Close(tagName);
-		}
-	}
+            public static void Close(string milestone)
+            {
+                Execute($"close -m {milestone}");
+            }
 
-	private static class GRM
-	{
-		private static readonly string CREDENTIALS =
-				$"--token {BuildSettings.GitHubAccessToken}" + $" -o {BuildSettings.GitHubOwner} -r {BuildSettings.GitHubRepository}";
+            private static void Execute(string arguments)
+            {
+                arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
 
-		public static void Create(string name, string milestone)
-		{
-			Execute($"create -n \"{name}\" -m {milestone}");
-		}
-
-		public static void Export(string filename, string milestone)
-		{
-			Execute($"export -f \"{filename}\" -m {milestone}");
-		}
-
-		public static void AddAssets(string tagname, string assets)
-		{
-			Execute($"addasset -t {tagname} -a \"{assets}\"");
-		}
-
-		public static void Close(string milestone)
-		{
-			Execute($"close -m {milestone}");
-		}
-
-		private static void Execute(string arguments)
-		{
-            arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
-            
-			if (CommandLineOptions.NoPush)
-                _context.Information($"NoPush option skipping command `{arguments}`");
-			else
-				_context.StartProcess("dotnet", arguments);
-		}
+                if (CommandLineOptions.NoPush)
+                    _context.Information($"NoPush option skipping command `{arguments}`");
+                else
+                    _context.StartProcess("dotnet", arguments);
+            }
+        }
     }
-}
 }

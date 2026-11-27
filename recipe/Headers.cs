@@ -5,11 +5,11 @@
 
 public static partial class Program
 {
-/// <summary>
-/// Checks that every C# file in BuildSettings.HeaderCheckDirectories starts with the
-/// standard header, and fails the build if any header is missing or different.
-/// </summary>
-public static void CheckHeaders()
+    /// <summary>
+    /// Checks that every C# file in BuildSettings.HeaderCheckDirectories starts with the
+    /// standard header, and fails the build if any header is missing or different.
+    /// </summary>
+    public static void CheckHeaders()
     {
         var _context = BuildSettings.Context;
 
@@ -112,5 +112,5 @@ public static void CheckHeaders()
 
             return file.ToString().Substring(CD_LENGTH);
         }
-	}
+    }
 }

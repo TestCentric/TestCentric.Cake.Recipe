@@ -5,84 +5,84 @@
 
 public static partial class Program
 {
-/// <summary>
-/// Representation of a package reference, containing everything needed to install it
-/// </summary>
-public class PackageReference
-{
-	private ICakeContext _context;
+    /// <summary>
+    /// Representation of a package reference, containing everything needed to install it
+    /// </summary>
+    public class PackageReference
+    {
+        private ICakeContext _context;
 
-	public string Id { get; }
-	public string Version { get; }
+        public string Id { get; }
+        public string Version { get; }
 
-	public PackageReference(string id, string version)
-	{
-		_context = BuildSettings.Context;
+        public PackageReference(string id, string version)
+        {
+            _context = BuildSettings.Context;
 
-		Id = id;
-		Version = version;
-	}
+            Id = id;
+            Version = version;
+        }
 
-    public PackageReference LatestDevBuild => GetLatestDevBuild();
-	public PackageReference LatestRelease => GetLatestRelease();
-	
-	private PackageReference GetLatestDevBuild()
-	{
-		var packageList = _context.NuGetList(Id, new NuGetListSettings()
-		{
-			Prerelease = true, 
-			Source = new [] { $"https://www.myget.org/F/{GITHUB_OWNER}/api/v3/index.json" } 
-		} );
+        public PackageReference LatestDevBuild => GetLatestDevBuild();
+        public PackageReference LatestRelease => GetLatestRelease();
 
-		foreach (var package in packageList)
-			return new PackageReference(package.Name, package.Version);
-		
-		return this;
-	}
+        private PackageReference GetLatestDevBuild()
+        {
+            var packageList = _context.NuGetList(Id, new NuGetListSettings()
+            {
+                Prerelease = true, 
+                Source = new [] { $"https://www.myget.org/F/{GITHUB_OWNER}/api/v3/index.json" } 
+            } );
 
-	private PackageReference GetLatestRelease()
-	{
-		var packageList = _context.NuGetList(Id, new NuGetListSettings()
-		{
-			Prerelease = true, 
-			Source = new [] { 
-				"https://www.nuget.org/api/v2/",
-				"https://community.chocolatey.org/api/v2/" } 
-		} );
+            foreach (var package in packageList)
+                return new PackageReference(package.Name, package.Version);
 
-		// TODO: There seems to be an error in NuGet or in Cake, causing the list to
-		// contain ALL TestCentric packages, so we check the Id in this loop.
-		foreach (var package in packageList)
-			if (package.Name == Id)
-				return new PackageReference(Id, package.Version);
+            return this;
+        }
 
-		return this;
-	}
+        private PackageReference GetLatestRelease()
+        {
+            var packageList = _context.NuGetList(Id, new NuGetListSettings()
+            {
+                Prerelease = true, 
+                Source = new [] { 
+                    "https://www.nuget.org/api/v2/",
+                    "https://community.chocolatey.org/api/v2/" } 
+            } );
 
-    public bool IsInstalled(string installDirectory)
-	{
-		return _context.GetDirectories($"{installDirectory}{Id}.*").Count > 0;
-	}
+            // TODO: There seems to be an error in NuGet or in Cake, causing the list to
+            // contain ALL TestCentric packages, so we check the Id in this loop.
+            foreach (var package in packageList)
+                if (package.Name == Id)
+                    return new PackageReference(Id, package.Version);
 
-	public void InstallExtension(PackageDefinition targetPackage)
-	{
-		Install(targetPackage.PackageTestDirectory);
-	}
+            return this;
+        }
 
-	public void Install(string installDirectory)
-	{
-		if (!IsInstalled(installDirectory))
-		{
-			DisplayBanner($"Installing {Id} version {Version}");
+        public bool IsInstalled(string installDirectory)
+        {
+            return _context.GetDirectories($"{installDirectory}{Id}.*").Count > 0;
+        }
 
-			_context.NuGetInstall(Id,
-				new NuGetInstallSettings()
-				{
-					OutputDirectory = installDirectory,
-					Version = Version,
-					//Source = packageSources
-				});
-		}
-	}
-}
+        public void InstallExtension(PackageDefinition targetPackage)
+        {
+            Install(targetPackage.PackageTestDirectory);
+        }
+
+        public void Install(string installDirectory)
+        {
+            if (!IsInstalled(installDirectory))
+            {
+                DisplayBanner($"Installing {Id} version {Version}");
+
+                _context.NuGetInstall(Id,
+                    new NuGetInstallSettings()
+                    {
+                        OutputDirectory = installDirectory,
+                        Version = Version,
+                        //Source = packageSources
+                    });
+            }
+        }
+    }
 }

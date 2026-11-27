@@ -17,14 +17,14 @@ global using SIO = System.IO;
 
 public static partial class Program
 {
-	/// <summary>
-	/// Install all tools used by the recipe. Called by BuildSettings.Initialize
-	/// before anything that needs them, such as calculating the version.
-	/// </summary>
-	static void InstallRecipeTools()
-	{
-		InstallTool("nuget:?package=NuGet.CommandLine&version=7.0.1");
-		InstallTool("dotnet:?package=minver-cli&version=8.0.0");
-		InstallTool("dotnet:?package=GitReleaseManager.Tool&version=0.20.0");
-	}
+    /// <summary>
+    /// Install all tools used by the recipe. Called by BuildSettings.Initialize
+    /// before anything that needs them, such as calculating the version.
+    /// </summary>
+    static void InstallRecipeTools()
+    {
+        InstallTool("nuget:?package=NuGet.CommandLine&version=7.0.1");
+        InstallTool("dotnet:?package=minver-cli&version=8.0.0");
+        InstallTool("dotnet:?package=GitReleaseManager.Tool&version=0.20.0");
+    }
 }

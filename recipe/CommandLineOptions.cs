@@ -5,154 +5,154 @@
 
 public static partial class Program
 {
-/// <summary>
-/// The command-line options the recipe recognizes, with their aliases and defaults.
-/// </summary>
-public static class CommandLineOptions
-{
-	static private ICakeContext _context;
-
-	// Cake script called Initialize as this file was loaded. Under Cake.Sdk, the
-	// static constructor does it the first time any option is used.
-	static CommandLineOptions()
-	{
-		Initialize(Context);
-	}
-
-	static public ValueOption<string> Target;
-	static public MultiValueOption<string> Targets;
-
-	static public ValueOption<string> Configuration;
-	static public ValueOption<string> PackageVersion;
-	static public ValueOption<int> TestLevel;
-	static public ValueOption<string> TraceLevel;
-	static public SimpleOption NoBuild;
-	static public SimpleOption NoPush;
-	static public SimpleOption ShowUsage;
-	static public SimpleOption ShowTasks;
-
-	public static void Initialize(ICakeContext context)
-	{
-		_context = context;
-
-		// The name of the TARGET task to be run, e.g. Test.
-		Target = new ValueOption<string>("target|t", "Default");
-
-		// Multiple targets to be run
-		Targets = new MultiValueOption<string>("target|t", "Default");
-
-		Configuration = new ValueOption<String>("configuration|c", DEFAULT_CONFIGURATION);
-		
-		PackageVersion = new ValueOption<string>("packageVersion|package|pv|p", null);
-
-		TestLevel = new ValueOption<int>("level|lev|l", 0);
-
-		TraceLevel = new ValueOption<string>("trace|tr", "Off");
-
-		NoBuild = new SimpleOption("nobuild|nob");
-
-		NoPush = new SimpleOption("nopush|nop");
-
-		ShowUsage = new SimpleOption("usage");
-
-		ShowTasks = new SimpleOption("tasks");
-	}
-
-	// Nested classes to represent individual options
-
-	/// <summary>
-	/// Base class for a single option. It has a name, and can tell us whether it was given.
-	/// </summary>
-	public abstract class AbstractOption
-	{
-		public List<string> Aliases { get; }
-		
-		public bool Exists 
-		{
-			get
-			{
-				foreach (string alias in Aliases)
-					if (_context.HasArgument(alias))
-						return true;
-				return false;
-			}
-		}
-
-		public string Description { get; }
-
-		public AbstractOption(string aliases, string description = null)
-		{
-			Aliases = new List<string>(aliases.Split('|'));
-			Description = description;
-		}
-	}
-
-	/// <summary>
-	/// Simple Option adds an implicit boolean conversion operator.
-	/// It throws an exception if you gave it a value on the command-line.
-	/// </summary>
-	public class SimpleOption : AbstractOption
-	{
-		static public implicit operator bool(SimpleOption o) => o.Exists;
-
-		public SimpleOption(string aliases, string description = null)
-			: base(aliases, description)
-		{
-			foreach(string alias in Aliases)
-				if (_context.Argument(alias, (string)null) != null)
-					throw new Exception($"Option --{alias} does not take a value.");
-		}
-	}
-
-	/// <summary>
-	/// Generic ValueOption adds Value as well as a default value
-	/// </summary>
-	public class ValueOption<T> : AbstractOption
-	{
-		public T DefaultValue { get; }
-
-		public ValueOption(string aliases, T defaultValue, string description = null)
-			: base(aliases, description)
-		{
-			DefaultValue = defaultValue;
-		}
-
-		public T Value
-		{
-			get
-			{
-				foreach (string alias in Aliases)
-					if (_context.HasArgument(alias))
-						return _context.Argument<T>(alias);
-			
-				return DefaultValue;
-			}
-		}
-	}
-
     /// <summary>
-    /// Generic MultiValueOption adds Values, which returns a collection of values
+    /// The command-line options the recipe recognizes, with their aliases and defaults.
     /// </summary>
-    public class MultiValueOption<T> : ValueOption<T>
+    public static class CommandLineOptions
     {
-	    public MultiValueOption(string aliases, T defaultValue, string description = null)
-		    : base(aliases, defaultValue, description) { }
+        static private ICakeContext _context;
 
-		public ICollection<T> Values
-		{
-			get
-			{
-				var result = new List<T>();
+        // Cake script called Initialize as this file was loaded. Under Cake.Sdk, the
+        // static constructor does it the first time any option is used.
+        static CommandLineOptions()
+        {
+            Initialize(Context);
+        }
 
-				foreach (string alias in Aliases)
-				    if (_context.HasArgument(alias))
-					    result.AddRange(_context.Arguments<T>(alias));
+        static public ValueOption<string> Target;
+        static public MultiValueOption<string> Targets;
 
-				if (result.Count == 0) result.Add(DefaultValue);
+        static public ValueOption<string> Configuration;
+        static public ValueOption<string> PackageVersion;
+        static public ValueOption<int> TestLevel;
+        static public ValueOption<string> TraceLevel;
+        static public SimpleOption NoBuild;
+        static public SimpleOption NoPush;
+        static public SimpleOption ShowUsage;
+        static public SimpleOption ShowTasks;
 
-				return result;
-			}
-		}
+        public static void Initialize(ICakeContext context)
+        {
+            _context = context;
+
+            // The name of the TARGET task to be run, e.g. Test.
+            Target = new ValueOption<string>("target|t", "Default");
+
+            // Multiple targets to be run
+            Targets = new MultiValueOption<string>("target|t", "Default");
+
+            Configuration = new ValueOption<String>("configuration|c", DEFAULT_CONFIGURATION);
+
+            PackageVersion = new ValueOption<string>("packageVersion|package|pv|p", null);
+
+            TestLevel = new ValueOption<int>("level|lev|l", 0);
+
+            TraceLevel = new ValueOption<string>("trace|tr", "Off");
+
+            NoBuild = new SimpleOption("nobuild|nob");
+
+            NoPush = new SimpleOption("nopush|nop");
+
+            ShowUsage = new SimpleOption("usage");
+
+            ShowTasks = new SimpleOption("tasks");
+        }
+
+        // Nested classes to represent individual options
+
+        /// <summary>
+        /// Base class for a single option. It has a name, and can tell us whether it was given.
+        /// </summary>
+        public abstract class AbstractOption
+        {
+            public List<string> Aliases { get; }
+
+            public bool Exists 
+            {
+                get
+                {
+                    foreach (string alias in Aliases)
+                        if (_context.HasArgument(alias))
+                            return true;
+                    return false;
+                }
+            }
+
+            public string Description { get; }
+
+            public AbstractOption(string aliases, string description = null)
+            {
+                Aliases = new List<string>(aliases.Split('|'));
+                Description = description;
+            }
+        }
+
+        /// <summary>
+        /// Simple Option adds an implicit boolean conversion operator.
+        /// It throws an exception if you gave it a value on the command-line.
+        /// </summary>
+        public class SimpleOption : AbstractOption
+        {
+            static public implicit operator bool(SimpleOption o) => o.Exists;
+
+            public SimpleOption(string aliases, string description = null)
+                : base(aliases, description)
+            {
+                foreach(string alias in Aliases)
+                    if (_context.Argument(alias, (string)null) != null)
+                        throw new Exception($"Option --{alias} does not take a value.");
+            }
+        }
+
+        /// <summary>
+        /// Generic ValueOption adds Value as well as a default value
+        /// </summary>
+        public class ValueOption<T> : AbstractOption
+        {
+            public T DefaultValue { get; }
+
+            public ValueOption(string aliases, T defaultValue, string description = null)
+                : base(aliases, description)
+            {
+                DefaultValue = defaultValue;
+            }
+
+            public T Value
+            {
+                get
+                {
+                    foreach (string alias in Aliases)
+                        if (_context.HasArgument(alias))
+                            return _context.Argument<T>(alias);
+
+                    return DefaultValue;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Generic MultiValueOption adds Values, which returns a collection of values
+        /// </summary>
+        public class MultiValueOption<T> : ValueOption<T>
+        {
+            public MultiValueOption(string aliases, T defaultValue, string description = null)
+                : base(aliases, defaultValue, description) { }
+
+            public ICollection<T> Values
+            {
+                get
+                {
+                    var result = new List<T>();
+
+                    foreach (string alias in Aliases)
+                        if (_context.HasArgument(alias))
+                            result.AddRange(_context.Arguments<T>(alias));
+
+                    if (result.Count == 0) result.Add(DefaultValue);
+
+                    return result;
+                }
+            }
+        }
     }
-}
 }
