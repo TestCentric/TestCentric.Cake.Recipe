@@ -16,7 +16,7 @@ static public class HelpMessages
 
         TestCentric.Cake.Recipe is a set of scripts used to build this project. The
         recipe provides a number of built-in options and tasks. Additional options
-        and tasks may be defined in your build.cake file or in other files it loads.
+        and tasks may be defined in your build script or in other files it includes.
 
         Usage: build [options]
 
