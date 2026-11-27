@@ -6,26 +6,6 @@ public class PackageReference
 	public string Id { get; }
 	public string Version { get; }
 
-	// Static members provide reference to known packages
-	public static PackageReference Engine = new PackageReference(
-		"TestCentric.Engine", "2.0.0-beta7");
-	public static PackageReference EngineCore = new PackageReference(
-		"TestCentric.Engine.Core", "2.0.0-beta7");
-	public static PackageReference EngineApi = new PackageReference(
-		"TestCentric.Engine.Api", "2.0.0-beta7");
-	public static PackageReference AgentCore = new PackageReference(
-		"TestCentric.Agent.Core", "2.1.0");
-	public static PackageReference Extensibility = new PackageReference(
-		"TestCentric.Extensibility", "3.2.0");
-	public static PackageReference ExtensibilityApi = new PackageReference(
-		"TestCentric.ExtensibilityApi", "3.2.0");
-	public static PackageReference Metadata = new PackageReference(
-		"TestCentric.Metadata", "3.0.4");
-	public static PackageReference GuiRunner = new PackageReference(
-		"TestCentric.GuiRunner", "2.0.0-beta7");
-	public static PackageReference InternalTrace = new PackageReference(
-		"TestCentric.InternalTrace", "1.2.1");
-
 	public PackageReference(string id, string version)
 	{
 		_context = BuildSettings.Context;

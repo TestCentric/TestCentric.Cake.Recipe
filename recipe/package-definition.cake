@@ -96,44 +96,6 @@ public abstract class PackageDefinition
     // The directory used to contain results of package tests for this package
     public string PackageResultDirectory => $"{PackageInstallDirectory}results/";
 
-    public bool IsSelectedBy(string selectionExpression)
-    {
-        return IsSelectedByAny(selectionExpression.Split("|", StringSplitOptions.RemoveEmptyEntries));
-
-        bool IsSelectedByAny(string[] terms)
-        {
-            foreach (var term in terms)
-                if (IsSelectedByAll(term.Split("&", StringSplitOptions.RemoveEmptyEntries)))
-                    return true;
-
-            return false;
-        }
-
-        bool IsSelectedByAll(string[] factors)
-        {
-            foreach (string factor in factors)
-            {
-                int index = factor.IndexOf("=");
-                if (index <= 0)
-                    throw new ArgumentException("Selection expression does not contain =", "where");
-                string prop = factor.Substring(0, index).Trim();
-                string val = factor.Substring(index+1).Trim();
-
-                switch(prop.ToUpper())
-                {
-                    case "ID":
-                        return PackageId.ToLower() == val.ToLower();
-                    case "TYPE":
-                        return PackageType.ToString().ToLower() == val.ToLower();
-                    default:
-                        throw new Exception($"Not a valid selection property: {prop}");
-                }
-            }
-
-            return false;
-        }
-    }
-
     public void BuildVerifyAndTest()
     {
         _context.EnsureDirectoryExists(BuildSettings.PackageDirectory);

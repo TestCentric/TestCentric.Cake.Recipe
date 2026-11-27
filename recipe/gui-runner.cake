@@ -7,8 +7,6 @@ public class GuiRunner : InstallableTestRunner
 	public const string NuGetId = "TestCentric.GuiRunner";
 	public const string ChocoId = "testcentric-gui";
 
-	private const string RUNNER_EXE = "testcentric.exe";
-
 	public GuiRunner(string packageId, string version)
 		: base(packageId, version)
 	{

@@ -162,20 +162,6 @@ public class NUnitNetCoreConsoleRunner : InstallableTestRunner, IUnitTestRunner,
 	public int RunPackageTest(string arguments) => RunTest(ExecutablePath, arguments);
 }
 
-public class EngineExtensionTestRunner : TestRunner, IPackageTestRunner
-{
-	private IPackageTestRunner[] _runners = new IPackageTestRunner[] {
-		new NUnitConsoleRunner("3.17.0"),
-		new NUnitConsoleRunner("3.15.5")
-	};
-
-	public int RunPackageTest(string arguments)
-	{
-		
-		return _runners[0].RunPackageTest(arguments);
-	}
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // AGENT RUNNER
 /////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,6 @@
 		<file src="LICENSE.txt" />
 		<file src="README.md" />
 		<file src="testcentric.png" />
-		<file src="recipe/agent-factory.cake" target="content" />
 		<file src="recipe/banner.cake" target="content" />
 		<file src="recipe/build-settings.cake" target="content" />
 		<file src="recipe/builder.cake" target="content" />
