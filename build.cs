@@ -35,7 +35,9 @@ BuildSettings.Packages.Add(
 		checks: new PackageCheck[]
 		{
 			HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
-			HasDirectory("content").WithFiles(
+			HasDependency("Cake.Git", "5.0.1"),
+			HasDependency("Cake.MinVer", "4.0.0"),
+			HasDirectory("contentFiles/cs/any/TestCentric.Cake.Recipe").WithFiles(
 				"Banner.cs", "BuildSettings.cs", "BuildTasks.cs", "BuildVersion.cs", "Builder.cs",
 				"ChocolateyPackage.cs", "CommandLineOptions.cs", "ConsoleReporter.cs", "Constants.cs",
 				"DotNetToolPackage.cs", "ExtensionSpecifier.cs", "GuiRunner.cs", "Headers.cs",
