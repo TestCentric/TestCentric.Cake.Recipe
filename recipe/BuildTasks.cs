@@ -171,7 +171,16 @@ BuildTasks.BuildTask = Task("Build")
         """)
 	.Does(() =>
 	{
-        DotNetBuild(BuildSettings.SolutionFile, BuildSettings.DotNetBuildSettings);
+		// TODO: Change back to DotNetBuild once TestCentric-Gui can use it, i.e.
+		//   DotNetBuild(BuildSettings.SolutionFile, BuildSettings.DotNetBuildSettings);
+		// DotNetBuildSettings sets GenerateResourceUsePreserializedResources, so each
+		// .NET Framework project with non-string resources then needs a reference to
+		// System.Resources.Extensions, and the GUI packages must ship that DLL and its
+		// dependencies (System.Memory, System.Buffers, System.Numerics.Vectors and
+		// System.Runtime.CompilerServices.Unsafe). Without them the GUI build fails
+		// with MSB3822, or the packaged GUI fails at startup.
+		MSBuild(BuildSettings.SolutionFile, BuildSettings.MSBuildSettings
+			.WithProperty("Version", BuildSettings.PackageVersion));
 	});
 
 //////////////////////////////////////////////////////////////////////
