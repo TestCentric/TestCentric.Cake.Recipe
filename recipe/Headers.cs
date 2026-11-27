@@ -3,21 +3,16 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-//////////////////////////////////////////////////////////////////////
-// CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
-//////////////////////////////////////////////////////////////////////
-
-public static class Headers
+public static partial class Program
 {
-    private static ICakeContext _context;
-
-    static Headers()
+    /// <summary>
+    /// Checks that every C# file in BuildSettings.HeaderCheckDirectories starts with the
+    /// standard header, and fails the build if any header is missing or different.
+    /// </summary>
+    public static void CheckHeaders()
     {
-        _context = BuildSettings.Context;
-    }
+        var _context = BuildSettings.Context;
 
-    public static void Check()
-    {
         var NoHeader = new List<FilePath>();
         var NonStandard = new List<FilePath>();
         var Exempted = new List<FilePath>();
@@ -117,5 +112,5 @@ public static class Headers
 
             return file.ToString().Substring(CD_LENGTH);
         }
-	}
+    }
 }

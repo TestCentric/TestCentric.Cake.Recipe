@@ -3,7 +3,7 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-public static class Recipe
+public static partial class Program
 {
-    public static string Version => "2.0.0-dev00001";
+    public const string RECIPE_VERSION = "2.0.0-dev00001";
 }

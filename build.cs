@@ -1,6 +1,16 @@
-// We use some recipe files for testing. In addition, loading the
-// entire recipe gives us an error if any references are missing.
-#load recipe/*.cs
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
+// Cake.Sdk build for the recipe. Run with: dotnet build.cs -- --target=Package
+// or through the build.cmd, build.ps1 and build.sh wrappers.
+
+#:sdk Cake.Sdk@7.0.0
+#:package Cake.Git@5.0.1
+#:package Cake.MinVer@4.0.0
+#:property IncludeAdditionalFiles=recipe/*.cs
+#:property Nullable=disable
 
 //////////////////////////////////////////////////////////////////////
 // INITIALIZE BUILD SETTINGS
@@ -33,7 +43,7 @@ BuildSettings.Packages.Add(
 				"PackageDefinition.cs", "PackageReference.cs", "PackageReleaseManager.cs", "PackageTest.cs",
 				"PackageTestReport.cs", "Recipe.cs", "RecipePackage.cs", "Setup.cs",
 				"TestResults.cs", "TestRunners.cs", "Tools.cs", "UnitTesting.cs" )
-        }
+		}
 	) );
 
 //////////////////////////////////////////////////////////////////////
