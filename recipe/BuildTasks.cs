@@ -1,6 +1,11 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // All tasks incorporated in the recipe are defined using CakeTaskBuilders.
 // The actual specification of criteria, dependencies and actions for each
-// task is done separately in task-definitions.cake.
+// task is done separately, later in this file.
 //
 // This approach provides a level of indirection, permitting the user to
 // modify or completely redefine what a task does in their build.cake file,
@@ -8,7 +13,7 @@
 
 public static class BuildTasks
 {
-	// Our context - set by setup.cake
+	// Our context - set by BuildSettings.Initialize
 	public static ICakeContext Context { get; set; }
 
 	// General
@@ -61,8 +66,6 @@ public static class BuildTasks
 //
 // To make a change for a single project, you should add code to your
 // build.cake file or another project-specific cake file.
-//
-// See extending.cake for examples.
 
 //////////////////////////////////////////////////////////////////////
 // GENERAL TASKS

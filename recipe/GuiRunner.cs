@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 /// <summary>
 /// Class that knows how to install and run the TestCentric GUI,
 /// using either the NuGet or the Chocolatey package.

@@ -22,6 +22,11 @@ reviews:
   path_instructions:
     - path: "**/*.cake"
       instructions: |
-        Cake build scripts. build.cake loads the cake files in the recipe directory.
+        Cake build scripts. build.cake loads the .cs files in the recipe directory.
         Cake is a C#-based build automation system and the code may be treated as such.
         See https://cakebuild.net/ for more information.
+    - path: "recipe/**/*.cs"
+      instructions: |
+        Recipe files, loaded as Cake script by build.cake. They are not yet ordinary C#
+        source: they may contain Cake directives such as #tool and #addin, and top-level
+        statements such as Task() and Setup(). Converting them to Cake.Sdk is tracked separately.

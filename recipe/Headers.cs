@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 //////////////////////////////////////////////////////////////////////
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
@@ -18,7 +23,8 @@ public static class Headers
         var Exempted = new List<FilePath>();
         int examined = 0;
 
-        var sourceFiles = _context.GetFiles(BuildSettings.SourceDirectory + "**/*.cs");
+        var sourceFiles = BuildSettings.HeaderCheckDirectories
+            .SelectMany(dir => _context.GetFiles(BuildSettings.ProjectDirectory + dir + "**/*.cs"));
         var exemptFiles = BuildSettings.ExemptFiles;
         foreach (var file in sourceFiles)
         {
@@ -87,7 +93,7 @@ public static class Headers
             throw new Exception("Missing or invalid file headers found");
 
         if (examined == 0)
-            _context.Warning("\nWARNING: There were no '*.cs' files in the source directory. Use of the 'CheckHeaders' task may not make sense for this project.");
+            _context.Warning($"\nWARNING: There were no '*.cs' files in {string.Join(", ", BuildSettings.HeaderCheckDirectories)}. Use of the 'CheckHeaders' task may not make sense for this project.");
 
         List<string> GetHeader(FilePath file)
         {

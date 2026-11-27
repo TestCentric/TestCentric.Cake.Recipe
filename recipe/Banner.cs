@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // Banner class displays banners similar to those created by Cake
 // We use this to display intermediate steps within a task
 public static class Banner

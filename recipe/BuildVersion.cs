@@ -1,3 +1,8 @@
+// ***********************************************************************
+// Copyright (c) Charlie Poole and TestCentric contributors.
+// Licensed under the MIT License. See LICENSE file in root directory.
+// ***********************************************************************
+
 // Versions are calculated by MinVer from the most recent tag reachable from HEAD.
 // For example, after tag 2.0.0-beta.1, the next commit builds as 2.0.0-beta.1.1
 // and the one after as 2.0.0-beta.1.2, so every build gets a new, higher version.
