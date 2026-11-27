@@ -9,17 +9,10 @@ public static partial class Program
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
 
-public static class Headers
-{
-    private static ICakeContext _context;
-
-    static Headers()
+public static void CheckHeaders()
     {
-        _context = BuildSettings.Context;
-    }
+        var _context = BuildSettings.Context;
 
-    public static void Check()
-    {
         var NoHeader = new List<FilePath>();
         var NonStandard = new List<FilePath>();
         var Exempted = new List<FilePath>();
@@ -120,5 +113,4 @@ public static class Headers
             return file.ToString().Substring(CD_LENGTH);
         }
 	}
-}
 }

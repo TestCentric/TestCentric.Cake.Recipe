@@ -116,7 +116,7 @@ BuildTasks.CheckHeadersTask = Task("CheckHeaders")
 		""")
 	.WithCriteria(() => !CommandLineOptions.NoBuild)
 	.WithCriteria(() => !BuildSettings.SuppressHeaderCheck)
-	.Does(() => Headers.Check());
+	.Does(() => CheckHeaders());
 
 BuildTasks.CleanTask = Task("Clean")
 	.Description("Clean output directories for current config as well as the package directory.")
@@ -227,7 +227,7 @@ BuildTasks.BuildPackagesTask = Task("BuildPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
-	        Banner.Display($"Building {package.PackageFileName}");
+	        DisplayBanner($"Building {package.PackageFileName}");
 			package.BuildPackage();
 
 			if (BuildSettings.ShouldAddToLocalFeed)
@@ -242,7 +242,7 @@ BuildTasks.InstallPackagesTask = Task("InstallPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
-	        Banner.Display($"Installing {package.PackageFileName}");
+	        DisplayBanner($"Installing {package.PackageFileName}");
 			package.InstallPackage();
 		}
 	});
@@ -253,7 +253,7 @@ BuildTasks.VerifyPackagesTask = Task("VerifyPackages")
 	.Does(() => {
 		foreach(var package in BuildSettings.Packages)
 		{
-	        Banner.Display($"Verifying {package.PackageFileName}");
+	        DisplayBanner($"Verifying {package.PackageFileName}");
 			package.VerifyPackage();
 		}
 	});
@@ -266,7 +266,7 @@ BuildTasks.TestPackagesTask = Task("TestPackages")
 		{
 			if (package.PackageTests != null)
 			{
-				Banner.Display($"Testing {package.PackageFileName}");
+				DisplayBanner($"Testing {package.PackageFileName}");
 				package.RunPackageTests();
 			}
 		}

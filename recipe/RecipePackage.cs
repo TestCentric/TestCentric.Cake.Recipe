@@ -42,17 +42,14 @@ public class RecipePackage : NuGetPackage
         if (source != null && source.EndsWith(".nuspec"))
             _hasNuSpec = true;
 
-        // Create or rewrite Recipe.cs so it has the version we are building
+        // Create or rewrite Recipe.cs so RECIPE_VERSION is the version we are building
         using (var writer = new StreamWriter("./recipe/Recipe.cs"))
             writer.Write($$"""
                 {{string.Join(Environment.NewLine, DEFAULT_STANDARD_HEADER)}}
 
                 public static partial class Program
                 {
-                public static class Recipe
-                {
-                    public static string Version => "{{PackageVersion}}";
-                }
+                    public const string RECIPE_VERSION = "{{PackageVersion}}";
                 }
                 """);
 

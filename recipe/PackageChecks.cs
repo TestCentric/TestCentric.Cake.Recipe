@@ -9,9 +9,7 @@ public static partial class Program
 // SYNTAX FOR EXPRESSING CHECKS
 //////////////////////////////////////////////////////////////////////
 
-public static class Check
-{
-	public static void That(DirectoryPath testDirPath, IList<PackageCheck> checks)
+public static void ApplyPackageChecks(DirectoryPath testDirPath, IList<PackageCheck> checks)
 	{
 		if (checks == null)
 			throw new ArgumentNullException(nameof(checks));
@@ -23,7 +21,6 @@ public static class Check
 
         if (!allOK) throw new Exception("Verification failed!");
     }
-}
 
 public static FileCheck HasFile(FilePath file) => HasFiles(new[] { file });
 public static FileCheck HasFiles(params FilePath[] files) => new FileCheck(files);

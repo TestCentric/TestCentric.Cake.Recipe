@@ -72,7 +72,7 @@ public static class BuildSettings
 		UnitTestRunner = unitTestRunner ?? new NUnitLiteRunner();
 		UnitTestArguments = unitTestArguments;
 
-		RecipeVersion = Recipe.Version;
+		RecipeVersion = RECIPE_VERSION;
 		BuildVersion = new BuildVersion(context);
 
 		GitHubOwner = githubOwner;

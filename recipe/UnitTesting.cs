@@ -38,7 +38,7 @@ public static class UnitTesting
         if (IsValidRuntime(containingDir))
             msg += " under " + containingDir;
 
-        Banner.Display(msg);
+        DisplayBanner(msg);
 
         var runner = BuildSettings.UnitTestRunner ?? new NUnitLiteRunner();
         bool isNUnitLite = runner is NUnitLiteRunner;

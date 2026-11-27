@@ -107,31 +107,31 @@ public abstract class PackageDefinition
     {
         _context.EnsureDirectoryExists(BuildSettings.PackageDirectory);
 
-        Banner.Display($"Building {PackageFileName}");
+        DisplayBanner($"Building {PackageFileName}");
         BuildPackage();
 
-        Banner.Display($"Adding {PackageFileName} to local feed");
+        DisplayBanner($"Adding {PackageFileName} to local feed");
         AddPackageToLocalFeed();
 
-        Banner.Display($"Installing {PackageFileName}");
+        DisplayBanner($"Installing {PackageFileName}");
         InstallPackage();
 
         if (PackageChecks != null || PackageContent != null)
         {
-            Banner.Display($"Verifying {PackageFileName}");
+            DisplayBanner($"Verifying {PackageFileName}");
             VerifyPackage();
         }
 
         if (SymbolChecks != null)
         {
-            Banner.Display($"Verifying symbols for {PackageFileName}");
+            DisplayBanner($"Verifying symbols for {PackageFileName}");
             // TODO: Override this in NuGetPackage
             VerifySymbolPackage();
         }
 
         if (PackageTests != null)
         {
-            Banner.Display($"Testing {PackageFileName}");
+            DisplayBanner($"Testing {PackageFileName}");
             RunPackageTests();
         }
     }
@@ -221,7 +221,7 @@ public abstract class PackageDefinition
             var testResultDir = $"{PackageResultDirectory}/{packageTest.Name}/";
             var resultFile = testResultDir + "TestResult.xml";
 
-            Banner.Display(packageTest.Description);
+            DisplayBanner(packageTest.Description);
 
 			_context.CreateDirectory(testResultDir);
             string arguments = $"{packageTest.Arguments} {ExtraTestArguments} --work={testResultDir}";

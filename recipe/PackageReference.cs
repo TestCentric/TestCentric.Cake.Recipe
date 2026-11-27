@@ -71,7 +71,7 @@ public class PackageReference
 	{
 		if (!IsInstalled(installDirectory))
 		{
-			Banner.Display($"Installing {Id} version {Version}");
+			DisplayBanner($"Installing {Id} version {Version}");
 
 			_context.NuGetInstall(Id,
 				new NuGetInstallSettings()

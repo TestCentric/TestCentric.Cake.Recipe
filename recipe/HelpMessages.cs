@@ -8,7 +8,7 @@ public static partial class Program
 static public class HelpMessages
 {
     static private string HEADER = $"""
-        TestCentric.Cake.Recipe - Version {Recipe.Version}
+        TestCentric.Cake.Recipe - Version {RECIPE_VERSION}
         """;
 
 	static public string Usage => $"""
