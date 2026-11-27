@@ -63,7 +63,7 @@ public static partial class Program
 
                 PackageChecks = new PackageCheck[] {
                     HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
-                    HasDirectory("content").WithFiles(_recipeFiles.ToArray())
+                    HasDirectory(RecipeFilesTarget).WithFiles(_recipeFiles.ToArray())
                 };
             }
         }
@@ -80,11 +80,17 @@ public static partial class Program
                     settings.Files.Add(new NuSpecContent() { Source = "README.md" });
                     settings.Files.Add(new NuSpecContent() { Source = "testcentric.png" });
                     foreach (FilePath filePath in _recipeFiles)
-                        settings.Files.Add(new NuSpecContent() { Source = $"recipe/{filePath}", Target = "content" });
+                        settings.Files.Add(new NuSpecContent() { Source = $"recipe/{filePath}", Target = RecipeFilesTarget });
+                    // Compile the recipe files into the build script that references the package.
+                    // Addin dependencies need a nuspec; this path doesn't add them.
+                    settings.ContentFiles = new[] { new NuSpecContentFile { Include = "cs/any/**/*.cs", BuildAction = "Compile" } };
                 }
 
                 return settings;
             }
         }
+
+        // Where the recipe's .cs files go in the package, so that #:package compiles them
+        private string RecipeFilesTarget => $"contentFiles/cs/any/{PackageId}";
     }
 }

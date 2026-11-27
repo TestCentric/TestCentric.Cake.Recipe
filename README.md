@@ -2,13 +2,13 @@
 
 TestCentric.Cake.Recipe is a standard cake recipe used for TestCentric projects. It is inspired by Cake.Recipe but is somewhat simpler in implementation, since it isn't intended for general use. The recipe is still under development.
 
-## Structure of the `build.cake` File
+## The `build.cs` File
 
-The following is an example of a simple `build.cake` file for a project which creates a single package.
+Projects use the recipe from a [Cake.Sdk](https://cakebuild.net/docs/running-builds/runners/cake-sdk) build script, a single-file C# app named `build.cs`. This requires the .NET 10 SDK or later. The following is an example for a project which creates a single package.
 
-```
-// Load the recipe
-#load nuget:?package=TestCentric.Cake.Recipe&version=1.1.0
+```csharp
+#:sdk Cake.Sdk@7.0.0
+#:package TestCentric.Cake.Recipe@2.0.0
 
 // Initialize Build Settings
 BuildSettings.Initialize(
@@ -29,24 +29,48 @@ BuildSettings.Packages.Add(new NuGetPackage(
 Build.Run();
 ```
 
+Run it with `dotnet run --file build.cs -- <arguments>`, for example `dotnet run --file build.cs -- --target=Package`.
+
 **NOTES:**
 
-1. The `#load` statement loads `TestCentric.Cake.Recipe`, specifying the version to use, 
-   in this case version 1.1.0. It is generally recommended that you specify the recipe 
-   version to avoid unpleasant surprises when the recipe is updated.
+1. `#:package` references the recipe, specifying the version to use. It is generally recommended
+   that you pin the version to avoid unpleasant surprises when the recipe is updated. The recipe's
+   files are compiled into your build script, and the Cake addins it needs come with it.
 
 2. `BuildSettings.Initialize` sets the parameters which drive the build process. The example
-   specifies only the three required paraameters. See below for a complete list of parameters.
+   specifies only the three required parameters.
 
 3. Define a single `nuget` package.
 
-4. Run the selected target. This must be the last command in the file.
+4. Run the selected target. This must be the last statement in the file.
+
+### Additional build files
+
+Code in other files can be included with `#:property IncludeAdditionalFiles=file1.cs;file2.cs`.
+Like the recipe's own files, each must be ordinary C#. Wrap its contents in
+`public static partial class Program { ... }`, so its members are visible to `build.cs` and can
+call Cake methods such as `Information` and `Task` directly.
+
+If the project uses Central Package Management, add `#:property ManagePackageVersionsCentrally=false`
+so that the `#:package` versions are accepted.
+
+### Testing a local copy of the recipe
+
+To build against a local checkout of the recipe instead of the package, remove the `#:package`
+line for the recipe and include its files directly, for example:
+
+```csharp
+#:property IncludeAdditionalFiles=../TestCentric.Cake.Recipe/recipe/*.cs;PackageTests.cs
+```
+
+The recipe's addins then have to be referenced directly as well, with `#:package` lines for
+`Cake.Git` and `Cake.MinVer`.
 
 ## Supported Arguments
 
 The recipe supports a number of standard arguments for use in any project
 that uses it. Additional arguments may be supported directly by the user's
-`build.cake` if necessary but must not conflict with the built-in arguments.
+build script if necessary but must not conflict with the built-in arguments.
 
 Arguments taking a value may use  `=` or space to separate the name
 from the value.

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
 
 	<metadata>
 		<id>TestCentric.Cake.Recipe</id>
@@ -18,41 +18,52 @@
 		<readme>README.md</readme>
 		<tags>testcentric cake recipe</tags>
 		<language>en-US</language>
+		<!-- Addins the recipe uses. Projects get them with the recipe, through #:package. -->
+		<dependencies>
+			<group targetFramework="net10.0">
+				<dependency id="Cake.Git" version="5.0.1" />
+				<dependency id="Cake.MinVer" version="4.0.0" />
+			</group>
+		</dependencies>
+		<!-- The recipe is C# source, compiled into a Cake.Sdk build script that references this package. -->
+		<contentFiles>
+			<files include="cs/any/**/*.cs" buildAction="Compile" />
+		</contentFiles>
 	</metadata>
 
 	<files>
 		<file src="LICENSE.txt" />
 		<file src="README.md" />
 		<file src="testcentric.png" />
-		<file src="recipe/Banner.cs" target="content" />
-		<file src="recipe/Builder.cs" target="content" />
-		<file src="recipe/BuildSettings.cs" target="content" />
-		<file src="recipe/BuildTasks.cs" target="content" />
-		<file src="recipe/BuildVersion.cs" target="content" />
-		<file src="recipe/ChocolateyPackage.cs" target="content" />
-		<file src="recipe/CommandLineOptions.cs" target="content" />
-		<file src="recipe/ConsoleReporter.cs" target="content" />
-		<file src="recipe/Constants.cs" target="content" />
-		<file src="recipe/DotNetToolPackage.cs" target="content" />
-		<file src="recipe/ExtensionSpecifier.cs" target="content" />
-		<file src="recipe/GuiRunner.cs" target="content" />
-		<file src="recipe/Headers.cs" target="content" />
-		<file src="recipe/HelpMessages.cs" target="content" />
-		<file src="recipe/NuGetPackage.cs" target="content" />
-		<file src="recipe/PackageChecks.cs" target="content" />
-		<file src="recipe/PackageContent.cs" target="content" />
-		<file src="recipe/PackageDefinition.cs" target="content" />
-		<file src="recipe/PackageReference.cs" target="content" />
-		<file src="recipe/PackageReleaseManager.cs" target="content" />
-		<file src="recipe/PackageTest.cs" target="content" />
-		<file src="recipe/PackageTestReport.cs" target="content" />
-		<file src="recipe/Recipe.cs" target="content" />
-		<file src="recipe/RecipePackage.cs" target="content" />
-		<file src="recipe/Setup.cs" target="content" />
-		<file src="recipe/TestResults.cs" target="content" />
-		<file src="recipe/TestRunners.cs" target="content" />
-		<file src="recipe/Tools.cs" target="content" />
-		<file src="recipe/UnitTesting.cs" target="content" />
+		<file src="recipe/Banner.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/Builder.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/BuildSettings.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/BuildTasks.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/BuildVersion.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/ChocolateyPackage.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/CommandLineOptions.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/ConsoleReporter.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/Constants.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/DotNetToolPackage.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/ExtensionSpecifier.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/GuiRunner.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/Headers.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/HelpMessages.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/NuGetPackage.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageChecks.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageContent.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageDefinition.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageReference.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageReleaseManager.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageTest.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/PackageTestReport.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/Recipe.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/RecipePackage.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/Setup.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/TestResults.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/TestRunners.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/Tools.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<file src="recipe/UnitTesting.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
 	</files>
 
 </package>
