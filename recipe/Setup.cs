@@ -3,6 +3,11 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
+// Registers the recipe's Setup action. Called by BuildSettings.Initialize.
+static void DefineSetup()
+{
 Setup((context) =>
 {
 	var target = context.TargetTask.Name;
@@ -57,3 +62,5 @@ Setup((context) =>
 		throw new Exception(message);
 	}
 });
+}
+}

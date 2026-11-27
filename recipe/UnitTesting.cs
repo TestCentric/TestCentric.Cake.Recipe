@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // UNIT TEST RUNNER
 //////////////////////////////////////////////////////////////////////
@@ -102,4 +104,5 @@ public static class UnitTesting
             return x.GetFilename().ToString().CompareTo(y.GetFilename().ToString());
         }
     }
+}
 }

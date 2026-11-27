@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 static public class HelpMessages
 {
     static private string HEADER = $"""
@@ -259,4 +261,5 @@ static public class HelpMessages
           Depends On: {BuildTasks.DefaultTask.Task.Dependencies.FirstOrDefault().Name}
                 
         """;
+}
 }

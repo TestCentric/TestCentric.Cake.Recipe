@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 public static class PackageReleaseManager
 {
 	private static ICakeContext _context;
@@ -264,4 +266,5 @@ public static class PackageReleaseManager
 				_context.StartProcess("dotnet", arguments);
 		}
     }
+}
 }

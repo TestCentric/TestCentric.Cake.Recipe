@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 public class PackageTestReport
 {
 	public PackageTest Test;
@@ -177,4 +179,5 @@ public class ResultReporter
 
 		return hasErrors;
 	}
+}
 }

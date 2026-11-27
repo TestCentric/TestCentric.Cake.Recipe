@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // PACKAGE DEFINITION ABSTRACT CLASS
 //////////////////////////////////////////////////////////////////////
@@ -283,4 +285,5 @@ public abstract class PackageDefinition
     public virtual void VerifySymbolPackage() { } // Does nothing. Overridden for NuGet packages.
 
     protected abstract bool IsRemovableExtensionDirectory(DirectoryPath dirPath);
+}
 }

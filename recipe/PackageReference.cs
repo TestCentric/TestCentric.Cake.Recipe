@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // Representation of a package reference, containing everything needed to install it
 public class PackageReference
 {
@@ -80,4 +82,5 @@ public class PackageReference
 				});
 		}
 	}
+}
 }

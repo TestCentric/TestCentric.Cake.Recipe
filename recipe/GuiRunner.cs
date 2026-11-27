@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 /// <summary>
 /// Class that knows how to install and run the TestCentric GUI,
 /// using either the NuGet or the Chocolatey package.
@@ -35,4 +37,5 @@ public class GuiRunner : InstallableTestRunner
 
 		return RunTest(ExecutablePath, arguments);
 	}
+}
 }

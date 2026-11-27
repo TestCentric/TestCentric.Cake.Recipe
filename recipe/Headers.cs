@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // CHECK FOR MISSING AND NON-STANDARD FILE HEADERS
 //////////////////////////////////////////////////////////////////////
@@ -118,4 +120,5 @@ public static class Headers
             return file.ToString().Substring(CD_LENGTH);
         }
 	}
+}
 }

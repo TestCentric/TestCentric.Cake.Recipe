@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // BUILD SETTINGS
 //////////////////////////////////////////////////////////////////////
@@ -40,6 +42,13 @@ public static class BuildSettings
 		NuGetVerbosity nugetVerbosity = NuGetVerbosity.Normal,
 		bool chocolateyVerbosity = false )
 	{
+		// Under Cake script these ran as the recipe files were loaded. Under Cake.Sdk
+		// they are methods, so we call them first: tools are needed to calculate the
+		// version, and tasks must exist before the default target is set below.
+		InstallRecipeTools();
+		DefineTasks();
+		DefineSetup();
+
 		// Required arguments
 		Context = context;
         Title = title ?? throw new ArgumentNullException(nameof(title));
@@ -500,4 +509,5 @@ public static class BuildSettings
 	{
 		return !string.IsNullOrEmpty(GetApiKey(name, fallback)) ? "AVAILABLE" : "NOT AVAILABLE";
 	}
+}
 }

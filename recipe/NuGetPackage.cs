@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // NUGET PACKAGE DEFINITION
 //////////////////////////////////////////////////////////////////////
@@ -151,4 +153,5 @@ public class NuGetPackage : PackageDefinition
 
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
         dirPath.GetDirectoryName().StartsWith("NUnit.Extension.");
+}
 }

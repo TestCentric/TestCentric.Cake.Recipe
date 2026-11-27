@@ -3,10 +3,10 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // This file contains classes used to interpret the result XML that is
 // produced by test runs of the GUI.
-
-using System.Xml;
 
 public abstract class ResultSummary
 {
@@ -115,4 +115,5 @@ public class ActualAssemblyResult
 	public string AgentName { get; }
 
 	public string TargetRuntime { get; }
+}
 }

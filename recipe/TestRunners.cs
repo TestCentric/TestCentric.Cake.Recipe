@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 /////////////////////////////////////////////////////////////////////////////
 // TEST RUNNER INTERFACES
 /////////////////////////////////////////////////////////////////////////////
@@ -197,4 +199,5 @@ public class AgentRunner : TestRunner, IPackageTestRunner
 		else
 			return base.RunTest(executablePath, arguments);
 	}
+}
 }

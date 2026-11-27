@@ -3,11 +3,18 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-CommandLineOptions.Initialize(Context);
-
+public static partial class Program
+{
 public static class CommandLineOptions
 {
 	static private ICakeContext _context;
+
+	// Cake script called Initialize as this file was loaded. Under Cake.Sdk, the
+	// static constructor does it the first time any option is used.
+	static CommandLineOptions()
+	{
+		Initialize(Context);
+	}
 
 	static public ValueOption<string> Target;
 	static public MultiValueOption<string> Targets;
@@ -136,4 +143,5 @@ public static class CommandLineOptions
 			}
 		}
     }
+}
 }

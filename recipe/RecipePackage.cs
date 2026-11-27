@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 public class RecipePackage : NuGetPackage
 {
     private IEnumerable<FilePath> _recipeFiles;
@@ -45,9 +47,12 @@ public class RecipePackage : NuGetPackage
             writer.Write($$"""
                 {{string.Join(Environment.NewLine, DEFAULT_STANDARD_HEADER)}}
 
+                public static partial class Program
+                {
                 public static class Recipe
                 {
                     public static string Version => "{{PackageVersion}}";
+                }
                 }
                 """);
 
@@ -81,4 +86,5 @@ public class RecipePackage : NuGetPackage
             return settings;
         }
     }
+}
 }

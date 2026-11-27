@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // Reports on the output of a GUI test run using a format
 // simiar to that of the NUnit console runner.
 public class ConsoleReporter
@@ -171,4 +173,5 @@ public class ConsoleReporter
 
         Console.WriteLine();
     }
+}
 }

@@ -3,11 +3,12 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // This file contains both real constants and static readonly variables used
 // as constants. All values are initialized before any instance variables.
 
 // Alias used throughout the recipe
-using SIO = System.IO;
 
 // GitHub owner is the TestCentric organization
 const string GITHUB_OWNER = "TestCentric";
@@ -85,3 +86,4 @@ const string TESTCENTRIC_GITHUB_URL = "https://github.com/TestCentric/";
 const string TESTCENTRIC_RAW_URL = "https://raw.githubusercontent.com/TestCentric/";
 const string TESTCENTRIC_ICON_URL = "https://test-centric.org/assets/img/testcentric_128x128.png";
 const string TESTCENTRIC_MAILING_LIST_URL = "https://groups.google.com/forum/#!forum/nunit-discuss";
+}

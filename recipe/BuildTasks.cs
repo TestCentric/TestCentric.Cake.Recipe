@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // All tasks incorporated in the recipe are defined using CakeTaskBuilders.
 // The actual specification of criteria, dependencies and actions for each
 // task is done separately, later in this file.
@@ -59,14 +61,16 @@ public static class BuildTasks
 	public static CakeTaskBuilder ContinuousIntegrationTask { get; set; }
 }
 
-// The following statements initialize each of the defined tasks as the file
-// is loaded. They define what each of the tasks in the recipe actually does.
+// The following statements initialize each of the defined tasks. They run in
+// DefineTasks(), which BuildSettings.Initialize calls. They define what each of the tasks in the recipe actually does.
 // You should not change these definitions unless you intend to change
 // the behavior of a task for all projects that use the recipe.
 //
 // To make a change for a single project, you should add code to your
 // build.cake file or another project-specific cake file.
 
+static void DefineTasks()
+{
 //////////////////////////////////////////////////////////////////////
 // GENERAL TASKS
 //////////////////////////////////////////////////////////////////////
@@ -385,3 +389,5 @@ BuildTasks.DefaultTask = Task("Default")
 		Default target if none is specified on the command-line. This is normally set
 		to Build but may be changed when calling BuildSettings.Initialize().
 		""");
+}
+}

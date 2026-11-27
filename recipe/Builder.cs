@@ -3,19 +3,21 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 
-public Builder Build => new Builder(() => RunTargets(CommandLineOptions.Targets.Values));
+public static Builder Build => new Builder(() => RunTargets(CommandLineOptions.Targets.Values));
 
-CakeReport RunTargets(ICollection<string> targets)
+static CakeReport RunTargets(ICollection<string> targets)
     => RunTarget(GetOrAddTargetsTask(targets).Name);
 
-Task<CakeReport> RunTargetsAsync(ICollection<string> targets)
+static System.Threading.Tasks.Task<CakeReport> RunTargetsAsync(ICollection<string> targets)
     => RunTargetAsync(GetOrAddTargetsTask(targets).Name);
 
-private ICakeTaskInfo GetOrAddTargetsTask(ICollection<string> targets)
+private static ICakeTaskInfo GetOrAddTargetsTask(ICollection<string> targets)
 {
     var targetsTaskName = string.Join('+', targets);
     var targetsTask = Tasks.FirstOrDefault(task => task.Name.Equals(targetsTaskName, StringComparison.OrdinalIgnoreCase));
@@ -54,4 +56,5 @@ public class Builder
     {
         _action();
     }
+}
 }

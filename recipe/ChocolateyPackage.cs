@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 //////////////////////////////////////////////////////////////////////
 // CHOCOLATEY PACKAGE DEFINITION
 //////////////////////////////////////////////////////////////////////
@@ -133,4 +135,5 @@ public class ChocolateyPackage : PackageDefinition
 
     protected override bool IsRemovableExtensionDirectory(DirectoryPath dirPath) =>
         dirPath.GetDirectoryName().StartsWith("nunit-extension-");
+}
 }

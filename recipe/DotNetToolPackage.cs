@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // A dotnet tool is packaged using nuget but requires a different installation step
 public class DotNetToolPackage : NuGetPackage
 {
@@ -32,4 +34,5 @@ public class DotNetToolPackage : NuGetPackage
         Console.WriteLine($"Executing dotnet {arguments}");
         _context.StartProcess("dotnet", arguments);
     }
+}
 }

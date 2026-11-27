@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // Versions are calculated by MinVer from the most recent tag reachable from HEAD.
 // For example, after tag 2.0.0-beta.1, the next commit builds as 2.0.0-beta.1.1
 // and the one after as 2.0.0-beta.1.2, so every build gets a new, higher version.
@@ -63,4 +65,5 @@ public class BuildVersion
     // beta.1.3 or alpha.0.2. These are untagged builds, which we never
     // publish anywhere but MyGet.
     public bool IsFractionalPreRelease => PreReleaseSuffix.Count(c => c == '.') > 1;
+}
 }

@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // Banner class displays banners similar to those created by Cake
 // We use this to display intermediate steps within a task
 public static class Banner
@@ -25,4 +27,5 @@ public static class Banner
             return length;
         }
     }
+}
 }

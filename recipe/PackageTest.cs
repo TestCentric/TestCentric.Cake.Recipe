@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+public static partial class Program
+{
 // Representation of a single test to be run against a pre-built package.
 // Each test has a Level, with the following values defined...
 //  0 Do not run - used for temporarily disabling a test
@@ -57,4 +59,5 @@ public struct PackageTest
         ExpectedResult = expectedResult;
 		ExtensionsNeeded = extensionsNeeded;
     }
+}
 }
