@@ -36,9 +36,10 @@ public static partial class Program
         if (needChocolateyApiKey && string.IsNullOrEmpty(BuildSettings.ChocolateyApiKey))
             DisplayErrorAndThrow("Chocolatey ApiKey is required but was not set.");
 
-        // GitHub Access Token, Owner and Repository
+        // GitHub Access Token, Owner and Repository, needed whenever a task will call GitHub
         if (!CommandLineOptions.NoPush)
-            if (tasksToExecute.Contains("CreateDraftRelease") && BuildSettings.IsReleaseBranch ||
+            if (tasksToExecute.Contains("CreateDraftRelease") && PackageReleaseManager.DraftReleaseVersion != null ||
+                tasksToExecute.Contains("UpdateReleaseNotes") && PackageReleaseManager.ReleaseNotesVersion != null ||
                 tasksToExecute.Contains("CreateProductionRelease") && BuildSettings.IsProductionRelease)
             {
                 if (string.IsNullOrEmpty(BuildSettings.GitHubAccessToken))

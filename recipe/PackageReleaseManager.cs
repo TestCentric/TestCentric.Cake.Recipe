@@ -127,23 +127,42 @@ public static partial class Program
 
         private const string DRAFT_RELEASE_ERROR =
             "A direct call to CreateDraftRelease is permitted only:\r\n" +
-            "  * On a release branch (release-x.x.x)\r\n" +
+            "  * Locally on main, with HEAD tagged with the release version (e.g. 2.0.0-beta9)\r\n" +
+            "  * On a release branch (release-x.y.z)\r\n" +
             "  * Using option --packageVersion to specify a release version";
+
+        /// <summary>
+        /// The version CreateDraftRelease creates a draft release for, or null if it
+        /// creates none. Setup uses this too, to require a GitHub token only when needed.
+        /// </summary>
+        public static string DraftReleaseVersion =>
+            CommandLineOptions.PackageVersion.Exists
+                ? CommandLineOptions.PackageVersion.Value
+                : BuildSettings.IsReleaseBranch
+                    ? BuildSettings.BranchName.Substring(8)
+                    // On a production release, we only create a draft release if the target
+                    // was called directly on a local system. Otherwise, we risk either an
+                    // exception or possibly modifying a user-edited draft release.
+                    : IsLocalDirectCall("CreateDraftRelease") && BuildSettings.IsProductionRelease
+                        ? BuildSettings.PackageVersion : null;
+
+        /// <summary>
+        /// The version UpdateReleaseNotes updates the release notes for, or null if none.
+        /// </summary>
+        public static string ReleaseNotesVersion =>
+            CommandLineOptions.PackageVersion.Exists
+                ? CommandLineOptions.PackageVersion.Value
+                : BuildSettings.IsProductionRelease
+                    ? BuildSettings.PackageVersion : null;
+
+        // Cake matches target names without regard to case, so we do the same.
+        private static bool IsLocalDirectCall(string target) =>
+            BuildSettings.IsLocalBuild &&
+            string.Equals(CommandLineOptions.Target.Value, target, StringComparison.OrdinalIgnoreCase);
 
         public static void CreateDraftRelease()
         {
-            // If we are called for a production release, we only create a draft release if
-            // the target was called directly on a local system. Otherwise, we risk either
-            // an exception or possibly modifying a user-edited draft release.
-            bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
-
-            string releaseVersion =
-                CommandLineOptions.PackageVersion.Exists
-                    ? CommandLineOptions.PackageVersion.Value
-                    : BuildSettings.IsReleaseBranch
-                        ? BuildSettings.BranchName.Substring(8)
-                        : localDirectCall && BuildSettings.IsProductionRelease
-                            ? BuildSettings.PackageVersion : null;
+            string releaseVersion = DraftReleaseVersion;
 
             if (releaseVersion != null)
             {
@@ -152,7 +171,7 @@ public static partial class Program
 
                 try
                 {
-                    GRM.Create(releaseName, releaseVersion);
+                    GRM.Create(releaseName, releaseVersion, IsPreReleaseVersion(releaseVersion));
                 }
                 catch
                 {
@@ -164,7 +183,7 @@ public static partial class Program
             }
             else
             {
-                if (localDirectCall)
+                if (IsLocalDirectCall("CreateDraftRelease"))
                     throw new InvalidOperationException(DRAFT_RELEASE_ERROR);
                 else
                     _context.Information("Skipping creation of draft release because this is not a release branch");
@@ -178,10 +197,7 @@ public static partial class Program
 
         public static void UpdateReleaseNotes()
         {
-            string releaseVersion = CommandLineOptions.PackageVersion.Exists
-                ? CommandLineOptions.PackageVersion.Value
-                : BuildSettings.IsProductionRelease
-                    ? BuildSettings.PackageVersion : null;
+            string releaseVersion = ReleaseNotesVersion;
 
             if (releaseVersion == null)
                 throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
@@ -191,7 +207,7 @@ public static partial class Program
 
             try
             {
-                GRM.Create(releaseName, releaseVersion);
+                GRM.Create(releaseName, releaseVersion, IsPreReleaseVersion(releaseVersion));
             }
             catch
             {
@@ -235,14 +251,18 @@ public static partial class Program
             }
         }
 
+        // The version being released, not the version being built, decides this: a draft
+        // release may be created from a build of some other version, e.g. on a release
+        // branch or with --packageVersion. A SemVer version with a pre-release part,
+        // such as 2.0.0-beta9, has a hyphen.
+        private static bool IsPreReleaseVersion(string releaseVersion) => releaseVersion.Contains('-');
+
         private static class GRM
         {
-            private static readonly string CREDENTIALS =
-                    $"--token {BuildSettings.GitHubAccessToken}" + $" -o {BuildSettings.GitHubOwner} -r {BuildSettings.GitHubRepository}";
-
-            public static void Create(string name, string milestone)
+            // With preRelease, GitHub shows the release as a pre-release when it is published.
+            public static void Create(string name, string milestone, bool preRelease)
             {
-                Execute($"create -n \"{name}\" -m {milestone}");
+                Execute($"create -n \"{name}\" -m {milestone}" + (preRelease ? " --pre" : ""));
             }
 
             public static void Export(string filename, string milestone)
@@ -262,12 +282,19 @@ public static partial class Program
 
             private static void Execute(string arguments)
             {
-                arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
+                // The token is a secret, so anything we log uses RenderSafe(), which redacts it.
+                // Cake's own logging of the process command line does the same.
+                var builder = new ProcessArgumentBuilder()
+                    .Append("gitreleasemanager")
+                    .Append(arguments)
+                    .AppendSwitchSecret("--token", " ", BuildSettings.GitHubAccessToken ?? "")
+                    .AppendSwitch("-o", " ", BuildSettings.GitHubOwner)
+                    .AppendSwitch("-r", " ", BuildSettings.GitHubRepository);
 
                 if (CommandLineOptions.NoPush)
-                    _context.Information($"NoPush option skipping command `{arguments}`");
+                    _context.Information($"NoPush option skipping command `{builder.RenderSafe()}`");
                 else
-                    _context.StartProcess("dotnet", arguments);
+                    _context.StartProcess("dotnet", new ProcessSettings { Arguments = builder });
             }
         }
     }
