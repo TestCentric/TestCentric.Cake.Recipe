@@ -5,5 +5,8 @@
 
 public static partial class Program
 {
-    public const string RECIPE_VERSION = "2.0.0-dev00001";
+    // "source" means the recipe was compiled from a checkout rather than from a
+    // package. When the recipe package is built, RecipePackage packs a copy of
+    // this file with the package version in its place; this file is not changed.
+    public const string RECIPE_VERSION = "source";
 }

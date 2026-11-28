@@ -57,7 +57,8 @@
 		<file src="recipe/PackageReleaseManager.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
 		<file src="recipe/PackageTest.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
 		<file src="recipe/PackageTestReport.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
-		<file src="recipe/Recipe.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
+		<!-- Built by RecipePackage, with RECIPE_VERSION set to the package version -->
+		<file src="packages/generated/Recipe.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
 		<file src="recipe/RecipePackage.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
 		<file src="recipe/Setup.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
 		<file src="recipe/TestResults.cs" target="contentFiles/cs/any/TestCentric.Cake.Recipe" />
