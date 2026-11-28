@@ -44,6 +44,22 @@ Run it with `dotnet run --file build.cs -- <arguments>`, for example `dotnet run
 
 4. Run the selected target. This must be the last statement in the file.
 
+### A package README
+
+nuget.org shows a package's description as plain text, but renders a package README as Markdown
+on the package page. To add one, pass its path, relative to the project directory, as `readme`:
+
+```csharp
+BuildSettings.Packages.Add(new NuGetPackage(
+	id: "TestCentric.Sample.Application",
+	readme: "nuget/README.md",
+	...
+```
+
+The recipe puts the file at the package root and names it in the nuspec's `readme` element. It
+also adds a `HasReadMe` check, which verifies both. A package built entirely from a nuspec can
+use `<readme>` there instead, and add `HasReadMe("README.md")` to its checks.
+
 ### Additional build files
 
 Code in other files can be included with `#:property IncludeAdditionalFiles=file1.cs;file2.cs`.
