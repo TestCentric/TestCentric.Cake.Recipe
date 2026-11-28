@@ -152,7 +152,7 @@ public static partial class Program
 
                 try
                 {
-                    GRM.Create(releaseName, releaseVersion);
+                    GRM.Create(releaseName, releaseVersion, IsPreReleaseVersion(releaseVersion));
                 }
                 catch
                 {
@@ -191,7 +191,7 @@ public static partial class Program
 
             try
             {
-                GRM.Create(releaseName, releaseVersion);
+                GRM.Create(releaseName, releaseVersion, IsPreReleaseVersion(releaseVersion));
             }
             catch
             {
@@ -235,14 +235,21 @@ public static partial class Program
             }
         }
 
+        // The version being released, not the version being built, decides this: a draft
+        // release may be created from a build of some other version, e.g. on a release
+        // branch or with --packageVersion. A SemVer version with a pre-release part,
+        // such as 2.0.0-beta9, has a hyphen.
+        private static bool IsPreReleaseVersion(string releaseVersion) => releaseVersion.Contains('-');
+
         private static class GRM
         {
             private static readonly string CREDENTIALS =
                     $"--token {BuildSettings.GitHubAccessToken}" + $" -o {BuildSettings.GitHubOwner} -r {BuildSettings.GitHubRepository}";
 
-            public static void Create(string name, string milestone)
+            // With preRelease, GitHub shows the release as a pre-release when it is published.
+            public static void Create(string name, string milestone, bool preRelease)
             {
-                Execute($"create -n \"{name}\" -m {milestone}");
+                Execute($"create -n \"{name}\" -m {milestone}" + (preRelease ? " --pre" : ""));
             }
 
             public static void Export(string filename, string milestone)
