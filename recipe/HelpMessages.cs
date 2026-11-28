@@ -203,22 +203,24 @@ public static partial class Program
             ==============================================================================
         
             CreateDraftRelease
-              Creates a draft release for a milestone on GitHub. The milestone name must
-              match the three-part package version for each package. This target will fail
-              with an error message if no milestone is found or if it doesn't meet criteria
-              for a draft release.
-            
+              Creates a draft release on GitHub for a milestone named with the full release
+              version, such as 2.0.0 or 2.0.0-beta9. A pre-release version gives a draft
+              marked as a pre-release. Called directly, it runs locally on main with HEAD
+              tagged with the release version, on a release branch (release-x.y.z), or with
+              --packageVersion; otherwise it fails with an error message. It also fails if
+              no matching milestone is found.
+
             DownloadDraftRelease
               Download draft release for local use
 
             UpdateReleaseNotes
-              Update Release Notes.
-        
+              Updates the release notes of an existing GitHub release from its milestone.
+
             CreateProductionRelease
-              Creates a production release for a milestoneon GitHub. The milestone name
-              must match the three-part package version for each package. This target will
-              fail with an error message if no milestone is found or if it doesn't meet
-              criteria for a production release.
+              Creates a production release on GitHub for a milestone named with the full
+              release version, such as 2.0.0 or 2.0.0-beta9. This target will fail with an
+              error message if no milestone is found or if it doesn't meet criteria for a
+              production release.
 
             ==============================================================================
                 Continuous Integration Task

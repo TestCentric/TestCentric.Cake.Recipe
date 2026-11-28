@@ -127,23 +127,42 @@ public static partial class Program
 
         private const string DRAFT_RELEASE_ERROR =
             "A direct call to CreateDraftRelease is permitted only:\r\n" +
-            "  * On a release branch (release-x.x.x)\r\n" +
+            "  * Locally on main, with HEAD tagged with the release version (e.g. 2.0.0-beta9)\r\n" +
+            "  * On a release branch (release-x.y.z)\r\n" +
             "  * Using option --packageVersion to specify a release version";
+
+        /// <summary>
+        /// The version CreateDraftRelease creates a draft release for, or null if it
+        /// creates none. Setup uses this too, to require a GitHub token only when needed.
+        /// </summary>
+        public static string DraftReleaseVersion =>
+            CommandLineOptions.PackageVersion.Exists
+                ? CommandLineOptions.PackageVersion.Value
+                : BuildSettings.IsReleaseBranch
+                    ? BuildSettings.BranchName.Substring(8)
+                    // On a production release, we only create a draft release if the target
+                    // was called directly on a local system. Otherwise, we risk either an
+                    // exception or possibly modifying a user-edited draft release.
+                    : IsLocalDirectCall("CreateDraftRelease") && BuildSettings.IsProductionRelease
+                        ? BuildSettings.PackageVersion : null;
+
+        /// <summary>
+        /// The version UpdateReleaseNotes updates the release notes for, or null if none.
+        /// </summary>
+        public static string ReleaseNotesVersion =>
+            CommandLineOptions.PackageVersion.Exists
+                ? CommandLineOptions.PackageVersion.Value
+                : BuildSettings.IsProductionRelease
+                    ? BuildSettings.PackageVersion : null;
+
+        // Cake matches target names without regard to case, so we do the same.
+        private static bool IsLocalDirectCall(string target) =>
+            BuildSettings.IsLocalBuild &&
+            string.Equals(CommandLineOptions.Target.Value, target, StringComparison.OrdinalIgnoreCase);
 
         public static void CreateDraftRelease()
         {
-            // If we are called for a production release, we only create a draft release if
-            // the target was called directly on a local system. Otherwise, we risk either
-            // an exception or possibly modifying a user-edited draft release.
-            bool localDirectCall = BuildSettings.IsLocalBuild && CommandLineOptions.Target.Value == "CreateDraftRelease";
-
-            string releaseVersion =
-                CommandLineOptions.PackageVersion.Exists
-                    ? CommandLineOptions.PackageVersion.Value
-                    : BuildSettings.IsReleaseBranch
-                        ? BuildSettings.BranchName.Substring(8)
-                        : localDirectCall && BuildSettings.IsProductionRelease
-                            ? BuildSettings.PackageVersion : null;
+            string releaseVersion = DraftReleaseVersion;
 
             if (releaseVersion != null)
             {
@@ -164,7 +183,7 @@ public static partial class Program
             }
             else
             {
-                if (localDirectCall)
+                if (IsLocalDirectCall("CreateDraftRelease"))
                     throw new InvalidOperationException(DRAFT_RELEASE_ERROR);
                 else
                     _context.Information("Skipping creation of draft release because this is not a release branch");
@@ -178,10 +197,7 @@ public static partial class Program
 
         public static void UpdateReleaseNotes()
         {
-            string releaseVersion = CommandLineOptions.PackageVersion.Exists
-                ? CommandLineOptions.PackageVersion.Value
-                : BuildSettings.IsProductionRelease
-                    ? BuildSettings.PackageVersion : null;
+            string releaseVersion = ReleaseNotesVersion;
 
             if (releaseVersion == null)
                 throw new InvalidOperationException(UPDATE_RELEASE_ERROR);
