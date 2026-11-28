@@ -243,9 +243,6 @@ public static partial class Program
 
         private static class GRM
         {
-            private static readonly string CREDENTIALS =
-                    $"--token {BuildSettings.GitHubAccessToken}" + $" -o {BuildSettings.GitHubOwner} -r {BuildSettings.GitHubRepository}";
-
             // With preRelease, GitHub shows the release as a pre-release when it is published.
             public static void Create(string name, string milestone, bool preRelease)
             {
@@ -269,12 +266,19 @@ public static partial class Program
 
             private static void Execute(string arguments)
             {
-                arguments = $"gitreleasemanager {arguments} {CREDENTIALS}";
+                // The token is a secret, so anything we log uses RenderSafe(), which redacts it.
+                // Cake's own logging of the process command line does the same.
+                var builder = new ProcessArgumentBuilder()
+                    .Append("gitreleasemanager")
+                    .Append(arguments)
+                    .AppendSwitchSecret("--token", " ", BuildSettings.GitHubAccessToken ?? "")
+                    .AppendSwitch("-o", " ", BuildSettings.GitHubOwner)
+                    .AppendSwitch("-r", " ", BuildSettings.GitHubRepository);
 
                 if (CommandLineOptions.NoPush)
-                    _context.Information($"NoPush option skipping command `{arguments}`");
+                    _context.Information($"NoPush option skipping command `{builder.RenderSafe()}`");
                 else
-                    _context.StartProcess("dotnet", arguments);
+                    _context.StartProcess("dotnet", new ProcessSettings { Arguments = builder });
             }
         }
     }
